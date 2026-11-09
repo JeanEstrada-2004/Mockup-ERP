@@ -1,0 +1,566 @@
+// Restores the open, card-led Metis visual rhythm across every ERP workspace.
+// Kept after the module styles so the shared hierarchy is consistent.
+
+:root {
+  --header-height: 68px;
+  --erp-panel-shadow: 0 2px 12px rgba(30, 64, 115, 0.055);
+}
+
+body.admin-layout,
+.admin-main {
+  background: var(--surface-app);
+}
+
+.admin-header .navbar,
+.admin-sidebar {
+  background: var(--surface-panel);
+}
+
+.admin-header .navbar {
+  box-shadow: 0 1px 5px rgba(30, 64, 115, 0.045);
+}
+
+.admin-sidebar .sidebar-content {
+  padding-block: 0.85rem 1.5rem;
+}
+
+.shell-nav-group {
+  margin-bottom: 0.9rem;
+}
+
+.shell-nav-group > small {
+  padding: 0.8rem 0.85rem 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.065em;
+}
+
+.admin-sidebar .sidebar-nav .nav-link {
+  min-height: 44px;
+  margin-bottom: 0.18rem;
+  font-size: 0.94rem;
+  font-weight: 500;
+  border-radius: 0.625rem;
+}
+
+.admin-sidebar .sidebar-nav .nav-link i {
+  font-size: 1.05rem;
+  color: var(--bs-secondary-color);
+}
+
+.admin-sidebar .sidebar-nav .nav-link.active {
+  background: var(--surface-hover);
+  color: var(--brand-primary, var(--bs-primary));
+}
+
+.admin-sidebar .sidebar-nav .nav-link.active i {
+  color: var(--brand-primary, var(--bs-primary));
+}
+
+.shell-header .shell-header-grid {
+  gap: 0.9rem;
+  padding-inline: 1.25rem;
+}
+
+.shell-brand .shell-brand-name {
+  font-size: 1.16rem;
+}
+
+.shell-search .form-control {
+  height: 42px;
+  padding-left: 2.45rem;
+  font-size: 0.9rem;
+  border-radius: 0.65rem;
+}
+
+.shell-project label {
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.shell-project select {
+  height: 38px;
+  font-size: 0.84rem;
+  border-radius: 0.55rem;
+}
+
+.shell-icon-button,
+.shell-user-button {
+  min-width: 42px;
+  height: 42px;
+}
+
+.shell-user-label {
+  font-size: 0.875rem;
+}
+
+.shell-search-result {
+  padding: 0.85rem 0.95rem;
+  font-size: 0.9rem;
+}
+
+.shell-page {
+  max-width: 1700px;
+  margin-inline: auto;
+  padding: 2rem 2.15rem 3rem;
+}
+
+.shell-page-heading {
+  align-items: center;
+  margin-bottom: 1.6rem;
+}
+
+.shell-page-heading h1 {
+  font-size: clamp(1.7rem, 2.3vw, 2.15rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.shell-page-subtitle {
+  margin-top: 0.45rem;
+  font-size: 0.95rem;
+}
+
+.shell-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.075em;
+  margin-bottom: 0.5rem;
+}
+
+.shell-breadcrumb {
+  margin-bottom: 1.35rem;
+  font-size: 0.88rem;
+}
+
+.shell-demo-label {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 0.55rem;
+}
+
+.shell-page .card {
+  border-radius: 0.8rem;
+  border-color: var(--bs-border-color);
+  box-shadow: var(--erp-panel-shadow);
+  overflow: visible;
+}
+
+.shell-page .card-body {
+  padding: 1.4rem 1.5rem;
+}
+
+.shell-page .card-header,
+.shell-page .card-footer {
+  padding: 1rem 1.5rem;
+}
+
+.shell-page :is(.row.g-3, .d-grid.gap-3) {
+  --bs-gutter-x: 1.25rem;
+  --bs-gutter-y: 1.25rem;
+}
+
+.shell-section-header {
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+.shell-section-header h2,
+.shell-context-heading,
+.project-workspace h2 {
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.shell-section-header a {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.shell-kpi-label {
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: 0.65rem;
+}
+
+.shell-kpi-value {
+  font-size: clamp(1.6rem, 2.1vw, 2.15rem);
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+.shell-page .btn {
+  font-weight: 600;
+}
+
+.shell-page .btn-sm {
+  padding: 0.52rem 0.8rem;
+  font-size: 0.86rem;
+}
+
+.shell-page :is(.form-control, .form-select) {
+  min-height: 42px;
+  font-size: 0.93rem;
+}
+
+.shell-page .form-label {
+  font-size: 0.87rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.shell-page
+  :is(.table, .commercial-lines-table, .d9-table, .costs-table, .workspace-project-table) {
+  font-size: 0.9rem;
+}
+
+.shell-page .table {
+  --bs-table-bg: var(--surface-panel);
+  --bs-table-color: var(--bs-body-color);
+  --bs-table-hover-bg: var(--surface-hover);
+}
+
+.shell-page .table thead {
+  --bs-table-bg: var(--surface-sunken);
+}
+
+.shell-page .table :is(th, td) {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  padding-block: 0.85rem;
+}
+
+.shell-page .table th {
+  color: var(--bs-secondary-color);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.shell-page :is(.badge, .workspace-caption, .shell-project-code) {
+  font-size: 0.8rem;
+}
+
+.shell-page .workspace-caption {
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.shell-page small {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.shell-page :is(.d9-facts, .costs-operation-facts, .commercial-facts) small,
+.shell-page .commercial-facts span,
+.shell-page .commercial-history small {
+  font-size: 0.84rem;
+}
+
+.workspace-heading-actions {
+  gap: 0.75rem;
+}
+
+.workspace-quick-actions {
+  gap: 0.65rem;
+  margin-bottom: 1.25rem !important;
+  font-size: 0.86rem;
+}
+
+.workspace-quick-actions a {
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  background: var(--surface-panel);
+  box-shadow: var(--erp-panel-shadow);
+}
+
+.workspace-kpi {
+  min-height: 138px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.workspace-kpi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.workspace-kpi-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.65rem;
+  background: var(--surface-sunken);
+  color: var(--brand-primary, var(--bs-primary));
+  font-size: 1.15rem;
+}
+
+.workspace-kpi .shell-kpi-value {
+  font-size: clamp(1.55rem, 2.15vw, 2.1rem);
+}
+
+.workspace-kpi small {
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+}
+
+.workspace-chart-values {
+  gap: 0.55rem 1.2rem;
+  margin-top: 0.9rem;
+}
+
+.workspace-chart-details {
+  margin-top: 0.75rem;
+}
+
+.workspace-chart-details summary {
+  width: fit-content;
+  color: var(--brand-primary, var(--bs-primary));
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.workspace-chart-values span,
+.workspace-source-list > div {
+  font-size: 0.86rem;
+}
+
+.workspace-source-list {
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.workspace-project-row,
+.workspace-compact-list a,
+.workspace-record-list a {
+  padding-block: 0.95rem;
+}
+
+.workspace-project-row > span:first-child span {
+  font-size: 0.95rem;
+}
+
+.workspace-compact-list a {
+  font-size: 0.88rem;
+}
+
+.workspace-project-row strong,
+.workspace-compact-list time {
+  font-size: 0.8rem;
+}
+
+.workspace-filters .form-label,
+.commercial-facts span {
+  font-size: 0.85rem;
+}
+
+.commercial-facts strong,
+.commercial-facts a,
+.commercial-totals > div {
+  font-size: 0.94rem;
+}
+
+.commercial-totals .commercial-grand-total,
+.commercial-grand-total strong {
+  font-size: 1.2rem;
+}
+
+.expense-steps li,
+.delivery-nine-workspace .d9-tabs button {
+  font-size: 0.9rem;
+}
+
+.expense-steps li {
+  padding: 0.85rem;
+}
+
+.expense-example,
+.delivery-nine-workspace .d9-mobile-card {
+  padding: 1.15rem;
+  border-radius: 0.7rem;
+}
+
+.costs-kpis .card-body,
+.delivery-nine-workspace .d9-kpis .card-body {
+  min-height: 150px;
+  padding: 1.2rem;
+}
+
+.costs-kpis .card,
+.delivery-nine-workspace .d9-kpis .card {
+  border-top: 3px solid var(--brand-accent, var(--bs-primary));
+}
+
+.costs-kpis small,
+.delivery-nine-workspace .d9-kpis small {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.costs-kpis strong,
+.delivery-nine-workspace .d9-kpis strong {
+  font-size: clamp(1.25rem, 1.65vw, 1.75rem);
+}
+
+.costs-kpis span {
+  font-size: 0.84rem;
+}
+
+.costs-source-row {
+  min-height: 48px;
+  padding: 0.7rem 0.8rem;
+}
+
+.delivery-nine-workspace .d9-link-list > a,
+.delivery-nine-workspace .d9-link-list > div,
+.delivery-nine-workspace .d9-history > div {
+  padding: 0.95rem;
+  border-radius: 0.65rem;
+}
+
+.crm-workspace .col-xl-7 > .card.h-100 {
+  height: auto !important;
+}
+
+[data-bs-theme='dark'] {
+  --bs-border-color: #334155;
+  --bs-border-color-translucent: #475569;
+  --bs-secondary-color: #b6c2d2;
+  --bs-tertiary-bg: #172131;
+  --bs-secondary-bg: #172131;
+  --erp-panel-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
+}
+
+html[data-bs-theme='dark'] {
+  --brand-primary: #bfdbfe;
+  --brand-accent: #60a5fa;
+}
+
+[data-bs-theme='dark'] .shell-page a:not(.btn):not(.workspace-project-row),
+[data-bs-theme='dark'] .shell-page .workspace-chart-details summary,
+[data-bs-theme='dark'] .shell-page .workspace-kpi-icon {
+  color: #93c5fd;
+}
+
+[data-bs-theme='dark'] .shell-page a:not(.btn):hover {
+  color: #bfdbfe;
+}
+
+[data-bs-theme='dark'] .shell-notification-count,
+[data-bs-theme='dark'] .expense-steps li.active span,
+[data-bs-theme='dark'] .expense-steps li.done span {
+  background: #2563eb;
+  color: #fff;
+}
+
+[data-bs-theme='dark'] .apexcharts-xaxis-label,
+[data-bs-theme='dark'] .apexcharts-yaxis-label,
+[data-bs-theme='dark'] .apexcharts-datalabel-label,
+[data-bs-theme='dark'] .apexcharts-legend-text {
+  color: #b6c2d2 !important;
+  fill: #b6c2d2 !important;
+}
+
+[data-bs-theme='dark'] .apexcharts-gridline {
+  stroke: #334155;
+}
+
+[data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active,
+[data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active:hover {
+  background: var(--surface-hover);
+  color: #bfdbfe;
+}
+
+[data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active i {
+  color: #bfdbfe;
+}
+
+[data-bs-theme='dark'] .shell-search .form-control,
+[data-bs-theme='dark'] .shell-project select {
+  background: var(--surface-sunken);
+  border-color: var(--bs-border-color);
+}
+
+@media (max-width: 1199.98px) {
+  .shell-page {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .shell-header .shell-header-grid {
+    gap: 0.25rem 0.75rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  :root {
+    --header-height: 154px;
+  }
+
+  .shell-header .shell-header-grid {
+    padding-inline: 0.85rem;
+  }
+
+  .shell-page {
+    padding: 1.35rem 1rem 2.4rem;
+  }
+
+  .shell-page-heading {
+    margin-bottom: 1.25rem;
+  }
+
+  .shell-page-heading h1 {
+    font-size: 1.6rem;
+  }
+
+  .shell-page .card-body {
+    padding: 1.15rem;
+  }
+
+  .shell-page .card-header,
+  .shell-page .card-footer {
+    padding: 0.95rem 1.15rem;
+  }
+
+  .workspace-kpi {
+    min-height: 128px;
+  }
+
+  .workspace-kpi-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .workspace-kpi .shell-kpi-value {
+    font-size: clamp(1.32rem, 5.6vw, 1.7rem);
+  }
+
+  .workspace-quick-actions > span {
+    width: 100%;
+  }
+
+  .workspace-project-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .workspace-project-metrics {
+    display: flex;
+    align-items: center;
+    justify-items: start;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .shell-section-header {
+    align-items: flex-start;
+  }
+}

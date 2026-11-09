@@ -2,10 +2,8 @@
 // Card Components
 // ==========================================================================
 //
-// Cards are flat. A 1px border defines the panel; there is no drop shadow and
-// no hover lift. On a dashboard almost everything is a card, so shadowing them
-// makes the whole page appear to hover a few pixels off the background and
-// destroys any real sense of depth — the shadow stops meaning "this floats."
+// The original Metis dashboard used distinct cards on a pale canvas. Keep a
+// subtle shadow so dense ERP screens retain that visual grouping.
 //
 // ==========================================================================
 
@@ -13,7 +11,7 @@
   background-color: var(--surface-panel);
   border: 1px solid var(--bs-border-color);
   border-radius: var(--border-radius);
-  box-shadow: none;
+  box-shadow: var(--box-shadow-sm);
 
   .card-header {
     background-color: transparent;
@@ -27,10 +25,8 @@
     border-top: 1px solid var(--bs-border-color);
   }
 
-  // Card titles are section labels, not page headings — keep them close to body
-  // size and let weight do the work.
   .card-title {
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
     font-weight: 600;
     letter-spacing: -0.01em;
     margin-bottom: 0;
@@ -41,7 +37,9 @@
 // border and background response rather than a lift.
 .card-interactive {
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 
   &:hover {
     border-color: var(--bs-border-color-translucent);
@@ -52,9 +50,7 @@
 // --------------------------------------------------------------------------
 // Stats cards
 // --------------------------------------------------------------------------
-// The number is the content; everything else is annotation. The label goes
-// small/uppercase/tracked, the value goes large with tabular figures so digits
-// stay column-aligned as they animate, and the icon recedes to a neutral glyph.
+// Larger values and icon tiles bring the KPI hierarchy back to Metis.
 .stats-card {
   .card-body {
     padding: 1.125rem 1.25rem;
@@ -67,7 +63,7 @@
   // Label — the markup uses `<p class="h6 text-muted">`, so it has to be
   // overridden here rather than in each of the 21 pages.
   .card-body p.h6 {
-    font-size: 0.6875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -77,12 +73,12 @@
 
   // Value
   .card-body .h3 {
-    font-size: 1.625rem;
+    font-size: 1.9rem;
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum" 1;
+    font-feature-settings: 'tnum' 1;
     color: var(--ink-primary);
     margin-bottom: 0.25rem;
   }
@@ -94,10 +90,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  // Icon. The old treatment was a pastel `bg-*-subtle` tile in four different
-  // hues across four adjacent cards — the strongest single "generated template"
-  // tell on the dashboard. Neutralised to one recessive surface; the utility
-  // classes stay in the markup but are overridden here.
+  // Icon tile matches the dashboard KPI cards.
   .stats-icon {
     width: 2.25rem;
     height: 2.25rem;
@@ -107,7 +100,7 @@
     justify-content: center;
     font-size: 1rem;
     background-color: var(--surface-sunken) !important;
-    color: var(--ink-secondary) !important;
+    color: var(--bs-primary) !important;
     border: 1px solid var(--bs-border-color);
 
     @media (min-width: 992px) {

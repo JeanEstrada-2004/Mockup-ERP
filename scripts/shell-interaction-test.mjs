@@ -110,22 +110,39 @@ async function verifyProjectFlow(variant, projectId) {
     )
   );
   if (variant === 'surtec-peti') {
+    const lightProjectBackground = await page
+      .locator('#global-project-select')
+      .evaluate((element) => getComputedStyle(element).backgroundColor);
     await page.locator('[title="Cambiar tema"]').click();
     assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'dark');
-    await page.waitForFunction(
-      () =>
-        getComputedStyle(document.querySelectorAll('.sidebar-nav .nav-link')[1]).color ===
-          'rgb(228, 228, 231)' &&
-        getComputedStyle(document.querySelector('#global-project-select')).backgroundColor ===
-          'rgb(39, 39, 42)'
-    );
+    // Read contrast once the theme transition has settled.
+    await page.waitForTimeout(500);
     const darkColors = await page.evaluate(() => ({
       nav: getComputedStyle(document.querySelectorAll('.sidebar-nav .nav-link')[1]).color,
+      sidebarBackground: getComputedStyle(document.querySelector('.admin-sidebar')).backgroundColor,
+      projectColor: getComputedStyle(document.querySelector('#global-project-select')).color,
       projectBackground: getComputedStyle(document.querySelector('#global-project-select'))
         .backgroundColor,
     }));
-    assert.equal(darkColors.nav, 'rgb(228, 228, 231)');
-    assert.equal(darkColors.projectBackground, 'rgb(39, 39, 42)');
+    const luminance = (color) => {
+      const channels = color
+        .match(/[\d.]+/g)
+        .slice(0, 3)
+        .map(Number);
+      const linear = channels.map((channel) => {
+        const value = channel / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+      });
+      return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+    };
+    const contrast = (foreground, background) => {
+      const a = luminance(foreground);
+      const b = luminance(background);
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    };
+    assert.notEqual(darkColors.projectBackground, lightProjectBackground);
+    assert.ok(contrast(darkColors.nav, darkColors.sidebarBackground) >= 4.5);
+    assert.ok(contrast(darkColors.projectColor, darkColors.projectBackground) >= 4.5);
     if (process.env.VISUAL === '1') {
       const out = path.join(root, 'tmp', 'shell-review');
       await mkdir(out, { recursive: true });

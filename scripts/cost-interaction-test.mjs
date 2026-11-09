@@ -186,6 +186,7 @@ async function checkVariant(variant, projectId) {
   }
   await page.goto(url(variant, 'index.html'));
   await ready();
+  await page.locator('.workspace-chart-details summary').click();
   const dashboard = await page
     .locator('#budget-chart-title')
     .locator('xpath=ancestor::section')

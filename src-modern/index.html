@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="es" data-bs-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,36 +40,53 @@
               <div class="col-6 col-xl-3">
                 <div class="card h-100">
                   <div class="card-body workspace-kpi">
-                    <p class="shell-kpi-label">Proyectos en ejecución</p>
+                    <div class="workspace-kpi-head">
+                      <p class="shell-kpi-label">Proyectos en ejecución</p>
+                      <span class="workspace-kpi-icon"
+                        ><i class="bi bi-folder2-open" aria-hidden="true"></i
+                      ></span>
+                    </div>
                     <p class="shell-kpi-value" x-text="portfolio.activeProjectCount"></p>
-                    <small>Portafolio visible</small>
                   </div>
                 </div>
               </div>
               <div class="col-6 col-xl-3">
                 <div class="card h-100">
                   <div class="card-body workspace-kpi">
-                    <p class="shell-kpi-label">Presupuesto</p>
+                    <div class="workspace-kpi-head">
+                      <p class="shell-kpi-label">Presupuesto</p>
+                      <span class="workspace-kpi-icon"
+                        ><i class="bi bi-wallet2" aria-hidden="true"></i
+                      ></span>
+                    </div>
                     <p class="shell-kpi-value" x-text="formatMoney(portfolio.budgetAmount)"></p>
-                    <small>Proyectos activos</small>
                   </div>
                 </div>
               </div>
               <div class="col-6 col-xl-3">
                 <div class="card h-100">
                   <div class="card-body workspace-kpi">
-                    <p class="shell-kpi-label">Costo ejecutado</p>
+                    <div class="workspace-kpi-head">
+                      <p class="shell-kpi-label">Costo ejecutado</p>
+                      <span class="workspace-kpi-icon"
+                        ><i class="bi bi-graph-up-arrow" aria-hidden="true"></i
+                      ></span>
+                    </div>
                     <p class="shell-kpi-value" x-text="formatMoney(portfolio.executedCost)"></p>
-                    <small>Operaciones registradas</small>
                   </div>
                 </div>
               </div>
               <div class="col-6 col-xl-3">
                 <div class="card h-100">
                   <div class="card-body workspace-kpi">
-                    <p class="shell-kpi-label">Saldo frente al ejecutado</p>
+                    <div class="workspace-kpi-head">
+                      <p class="shell-kpi-label">Saldo por ejecutar</p>
+                      <span class="workspace-kpi-icon"
+                        ><i class="bi bi-pie-chart" aria-hidden="true"></i
+                      ></span>
+                    </div>
                     <p class="shell-kpi-value" x-text="formatMoney(availableBudget)"></p>
-                    <small>Presupuesto menos costo</small>
+                    <small>Presupuesto menos costo ejecutado</small>
                   </div>
                 </div>
               </div>
@@ -78,12 +95,12 @@
             <nav class="workspace-quick-actions mb-3" aria-label="Acciones rápidas">
               <span>Acciones rápidas</span>
               <a :href="projectHref(selectedProjectId)"
-                ><i class="bi bi-folder2-open" aria-hidden="true"></i> Ficha actual</a
+                ><i class="bi bi-folder2-open" aria-hidden="true"></i> Abrir proyecto</a
               >
               <a href="./purchases.html"
                 ><i class="bi bi-bag-check" aria-hidden="true"></i> Compras</a
               >
-              <a href="./module-preview.html?module=documents"
+              <a href="./documents.html"
                 ><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Documentos</a
               >
             </nav>
@@ -103,15 +120,18 @@
                       role="img"
                       aria-label="Gráfico de presupuesto y costo ejecutado por proyecto"
                     ></div>
-                    <div class="workspace-chart-values" aria-label="Valores del gráfico">
-                      <template x-for="project in projects" :key="project.id"
-                        ><span
-                          ><strong x-text="project.id"></strong>
-                          <small
-                            x-text="`Presupuesto ${formatMoney(project.budgetAmount)} · Ejecutado ${formatMoney(dataFinancials(project.id).executedCost)}`"
-                          ></small></span
-                      ></template>
-                    </div>
+                    <details class="workspace-chart-details">
+                      <summary>Ver importes por proyecto</summary>
+                      <div class="workspace-chart-values" aria-label="Valores del gráfico">
+                        <template x-for="project in projects" :key="project.id"
+                          ><span
+                            ><strong x-text="project.id"></strong>
+                            <small
+                              x-text="`Presupuesto ${formatMoney(project.budgetAmount)} · Ejecutado ${formatMoney(dataFinancials(project.id).executedCost)}`"
+                            ></small></span
+                        ></template>
+                      </div>
+                    </details>
                   </div>
                 </section>
               </div>
