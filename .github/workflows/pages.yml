@@ -55,7 +55,7 @@ jobs:
         run: npm run test:delivery10
 
       - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Subir exactamente el sitio compilado
         uses: actions/upload-pages-artifact@v3
