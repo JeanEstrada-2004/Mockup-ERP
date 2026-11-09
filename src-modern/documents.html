@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Documentos relacionados con proyectos y operaciones ficticias"
+    />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Documentos</title>
+  </head>
+  <body data-page="documents-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace"
+            x-data="documentsWorkspace"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Documentos</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">EVIDENCIA Y TRAZABILIDAD</p>
+                <h1>Documentos</h1>
+                <p class="shell-page-subtitle">
+                  Referencias documentales por proyecto, módulo y operación.
+                </p>
+              </div>
+            </div>
+            <div class="alert alert-info" role="note">
+              Los registros y nombres de archivo son ficticios. No hay PDF adjunto, carga ni
+              descarga real.
+            </div>
+            <section class="card mb-3" aria-label="Filtros de documentos">
+              <div class="card-body d9-filters">
+                <div>
+                  <label class="form-label" for="documents-search">Buscar</label
+                  ><input
+                    id="documents-search"
+                    class="form-control"
+                    type="search"
+                    placeholder="Código, archivo, operación o responsable"
+                    x-model="search"
+                    @input="updateUrl()"
+                  />
+                </div>
+                <div>
+                  <label class="form-label" for="documents-project">Proyecto</label
+                  ><select
+                    id="documents-project"
+                    class="form-select"
+                    x-model="projectFilter"
+                    @change="updateUrl()"
+                  >
+                    <option value="">Todos</option>
+                    <template x-for="item in projects" :key="item.id"
+                      ><option :value="item.id" x-text="item.id"></option
+                    ></template>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="documents-module">Módulo</label
+                  ><select
+                    id="documents-module"
+                    class="form-select"
+                    x-model="moduleFilter"
+                    @change="updateUrl()"
+                  >
+                    <option value="">Todos</option>
+                    <template x-for="item in modules" :key="item[0]"
+                      ><option :value="item[0]" x-text="item[1]"></option
+                    ></template>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="documents-type">Tipo</label
+                  ><select
+                    id="documents-type"
+                    class="form-select"
+                    x-model="typeFilter"
+                    @change="updateUrl()"
+                  >
+                    <option value="">Todos</option>
+                    <template x-for="item in types" :key="item"
+                      ><option :value="item" x-text="item"></option
+                    ></template>
+                  </select>
+                </div>
+                <button type="button" class="btn btn-outline-secondary" @click="clearFilters()">
+                  Limpiar
+                </button>
+              </div>
+            </section>
+            <section class="card" aria-labelledby="documents-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="documents-title">Documentos relacionados</h2>
+                  <span class="workspace-caption" x-text="`${filtered.length} registros`"></span>
+                </div>
+                <div class="table-responsive d-none d-lg-block">
+                  <table class="table align-middle d9-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Documento</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Módulo</th>
+                        <th scope="col">Operación</th>
+                        <th scope="col">Versión</th>
+                        <th scope="col">Responsable</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Ficha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filtered" :key="item.id"
+                        ><tr>
+                          <td>
+                            <a :href="detailHref(item)" x-text="item.id"></a
+                            ><small class="d-block" x-text="item.fileName"></small>
+                          </td>
+                          <td x-text="item.type"></td>
+                          <td>
+                            <a :href="projectHref(item.projectId)" x-text="item.projectId"></a>
+                          </td>
+                          <td x-text="moduleName(item.module)"></td>
+                          <td x-text="item.operationId"></td>
+                          <td x-text="`V${item.version}`"></td>
+                          <td x-text="workerName(item.responsibleId)"></td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td><a :href="detailHref(item)">Abrir →</a></td>
+                        </tr></template
+                      >
+                    </tbody>
+                  </table>
+                </div>
+                <div class="d9-mobile-list d-lg-none">
+                  <template x-for="item in filtered" :key="item.id"
+                    ><article class="d9-mobile-card">
+                      <div class="d9-mobile-heading">
+                        <strong x-text="item.id"></strong
+                        ><span class="badge text-bg-secondary" x-text="`V${item.version}`"></span>
+                      </div>
+                      <small
+                        x-text="`${item.type} · ${moduleName(item.module)} · ${formatDate(item.date)}`"
+                      ></small
+                      ><a :href="projectHref(item.projectId)" x-text="item.projectId"></a
+                      ><small
+                        x-text="`Operación ${item.operationId} · ${workerName(item.responsibleId)}`"
+                      ></small
+                      ><a class="btn btn-outline-primary" :href="detailHref(item)">Abrir ficha</a>
+                    </article></template
+                  >
+                </div>
+                <div class="d9-empty" x-show="filtered.length === 0">
+                  <i class="bi bi-folder2-open" aria-hidden="true"></i>
+                  <p>No hay documentos con estos filtros.</p>
+                  <button type="button" class="btn btn-outline-primary" @click="clearFilters()">
+                    Ver todos
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

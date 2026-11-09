@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Rendiciones de gastos por proyecto" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Rendiciones de Gastos</title>
+  </head>
+  <body data-page="expenses-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace expense-workspace"
+            x-data="expensesList"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Rendiciones</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">GASTOS POR PROYECTO</p>
+                <h1>Rendiciones de Gastos</h1>
+                <p class="shell-page-subtitle">Comprobantes de ejemplo, revisión y seguimiento.</p>
+              </div>
+              <a class="btn btn-primary expense-new-button" href="./expense.html?new=1">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i> Nueva rendición
+              </a>
+            </div>
+            <div class="alert alert-info expense-demo-note" role="note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              Los comprobantes son ejemplos; no se suben archivos ni se procesa OCR real.
+            </div>
+            <section class="card" aria-labelledby="expenses-list-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="expenses-list-title">Rendiciones</h2>
+                  <span
+                    class="text-muted small"
+                    aria-live="polite"
+                    x-text="`${filtered.length} de ${records.length} registros`"
+                  ></span>
+                </div>
+                <div class="workspace-filters expense-filters mb-3">
+                  <div>
+                    <label class="form-label" for="expenses-search">Buscar</label>
+                    <input
+                      id="expenses-search"
+                      class="form-control"
+                      type="search"
+                      placeholder="Código, proyecto o responsable"
+                      x-model="search"
+                      @input="updateUrl()"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-project">Proyecto</label>
+                    <select
+                      id="expenses-project"
+                      class="form-select"
+                      x-model="projectFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="item in projects" :key="item.id"
+                        ><option :value="item.id" x-text="item.id"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-status">Estado</label>
+                    <select
+                      id="expenses-status"
+                      class="form-select"
+                      x-model="statusFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <option>Borrador</option>
+                      <option>En revisión</option>
+                      <option>Observada</option>
+                      <option>Aprobada</option>
+                    </select>
+                  </div>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    x-show="search || projectFilter || statusFilter"
+                    @click="clearFilters()"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+                <div class="table-responsive workspace-project-table expense-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Código</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Responsable</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col"><span class="visually-hidden">Abrir</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filtered" :key="item.id"
+                        ><tr>
+                          <td>
+                            <a :href="detailHref(item)" x-text="item.id"></a
+                            ><small class="d-block text-muted" x-show="!item.base"
+                              >Simulación local</small
+                            >
+                          </td>
+                          <td x-text="projectName(item.projectId)"></td>
+                          <td x-text="workerName(item.workerId)"></td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td x-text="formatAmount(item.amount)"></td>
+                          <td>
+                            <span
+                              class="badge"
+                              :class="statusClass(item.status)"
+                              x-text="item.status"
+                            ></span>
+                          </td>
+                          <td>
+                            <a :href="detailHref(item)" :aria-label="`Abrir ${item.id}`"
+                              ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                            ></a>
+                          </td></tr
+                      ></template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="workspace-project-cards">
+                  <template x-for="item in filtered" :key="item.id"
+                    ><a class="workspace-project-card" :href="detailHref(item)">
+                      <span class="workspace-project-card-top"
+                        ><strong x-text="item.id"></strong
+                        ><span
+                          class="badge"
+                          :class="statusClass(item.status)"
+                          x-text="item.status"
+                        ></span
+                      ></span>
+                      <span
+                        class="workspace-project-card-name"
+                        x-text="projectName(item.projectId)"
+                      ></span>
+                      <small x-text="workerName(item.workerId)"></small>
+                      <span class="workspace-project-card-metrics"
+                        ><span
+                          ><small>Fecha</small
+                          ><strong x-text="formatDate(item.date)"></strong></span
+                        ><span
+                          ><small>Total</small
+                          ><strong x-text="formatAmount(item.amount)"></strong></span
+                      ></span>
+                      <span class="workspace-project-card-end">Abrir rendición →</span>
+                    </a></template
+                  >
+                </div>
+                <div class="workspace-empty" x-show="filtered.length === 0" role="status">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <p>No se encontraron rendiciones.</p>
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    type="button"
+                    @click="clearFilters()"
+                  >
+                    Mostrar todas
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Detalle y revisión de una rendición de gastos" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Rendición de Gastos</title>
+  </head>
+  <body data-page="expense-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace expense-workspace"
+            x-data="expenseDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./expenses.html">Rendiciones</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="record?.id || 'Nueva'"
+                ></li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading expense-detail-heading">
+              <div>
+                <p class="shell-eyebrow">RENDICIÓN DE GASTOS</p>
+                <h1 x-text="record?.id || 'Nueva rendición'"></h1>
+                <p class="shell-page-subtitle" x-show="record">
+                  <span x-text="projectName(record?.projectId)"></span>
+                  <span
+                    class="badge ms-2"
+                    :class="statusClass(record?.status)"
+                    x-text="record?.status"
+                  ></span>
+                </p>
+              </div>
+              <a class="btn btn-outline-primary" :href="backHref">← Volver a Rendiciones</a>
+            </div>
+
+            <div class="alert alert-info expense-demo-note" role="note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              Recorrido de demostración. Seleccionas comprobantes de ejemplo; no se toma una foto,
+              no se sube un archivo y no se ejecuta OCR.
+            </div>
+
+            <div
+              class="alert alert-danger"
+              role="alert"
+              x-show="error"
+              x-cloak
+              x-text="error"
+            ></div>
+            <section class="card" x-show="!record && !isNew" aria-label="Rendición no encontrada">
+              <div class="card-body">
+                <h2 class="h5">Rendición no encontrada</h2>
+                <p>Revisa el enlace o vuelve al listado.</p>
+                <a :href="backHref">Volver a Rendiciones</a>
+              </div>
+            </section>
+
+            <ol class="expense-steps" aria-label="Pasos de la rendición">
+              <li :class="step === 1 ? 'active' : step > 1 ? 'done' : ''">
+                <span>1</span><strong>Proyecto</strong>
+              </li>
+              <li :class="step === 2 ? 'active' : step > 2 ? 'done' : ''">
+                <span>2</span><strong>Comprobantes</strong>
+              </li>
+              <li :class="step === 3 ? 'active' : step > 3 ? 'done' : ''">
+                <span>3</span><strong>Revisión</strong>
+              </li>
+              <li :class="step === 4 ? 'active' : ''">
+                <span>4</span><strong>Seguimiento</strong>
+              </li>
+            </ol>
+
+            <section
+              class="card expense-stage"
+              x-show="step === 1 && isNew"
+              aria-labelledby="expense-project-title"
+            >
+              <div class="card-body">
+                <p class="shell-eyebrow">PASO 1 DE 4</p>
+                <h2 id="expense-project-title">Selecciona el proyecto</h2>
+                <p class="workspace-caption">
+                  La rendición quedará vinculada a este proyecto durante la demostración.
+                </p>
+                <label class="form-label" for="expense-project">Proyecto</label>
+                <select id="expense-project" class="form-select" x-model="projectChoice">
+                  <option value="">Seleccionar proyecto</option>
+                  <template x-for="item in projects" :key="item.id"
+                    ><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option
+                  ></template>
+                </select>
+                <button
+                  type="button"
+                  class="btn btn-primary expense-primary-action mt-3"
+                  :disabled="!projectChoice"
+                  @click="selectProject()"
+                >
+                  Continuar a comprobantes →
+                </button>
+              </div>
+            </section>
+
+            <template x-if="record"
+              ><div class="expense-detail-content" :class="step === 4 ? 'expense-follow-up' : ''">
+                <div class="expense-context card">
+                  <div class="card-body">
+                    <div>
+                      <small>Proyecto</small
+                      ><strong x-text="projectName(record.projectId)"></strong>
+                    </div>
+                    <div>
+                      <small>Responsable</small
+                      ><strong x-text="workerName(record.workerId)"></strong>
+                    </div>
+                    <div>
+                      <small>Total de la rendición</small
+                      ><strong x-text="formatAmount(totals.total)"></strong>
+                    </div>
+                    <a :href="projectHref"
+                      >Abrir proyecto <i class="bi bi-arrow-right" aria-hidden="true"></i
+                    ></a>
+                  </div>
+                </div>
+
+                <section
+                  class="card expense-stage"
+                  x-show="step === 2"
+                  aria-labelledby="expense-add-title"
+                >
+                  <div class="card-body">
+                    <p class="shell-eyebrow">PASO 2 DE 4</p>
+                    <h2 id="expense-add-title">Agrega comprobantes de ejemplo</h2>
+                    <p class="workspace-caption">
+                      Al elegir uno, aparecerá una propuesta de lectura simulada para que puedas
+                      corregirla.
+                    </p>
+                    <div class="expense-example-grid">
+                      <template x-for="example in examples" :key="example.id"
+                        ><button
+                          class="expense-example"
+                          type="button"
+                          @click="addExample(example.id)"
+                        >
+                          <i class="bi bi-file-earmark-text" aria-hidden="true"></i
+                          ><strong x-text="example.label"></strong
+                          ><small x-text="example.number"></small
+                          ><span
+                            x-text="formatAmount(Number(example.value) + Number(example.igv) + Number(example.nonTaxed))"
+                          ></span></button
+                      ></template>
+                    </div>
+                    <h3 class="workspace-subheading">Gastos agregados</h3>
+                    <p class="text-muted small" x-show="record.items.length === 0">
+                      Aún no hay comprobantes.
+                    </p>
+                    <div class="expense-added-list">
+                      <template x-for="item in record.items" :key="item.id"
+                        ><div>
+                          <span
+                            ><strong x-text="item.label"></strong
+                            ><small x-text="item.number"></small
+                          ></span>
+                          <strong
+                            x-text="formatAmount(Number(item.value) + Number(item.igv) + Number(item.nonTaxed))"
+                          ></strong>
+                          <button
+                            class="btn btn-outline-danger btn-sm"
+                            type="button"
+                            :aria-label="`Quitar ${item.label}`"
+                            @click="removeItem(item.id)"
+                          >
+                            Quitar
+                          </button>
+                        </div></template
+                      >
+                    </div>
+                    <div class="expense-actions">
+                      <button
+                        class="btn btn-primary expense-primary-action"
+                        type="button"
+                        @click="review()"
+                      >
+                        Revisar datos propuestos →
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <section
+                  class="card expense-stage expense-review-stage"
+                  x-show="step === 3 || step === 4"
+                  aria-labelledby="expense-review-title"
+                >
+                  <div class="card-body">
+                    <p
+                      class="shell-eyebrow"
+                      x-text="step === 3 ? 'PASO 3 DE 4' : 'EVIDENCIA Y DATOS'"
+                    ></p>
+                    <h2 id="expense-review-title">Compara y revisa cada gasto</h2>
+                    <p class="workspace-caption">
+                      La evidencia es un comprobante de ejemplo. La propuesta OCR es simulada y
+                      editable durante la revisión.
+                    </p>
+                    <div class="expense-compare-list">
+                      <template x-for="(item, index) in record.items" :key="item.id"
+                        ><article class="expense-compare">
+                          <h3 x-text="`Gasto ${index + 1}: ${item.label}`"></h3>
+                          <div class="expense-compare-grid">
+                            <div class="expense-evidence">
+                              <span class="expense-panel-label">Comprobante de ejemplo</span>
+                              <div class="expense-paper">
+                                <strong x-text="item.evidence.vendor"></strong
+                                ><small x-text="item.evidence.ruc"></small>
+                                <div>
+                                  <span>Número</span><strong x-text="item.evidence.number"></strong>
+                                </div>
+                                <div>
+                                  <span>Fecha</span
+                                  ><strong x-text="formatDate(item.evidence.date)"></strong>
+                                </div>
+                                <p x-text="item.evidence.description"></p>
+                                <div>
+                                  <span>Valor de Venta</span
+                                  ><strong x-text="formatAmount(item.evidence.value)"></strong>
+                                </div>
+                                <div>
+                                  <span>IGV</span
+                                  ><strong x-text="formatAmount(item.evidence.igv)"></strong>
+                                </div>
+                                <div>
+                                  <span>No Gravado</span
+                                  ><strong x-text="formatAmount(item.evidence.nonTaxed)"></strong>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="expense-proposal">
+                              <span class="expense-panel-label"
+                                >Propuesta OCR simulada · sin análisis de archivo</span
+                              >
+                              <div class="expense-edit-grid">
+                                <div>
+                                  <label class="form-label" :for="`vendor-${item.id}`">Emisor</label
+                                  ><input
+                                    class="form-control"
+                                    :id="`vendor-${item.id}`"
+                                    x-model="item.vendor"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`ruc-${item.id}`">RUC</label
+                                  ><input
+                                    class="form-control"
+                                    :id="`ruc-${item.id}`"
+                                    x-model="item.ruc"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`number-${item.id}`">Número</label
+                                  ><input
+                                    class="form-control"
+                                    :id="`number-${item.id}`"
+                                    x-model="item.number"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`date-${item.id}`">Fecha</label
+                                  ><input
+                                    class="form-control"
+                                    type="date"
+                                    :id="`date-${item.id}`"
+                                    x-model="item.date"
+                                    :disabled="!isEditable || step === 4"
+                                    @change="persist()"
+                                  />
+                                </div>
+                                <div class="expense-wide">
+                                  <label class="form-label" :for="`description-${item.id}`"
+                                    >Descripción del gasto</label
+                                  ><input
+                                    class="form-control"
+                                    :id="`description-${item.id}`"
+                                    x-model="item.description"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`value-${item.id}`"
+                                    >Valor de Venta</label
+                                  ><input
+                                    class="form-control"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    :id="`value-${item.id}`"
+                                    x-model.number="item.value"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`igv-${item.id}`">IGV</label
+                                  ><input
+                                    class="form-control"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    :id="`igv-${item.id}`"
+                                    x-model.number="item.igv"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                                <div>
+                                  <label class="form-label" :for="`nontaxed-${item.id}`"
+                                    >No Gravado</label
+                                  ><input
+                                    class="form-control"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    :id="`nontaxed-${item.id}`"
+                                    x-model.number="item.nonTaxed"
+                                    :disabled="!isEditable || step === 4"
+                                    @input="persist()"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div></article
+                      ></template>
+                    </div>
+                    <div class="expense-undocumented">
+                      <h3>No Documentado</h3>
+                      <p class="workspace-caption">
+                        Gasto declarado sin comprobante de ejemplo. Se muestra por separado.
+                      </p>
+                      <div class="expense-undocumented-fields">
+                        <div>
+                          <label class="form-label" for="expense-undocumented-amount">Importe</label
+                          ><input
+                            id="expense-undocumented-amount"
+                            class="form-control"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            x-model.number="record.undocumentedAmount"
+                            :disabled="!isEditable || step === 4"
+                            @input="persist()"
+                          />
+                        </div>
+                        <div>
+                          <label class="form-label" for="expense-undocumented-note">Motivo</label
+                          ><input
+                            id="expense-undocumented-note"
+                            class="form-control"
+                            x-model="record.undocumentedNote"
+                            :disabled="!isEditable || step === 4"
+                            @input="persist()"
+                            placeholder="Ejemplo: movilidad"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="expense-total-card" aria-label="Resumen de importes">
+                      <div>
+                        <span>Valor de Venta</span
+                        ><strong x-text="formatAmount(totals.value)"></strong>
+                      </div>
+                      <div><span>IGV</span><strong x-text="formatAmount(totals.igv)"></strong></div>
+                      <div>
+                        <span>No Gravado</span
+                        ><strong x-text="formatAmount(totals.nonTaxed)"></strong>
+                      </div>
+                      <div>
+                        <span>No Documentado</span
+                        ><strong x-text="formatAmount(totals.undocumented)"></strong>
+                      </div>
+                      <div class="expense-total">
+                        <span>Total</span><strong x-text="formatAmount(totals.total)"></strong>
+                      </div>
+                    </div>
+                    <div class="expense-actions" x-show="step === 3 && isEditable">
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        x-show="record.status === 'Borrador'"
+                        @click="step = 2"
+                      >
+                        ← Comprobantes
+                      </button>
+                      <button
+                        class="btn btn-primary expense-primary-action"
+                        type="button"
+                        @click="send()"
+                        x-text="record.status === 'Observada' ? 'Guardar corrección y reenviar' : 'Enviar a revisión'"
+                      ></button>
+                    </div>
+                  </div>
+                </section>
+
+                <section
+                  class="card expense-stage expense-status-stage"
+                  x-show="step === 4"
+                  aria-labelledby="expense-status-title"
+                >
+                  <div class="card-body">
+                    <p class="shell-eyebrow">PASO 4 DE 4</p>
+                    <h2 id="expense-status-title">Seguimiento de la rendición</h2>
+                    <p>
+                      Estado actual:
+                      <span
+                        class="badge"
+                        :class="statusClass(record.status)"
+                        x-text="record.status"
+                      ></span>
+                    </p>
+                    <p class="workspace-caption" x-show="record.base">
+                      Registro del conjunto mock. El comprobante mostrado es ilustrativo, no un
+                      archivo original.
+                    </p>
+                    <a
+                      class="btn btn-outline-primary expense-primary-action"
+                      x-show="record.base && record.status === 'En revisión'"
+                      :href="`./expense.html?new=1&project=${encodeURIComponent(record.projectId)}`"
+                      >Crear rendición de práctica para este proyecto</a
+                    >
+                    <div
+                      class="expense-actions"
+                      x-show="!record.base && record.status === 'En revisión'"
+                    >
+                      <button
+                        class="btn btn-outline-warning"
+                        type="button"
+                        @click="observationOpen = !observationOpen"
+                      >
+                        Simular observación
+                      </button>
+                      <button
+                        class="btn btn-success expense-primary-action"
+                        type="button"
+                        @click="approve()"
+                      >
+                        Simular aprobación
+                      </button>
+                    </div>
+                    <div
+                      class="expense-observation"
+                      x-show="observationOpen && record.status === 'En revisión'"
+                      x-cloak
+                    >
+                      <label class="form-label" for="expense-observation-note"
+                        >Motivo de la observación simulada</label
+                      >
+                      <textarea
+                        id="expense-observation-note"
+                        class="form-control"
+                        rows="3"
+                        x-model="observationNote"
+                        placeholder="Ejemplo: corregir el número del comprobante"
+                      ></textarea>
+                      <button class="btn btn-warning mt-2" type="button" @click="observe()">
+                        Registrar observación
+                      </button>
+                    </div>
+                    <div
+                      class="expense-actions"
+                      x-show="!record.base && record.status === 'Observada'"
+                    >
+                      <button
+                        class="btn btn-primary expense-primary-action"
+                        type="button"
+                        @click="correct()"
+                      >
+                        Corregir datos →
+                      </button>
+                    </div>
+                    <div
+                      class="alert alert-success mt-3 mb-0"
+                      x-show="record.status === 'Aprobada'"
+                      role="status"
+                    >
+                      <strong
+                        x-text="record.base ? 'Costo mock registrado' : 'Relación demostrativa con Costos'"
+                      ></strong>
+                      <p
+                        class="mb-2"
+                        x-text="record.base ? 'Esta rendición ya forma parte de los costos compartidos del proyecto.' : 'La aprobación simulada se muestra en Costos como registro de demostración y no modifica sus totales compartidos.'"
+                      ></p>
+                      <a x-show="costHref" :href="costHref">Ver relación en Costos →</a>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="card expense-history" aria-labelledby="expense-history-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="expense-history-title">Historial de acciones</h2>
+                      <span class="workspace-caption">Demostración local</span>
+                    </div>
+                    <ol>
+                      <template x-for="(event, index) in [...record.history].reverse()" :key="index"
+                        ><li>
+                          <strong x-text="event.label"></strong>
+                          <small x-text="formatDate(event.at.slice(0, 10))"></small>
+                          <p x-text="event.note"></p></li
+                      ></template>
+                    </ol>
+                  </div>
+                </section></div
+            ></template>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

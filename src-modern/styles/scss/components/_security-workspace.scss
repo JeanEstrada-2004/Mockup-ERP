@@ -1,0 +1,48 @@
+.security-workspace {
+  .security-filters {
+    display: grid;
+    grid-template-columns: minmax(190px, 1.5fr) minmax(170px, 1fr) auto;
+    gap: 0.7rem;
+    align-items: end;
+  }
+  .security-role-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+  .security-role-grid article {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: 0.4rem;
+    padding: 0.8rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+  .security-role-grid p {
+    margin: 0;
+    color: var(--bs-secondary-color);
+  }
+  .security-permissions-table {
+    min-width: 620px;
+  }
+  .security-permissions-table th {
+    white-space: nowrap;
+  }
+}
+@media (max-width: 767.98px) {
+  .security-workspace .security-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .security-workspace .security-filters > :first-child {
+    grid-column: span 2;
+  }
+  .security-workspace .security-filters .btn {
+    min-height: 44px;
+  }
+}
+@media (max-width: 479.98px) {
+  .security-workspace .security-role-grid {
+    grid-template-columns: 1fr;
+  }
+}

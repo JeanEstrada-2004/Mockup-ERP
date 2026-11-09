@@ -1,0 +1,58 @@
+.crm-workspace {
+  .crm-filters {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.7fr) repeat(2, minmax(150px, 1fr)) auto;
+    align-items: end;
+    gap: 0.7rem;
+  }
+  .crm-selected {
+    background: var(--bs-primary-bg-subtle);
+  }
+  .crm-flow {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0;
+    margin: 1rem 0;
+    list-style: none;
+  }
+  .crm-flow li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: start;
+    padding: 0.7rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+  .crm-flow li > span {
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--bs-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .crm-flow li > div {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .crm-flow small {
+    color: var(--bs-secondary-color);
+  }
+}
+@media (max-width: 767.98px) {
+  .crm-workspace .crm-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .crm-workspace .crm-filters > :first-child {
+    grid-column: span 2;
+  }
+  .crm-workspace .crm-filters .btn {
+    min-height: 44px;
+  }
+}

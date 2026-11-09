@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Costos por proyecto de demostración" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Costos por Proyecto</title>
+  </head>
+  <body data-page="costs-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace costs-workspace"
+            x-data="costWorkspace"
+            @theme-change.window="renderChart()"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Costos por Proyecto</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">CONTROL ECONÓMICO</p>
+                <h1>Costos por Proyecto</h1>
+                <p class="shell-page-subtitle">
+                  Presupuesto, compromisos y ejecución vinculados a operaciones ficticias.
+                </p>
+              </div>
+              <a class="btn btn-outline-primary" :href="projectHref">Abrir ficha del proyecto</a>
+            </div>
+            <div class="costs-project-selector card">
+              <div class="card-body">
+                <div>
+                  <label class="form-label" for="costs-project">Proyecto</label
+                  ><select
+                    id="costs-project"
+                    class="form-select"
+                    x-model="projectId"
+                    @change="selectProject($event.target.value)"
+                  >
+                    <template x-for="item in projects" :key="item.id"
+                      ><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option
+                    ></template>
+                  </select>
+                </div>
+                <p class="workspace-caption mb-0">
+                  Las cifras se calculan desde las mismas operaciones que usa el Panel General y la
+                  Ficha Integral.
+                </p>
+              </div>
+            </div>
+            <div class="costs-kpis">
+              <section class="card">
+                <div class="card-body">
+                  <small>Presupuesto total</small
+                  ><strong x-text="formatMoney(financials.budgetAmount)"></strong
+                  ><span>Importe aprobado de referencia del proyecto.</span>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-body">
+                  <small>Costo comprometido total</small
+                  ><strong x-text="formatMoney(financials.committedCost)"></strong
+                  ><span>Ejecutado + OC aprobadas aún abiertas; no se suman dos veces.</span>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-body">
+                  <small>Costo ejecutado</small
+                  ><strong x-text="formatMoney(financials.executedCost)"></strong
+                  ><span>Suma de las cinco fuentes con operación y documento.</span>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-body">
+                  <small>Saldo frente al ejecutado</small
+                  ><strong x-text="formatMoney(financials.availableAgainstExecuted)"></strong
+                  ><span>Presupuesto − ejecutado. Es el «Disponible» de la especificación.</span>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-body">
+                  <small>Ejecución presupuestal</small
+                  ><strong x-text="`${financials.executionPercent} %`"></strong
+                  ><span>Ejecutado ÷ presupuesto.</span>
+                </div>
+              </section>
+            </div>
+            <div class="costs-commit-summary alert alert-info" role="note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              <span
+                ><strong
+                  x-text="`Compromisos abiertos: ${formatMoney(financials.outstandingCommitments)}`"
+                ></strong
+                >. Disponible para nuevos compromisos:
+                <strong x-text="formatMoney(financials.availableToCommit)"></strong
+                ><span x-show="hasWarehouse"
+                  >. Las OC de inventario recibidas no se contabilizan otra vez al salir el
+                  material</span
+                >.</span
+              >
+            </div>
+            <div class="costs-alerts" x-show="alerts.length">
+              <template x-for="alert in alerts" :key="alert.text"
+                ><div
+                  class="alert"
+                  :class="`alert-${alert.level}`"
+                  role="status"
+                  x-text="alert.text"
+                ></div
+              ></template>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-xl-6">
+                <section class="card h-100" aria-labelledby="cost-chart-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="cost-chart-title">Presupuesto vs. costo</h2>
+                        <p class="workspace-caption">
+                          El comprometido total contiene el ejecutado.
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      id="cost-budget-chart"
+                      role="img"
+                      aria-label="Presupuesto, costo comprometido total y costo ejecutado"
+                    ></div>
+                    <div class="costs-chart-values">
+                      <span
+                        >Presupuesto
+                        <strong x-text="formatMoney(financials.budgetAmount)"></strong></span
+                      ><span
+                        >Comprometido
+                        <strong x-text="formatMoney(financials.committedCost)"></strong></span
+                      ><span
+                        >Ejecutado <strong x-text="formatMoney(financials.executedCost)"></strong
+                      ></span>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <div class="col-xl-6">
+                <section class="card h-100" aria-labelledby="cost-sources-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="cost-sources-title">Costos por fuente</h2>
+                        <p class="workspace-caption">
+                          Selecciona una fuente para ver sus operaciones.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="costs-sources">
+                      <template x-for="item in sources" :key="item.id"
+                        ><button
+                          type="button"
+                          class="costs-source-row"
+                          :class="sourceFilter === item.id ? 'active' : ''"
+                          @click="selectSource(item.id)"
+                        >
+                          <span x-text="item.label"></span
+                          ><strong x-text="formatMoney(item.amount)"></strong
+                          ><small x-text="`${item.percent} % · ${item.count} operaciones`"></small
+                          ><i class="bi bi-arrow-right" aria-hidden="true"></i></button
+                      ></template>
+                    </div>
+                    <div class="costs-source-total">
+                      <span>Total de fuentes</span
+                      ><strong x-text="formatMoney(sourceTotal)"></strong>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+            <section class="card mb-3" aria-labelledby="cost-operations-title">
+              <div class="card-body">
+                <div class="shell-section-header costs-section-header">
+                  <div>
+                    <h2 id="cost-operations-title">
+                      Operaciones de <span x-text="sourceTitle"></span>
+                    </h2>
+                    <p class="workspace-caption">
+                      Cada importe ejecutado aparece una sola vez en estas filas.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    x-show="sourceFilter"
+                    @click="selectSource('')"
+                  >
+                    Ver todas
+                  </button>
+                </div>
+                <div class="table-responsive d-none d-lg-block">
+                  <table class="table align-middle costs-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Operación</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Fuente</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Importe ejecutado</th>
+                        <th scope="col">Documento</th>
+                        <th scope="col">Detalle</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in visibleEntries" :key="item.id"
+                        ><tr :class="selectedEntry?.id === item.id ? 'costs-selected' : ''">
+                          <td>
+                            <button
+                              type="button"
+                              class="btn btn-link btn-sm p-0"
+                              @click="selectOperation(item)"
+                              x-text="item.operationId"
+                            ></button>
+                          </td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td x-text="item.sourceLabel"></td>
+                          <td x-text="item.status"></td>
+                          <td class="fw-semibold" x-text="formatMoney(item.amount)"></td>
+                          <td><a :href="documentHref(item)" x-text="item.documentId"></a></td>
+                          <td>
+                            <button
+                              type="button"
+                              class="btn btn-outline-primary btn-sm"
+                              @click="selectOperation(item)"
+                            >
+                              Ver trazabilidad
+                            </button>
+                          </td>
+                        </tr></template
+                      >
+                    </tbody>
+                  </table>
+                </div>
+                <div class="costs-mobile-list d-lg-none">
+                  <template x-for="item in visibleEntries" :key="item.id"
+                    ><article class="costs-mobile-card">
+                      <div>
+                        <strong x-text="item.operationId"></strong
+                        ><span x-text="formatMoney(item.amount)"></span>
+                      </div>
+                      <small
+                        x-text="`${formatDate(item.date)} · ${item.sourceLabel} · ${item.status}`"
+                      ></small>
+                      <div class="costs-mobile-actions">
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary"
+                          @click="selectOperation(item)"
+                        >
+                          Ver trazabilidad</button
+                        ><a class="btn btn-outline-secondary" :href="documentHref(item)"
+                          >Documento</a
+                        >
+                      </div>
+                    </article></template
+                  >
+                </div>
+                <p class="workspace-caption" x-show="visibleEntries.length === 0">
+                  No hay costos ejecutados para esta fuente.
+                </p>
+              </div>
+            </section>
+            <section
+              class="card mb-3 costs-operation-detail"
+              x-show="selectedEntry"
+              id="cost-operation-detail"
+              aria-labelledby="cost-operation-title"
+            >
+              <div class="card-body" x-show="selectedEntry">
+                <div class="shell-section-header">
+                  <div>
+                    <p class="shell-eyebrow mb-1">TRAZABILIDAD DEL COSTO</p>
+                    <h2 id="cost-operation-title" x-text="selectedEntry?.operationId"></h2>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    aria-label="Cerrar operación"
+                    @click="closeOperation()"
+                  ></button>
+                </div>
+                <div class="costs-operation-facts">
+                  <div>
+                    <small>Fuente</small><strong x-text="selectedEntry?.sourceLabel"></strong>
+                  </div>
+                  <div><small>Tipo</small><strong x-text="selectedEntry?.kind"></strong></div>
+                  <div>
+                    <small>Fecha</small><strong x-text="formatDate(selectedEntry?.date)"></strong>
+                  </div>
+                  <div><small>Estado</small><strong x-text="selectedEntry?.status"></strong></div>
+                  <div>
+                    <small>Importe ejecutado</small
+                    ><strong x-text="formatMoney(selectedEntry?.amount || 0)"></strong>
+                  </div>
+                  <div>
+                    <small>Proyecto</small><a :href="projectHref" x-text="project?.name"></a>
+                  </div>
+                  <div x-show="selectedEntry?.supplierId">
+                    <small>Proveedor</small
+                    ><strong x-text="supplierName(selectedEntry?.supplierId)"></strong>
+                  </div>
+                  <div x-show="selectedEntry?.workerId">
+                    <small>Trabajador</small
+                    ><strong x-text="workerName(selectedEntry?.workerId)"></strong>
+                  </div>
+                  <div x-show="selectedEntry?.materialId">
+                    <small>Material</small
+                    ><strong x-text="materialName(selectedEntry?.materialId)"></strong>
+                  </div>
+                  <div>
+                    <small>Documento mock</small
+                    ><a :href="documentHref(selectedEntry)" x-text="selectedEntry?.documentId"></a>
+                  </div>
+                </div>
+                <div class="costs-detail-actions">
+                  <a
+                    x-show="operationHref(selectedEntry)"
+                    :href="operationHref(selectedEntry)"
+                    class="btn btn-outline-primary"
+                    >Abrir operación de origen</a
+                  ><a :href="documentHref(selectedEntry)" class="btn btn-primary"
+                    >Abrir documento mock</a
+                  ><button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="closeOperation()"
+                  >
+                    Volver a la fuente
+                  </button>
+                </div>
+              </div>
+            </section>
+            <div class="row g-3">
+              <div class="col-xl-7">
+                <section class="card h-100" aria-labelledby="cost-parts-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="cost-parts-title">Partidas de control referencial</h2>
+                        <p class="workspace-caption">
+                          El presupuesto original solo define un total. Esta distribución por fuente
+                          es ilustrativa y suma el presupuesto del proyecto.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table align-middle costs-table costs-parts-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Partida</th>
+                            <th scope="col">Presupuesto referencial</th>
+                            <th scope="col">Ejecutado</th>
+                            <th scope="col">Variación disponible</th>
+                            <th scope="col">Ejecución</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="part in parts" :key="part.id"
+                            ><tr :class="part.variation < 0 ? 'costs-part-over' : ''">
+                              <td>
+                                <button
+                                  type="button"
+                                  class="btn btn-link btn-sm p-0"
+                                  @click="selectSource(part.id)"
+                                  x-text="part.label"
+                                ></button>
+                              </td>
+                              <td x-text="formatMoney(part.budget)"></td>
+                              <td x-text="formatMoney(part.amount)"></td>
+                              <td x-text="formatMoney(part.variation)"></td>
+                              <td>
+                                <span
+                                  class="badge"
+                                  :class="part.executionPercent > 100 ? 'text-bg-warning' : 'text-bg-secondary'"
+                                  x-text="`${part.executionPercent} %`"
+                                ></span>
+                              </td></tr
+                          ></template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <div class="col-xl-5">
+                <section class="card h-100" aria-labelledby="cost-commitments-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="cost-commitments-title">OC con compromiso abierto</h2>
+                        <p class="workspace-caption">
+                          Separadas del costo ejecutado; se incluyen solo al calcular el
+                          comprometido total.
+                        </p>
+                      </div>
+                    </div>
+                    <div class="costs-commit-list">
+                      <template x-for="item in commitments" :key="item.id"
+                        ><div>
+                          <a :href="moduleHref('purchases', item.id)" x-text="item.id"></a
+                          ><small x-text="`${formatDate(item.date)} · ${item.status}`"></small
+                          ><strong x-text="formatMoney(item.amount)"></strong></div
+                      ></template>
+                    </div>
+                    <p class="workspace-caption" x-show="commitments.length === 0">
+                      No hay OC con compromiso abierto en este proyecto.
+                    </p>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

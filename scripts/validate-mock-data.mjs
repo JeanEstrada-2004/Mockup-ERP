@@ -13,6 +13,24 @@ import {
   getPortfolioFinancials,
   getProjectFinancials,
 } from '../src-modern/scripts/data/mock-data.js';
+import {
+  commercialBreakdown,
+  inventoryPurchaseBreakdown,
+} from '../src-modern/scripts/data/commercial-data.js';
+import {
+  warehouseMovements,
+  warehouseOpening,
+  warehouseStock,
+} from '../src-modern/scripts/data/warehouse-data.js';
+import { projectCostModel } from '../src-modern/scripts/data/cost-data.js';
+import {
+  personnelAssignments,
+  baseAttendance,
+  baseTimesheets,
+  incidentRows,
+  laborCostRows,
+  hoursBetween,
+} from '../src-modern/scripts/data/personnel-data.js';
 
 function uniqueIds(items, label) {
   const ids = items.map((item) => item.id);
@@ -38,6 +56,7 @@ for (const variantId of VARIANT_IDS) {
   for (const key of ['clients', 'suppliers', 'workers', 'projects', 'budgets', 'operations']) {
     uniqueIds(data[key], `${variantId}.${key}`);
   }
+  uniqueIds(data.opportunities, `${variantId}.opportunities`);
   const documents = getDocuments(data);
   uniqueIds(documents, `${variantId}.documents`);
 
@@ -48,6 +67,146 @@ for (const variantId of VARIANT_IDS) {
   const projects = new Set(data.projects.map((item) => item.id));
   const documentIds = new Set(documents.map((item) => item.id));
   const budgets = new Map(data.budgets.map((item) => [item.id, item]));
+  for (const opportunity of data.opportunities) {
+    assert.ok(clients.has(opportunity.clientId));
+    assert.ok(workers.has(opportunity.ownerId));
+    assert.ok(projects.has(opportunity.projectId));
+    assert.equal(budgets.get(opportunity.budgetId)?.projectId, opportunity.projectId);
+    assert.equal(budgets.get(opportunity.budgetId)?.clientId, opportunity.clientId);
+    assert.equal(budgets.get(opportunity.budgetId)?.amount, opportunity.estimatedAmount);
+  }
+
+  const stockMovements = warehouseMovements(data);
+  if (config.enabledModules.includes('warehouse')) {
+    uniqueIds(stockMovements, `${variantId}.warehouse`);
+    for (const material of data.materials) {
+      assert.equal(
+        warehouseStock(data, material.id),
+        material.stock,
+        `${material.id}: stock inconsistente`
+      );
+      assert.ok(warehouseOpening(material.id) >= 0);
+    }
+    for (const movement of stockMovements) {
+      const operation = data.operations.find((item) => item.id === movement.operationId);
+      const purchase = data.operations.find((item) => item.id === movement.purchaseId);
+      assert.ok(operation && purchase && purchase.inventoryLine);
+      assert.ok(materials.has(movement.materialId) && projects.has(movement.projectId));
+      assert.ok(
+        documentIds.has(movement.documentId) && documentIds.has(movement.purchaseDocumentId)
+      );
+      assert.ok(movement.quantity > 0 && movement.balance >= 0);
+      assert.equal(purchase.inventoryLine.materialId, movement.materialId);
+      assert.equal(
+        movement.balance,
+        movement.balanceBefore + (movement.type === 'issue' ? -1 : 1) * movement.quantity
+      );
+      if (movement.type === 'entry') {
+        assert.equal(operation.id, purchase.id);
+        assert.equal(movement.quantity, purchase.inventoryLine.quantity);
+        assert.equal(
+          purchase.costSource,
+          null,
+          `${purchase.id}: no sumar compra de inventario al costo`
+        );
+      }
+      if (movement.type === 'issue') {
+        assert.equal(operation.type, 'material_issue');
+        assert.equal(operation.costSource, 'materials');
+        assert.equal(movement.executedCost, operation.amount);
+      }
+      if (movement.type === 'return') {
+        assert.equal(operation.type, 'material_return');
+        assert.equal(operation.amount, 0);
+        assert.ok(
+          stockMovements.some(
+            (item) => item.id === movement.relatedIssueId && item.type === 'issue'
+          )
+        );
+      }
+    }
+    for (const project of data.projects) {
+      assert.equal(
+        stockMovements
+          .filter((item) => item.type === 'issue' && item.projectId === project.id)
+          .reduce((sum, item) => sum + item.executedCost, 0),
+        getCostBySource(data, project.id).materials || 0
+      );
+    }
+  } else {
+    assert.equal(stockMovements.length, 0);
+  }
+
+  assert.equal(new Set(data.workers.map((item) => item.dni)).size, data.workers.length);
+  for (const worker of data.workers) {
+    assert.match(worker.dni, /^0000\d{4}$/, `${worker.id}: DNI ficticio inválido`);
+    assert.ok(worker.role && worker.area && worker.status === 'Activo');
+  }
+  const assignments = personnelAssignments(data);
+  uniqueIds(assignments, `${variantId}.assignments`);
+  for (const assignment of assignments) {
+    assert.ok(workers.has(assignment.workerId));
+    assert.ok(projects.has(assignment.projectId));
+    assert.ok(assignment.percent > 0 && assignment.percent <= 100);
+  }
+  for (const worker of data.workers) {
+    assert.equal(
+      assignments
+        .filter((item) => item.workerId === worker.id)
+        .reduce((sum, item) => sum + item.percent, 0),
+      100,
+      `${worker.id}: asignación referencial inconsistente`
+    );
+  }
+  const attendance = baseAttendance(data, config.enabledModules.includes('biometrics'));
+  const timesheets = baseTimesheets(data);
+  uniqueIds(attendance, `${variantId}.attendance`);
+  uniqueIds(timesheets, `${variantId}.timesheets`);
+  for (const timesheet of timesheets) {
+    const source = data.operations.find((item) => item.id === timesheet.operationId);
+    const presence = attendance.find((item) => item.id === timesheet.attendanceId);
+    assert.equal(source?.type, 'timesheet');
+    assert.equal(source.workerId, timesheet.workerId);
+    assert.equal(source.projectId, timesheet.projectId);
+    assert.equal(presence?.workerId, timesheet.workerId);
+    assert.equal(presence?.projectId, timesheet.projectId);
+    assert.equal(presence?.date, timesheet.date);
+    assert.equal(hoursBetween(timesheet.start, timesheet.end), timesheet.hours);
+  }
+  assert.equal(
+    incidentRows(data, config.enabledModules.includes('biometrics')).length,
+    config.enabledModules.includes('biometrics') ? 1 : 0
+  );
+  assert.equal(
+    laborCostRows(data).length,
+    data.operations.filter((item) => item.type === 'timesheet').length
+  );
+  for (const project of data.projects) {
+    const costModel = projectCostModel(data, project.id);
+    assert.equal(
+      costModel.sources.reduce((sum, source) => sum + source.amount, 0),
+      costModel.financials.executedCost
+    );
+    assert.equal(
+      costModel.entries.reduce((sum, entry) => sum + entry.amount, 0),
+      costModel.financials.executedCost
+    );
+    assert.equal(
+      costModel.commitments.reduce((sum, item) => sum + item.amount, 0),
+      costModel.financials.outstandingCommitments
+    );
+    assert.equal(
+      costModel.parts.reduce((sum, item) => sum + item.budget, 0),
+      project.budgetAmount
+    );
+    for (const entry of costModel.entries) assert.ok(documentIds.has(entry.documentId));
+    assert.equal(
+      laborCostRows(data)
+        .filter((item) => item.projectId === project.id)
+        .reduce((sum, item) => sum + item.amount, 0),
+      getCostBySource(data, project.id).personnel || 0
+    );
+  }
 
   for (const project of data.projects) {
     assert.ok(clients.has(project.clientId), `${project.id}: cliente inexistente`);
@@ -68,6 +227,37 @@ for (const variantId of VARIANT_IDS) {
     if (item.documentId) assert.ok(documentIds.has(item.documentId));
     if (item.costSource) assert.ok(item.documentId, `${item.id}: costo sin documento`);
     if (item.commitmentOpen) assert.equal(item.costSource, null);
+    if (item.type === 'purchase') {
+      const breakdown = item.inventoryLine
+        ? inventoryPurchaseBreakdown(
+            item,
+            data.materials.find((material) => material.id === item.inventoryLine.materialId)
+          )
+        : commercialBreakdown(item.amount, 'purchase');
+      assert.equal(breakdown.total, item.amount);
+      assert.equal(
+        Math.round((breakdown.subtotal + breakdown.tax) * 100),
+        Math.round(item.amount * 100)
+      );
+      assert.equal(
+        Math.round(breakdown.items.reduce((sum, line) => sum + line.subtotal, 0) * 100),
+        Math.round(breakdown.subtotal * 100)
+      );
+      assert.ok(documents.some((document) => document.operationId === item.id));
+    }
+  }
+
+  for (const budget of data.budgets) {
+    const breakdown = commercialBreakdown(budget.amount, 'budget');
+    assert.equal(breakdown.total, budget.amount);
+    assert.equal(
+      Math.round((breakdown.subtotal + breakdown.tax) * 100),
+      Math.round(budget.amount * 100)
+    );
+    assert.equal(
+      Math.round(breakdown.items.reduce((sum, line) => sum + line.subtotal, 0) * 100),
+      Math.round(breakdown.subtotal * 100)
+    );
   }
 
   for (const document of documents) {

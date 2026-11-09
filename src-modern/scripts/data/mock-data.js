@@ -1,8 +1,17 @@
+/* global __ACTIVE_VARIANT__ */
 import { activeVariant, getVariantConfig } from '../config/variants.js';
 import { surtecData } from './surtec.js';
 import { jyData } from './jy.js';
 
-const dataSets = { surtec: surtecData, jy: jyData };
+// During a variant build, Vite replaces MODE and removes the other data set
+// from the generated bundle. Node validation keeps both sets available.
+const buildMode = typeof __ACTIVE_VARIANT__ === 'undefined' ? undefined : __ACTIVE_VARIANT__;
+const dataSets =
+  buildMode === 'surtec-peti'
+    ? { surtec: surtecData }
+    : buildMode === 'jy-pmi' || buildMode === 'jy-demo'
+      ? { jy: jyData }
+      : { surtec: surtecData, jy: jyData };
 
 export function getDataForVariant(variant = activeVariant) {
   const config = typeof variant === 'string' ? getVariantConfig(variant) : variant;
@@ -85,30 +94,118 @@ export function getPortfolioFinancials(data) {
 }
 
 export function getDocuments(data) {
-  const budgetDocuments = data.budgets.map((budget) => ({
-    id: budget.documentId,
-    projectId: budget.projectId,
-    module: 'budgets',
-    operationId: budget.id,
-    fileName: `${budget.id}.pdf`,
-    version: budget.version,
-    simulated: true,
-  }));
-  const operationDocuments = data.operations
-    .filter((operation) => operation.documentId)
-    .map((operation) => ({
-      id: operation.documentId,
-      projectId: operation.projectId,
-      module: operation.type,
-      operationId: operation.id,
-      fileName: `${operation.id}.pdf`,
-      version: 1,
+  const budgetDocuments = data.budgets.map((budget) => {
+    const project = getProject(data, budget.projectId);
+    return {
+      id: budget.documentId,
+      projectId: budget.projectId,
+      module: 'budgets',
+      operationId: budget.id,
+      fileName: `${budget.id}.pdf`,
+      type: 'Presupuesto',
+      date: project.startDate,
+      responsibleId: project.managerId,
+      status: 'Referencia mock',
+      description: `Metadatos de la cotización ${budget.id} vinculada al proyecto.`,
+      version: budget.version,
       simulated: true,
-    }));
+    };
+  });
+  const operationDocuments = data.operations
+    .filter((operation) => operation.documentId || operation.type === 'purchase')
+    .map((operation) => {
+      const project = getProject(data, operation.projectId);
+      const module = {
+        purchase: 'purchases',
+        expense: 'expenses',
+        timesheet: 'personnel',
+        material_issue: 'warehouse',
+        material_return: 'warehouse',
+        other: 'costs',
+      }[operation.type];
+      const type = {
+        purchase: 'Orden de compra',
+        expense: 'Rendición',
+        timesheet: 'Tareo',
+        material_issue: 'Salida de material',
+        material_return: 'Devolución',
+        other: 'Ajuste de costo',
+      }[operation.type];
+      return {
+        id: operation.documentId || `DOC-${operation.id}`,
+        projectId: operation.projectId,
+        module,
+        operationId: operation.id,
+        fileName: `${operation.id}.pdf`,
+        type,
+        date: operation.date,
+        responsibleId: operation.workerId || project.managerId,
+        status: operation.documentId ? 'Referencia mock' : 'Ficha de ejemplo',
+        description: `Metadatos de ${type.toLowerCase()} ${operation.id}; no hay un archivo adjunto.`,
+        version: 1,
+        simulated: true,
+      };
+    });
 
   return [...budgetDocuments, ...operationDocuments];
 }
 
 export function getDocument(data, documentId) {
   return getDocuments(data).find((document) => document.id === documentId) || null;
+}
+
+export function getShellNotifications(data, variant) {
+  const notifications = [];
+
+  for (const operation of data.operations) {
+    if (operation.type === 'purchase' && operation.status === 'Pendiente') {
+      notifications.push({
+        id: `notification-${operation.id}`,
+        text: `${operation.id} requiere aprobación.`,
+        moduleId: 'purchases',
+        recordId: operation.id,
+        level: 'warning',
+      });
+    }
+    if (operation.type === 'expense' && operation.status === 'En revisión') {
+      notifications.push({
+        id: `notification-${operation.id}`,
+        text: `Rendición ${operation.id} pendiente de revisión.`,
+        moduleId: 'expenses',
+        recordId: operation.id,
+        level: 'info',
+      });
+    }
+  }
+
+  for (const project of data.projects) {
+    const { executionPercent } = getProjectFinancials(data, project.id);
+    if (project.status === 'En riesgo' && executionPercent >= 80) {
+      notifications.push({
+        id: `notification-${project.id}`,
+        text: `${project.id} ejecutó ${executionPercent} % de su presupuesto.`,
+        moduleId: 'projects',
+        recordId: project.id,
+        level: 'warning',
+      });
+    }
+  }
+
+  if (variant.enabledModules.includes('warehouse')) {
+    for (const material of data.materials) {
+      if (material.stock < material.minimum) {
+        notifications.push({
+          id: `notification-${material.id}`,
+          text: `Stock bajo: ${material.name}.`,
+          moduleId: 'warehouse',
+          recordId: material.id,
+          level: 'warning',
+        });
+      }
+    }
+  }
+
+  return notifications.filter((notification) =>
+    variant.enabledModules.includes(notification.moduleId)
+  );
 }

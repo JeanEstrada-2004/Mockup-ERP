@@ -4,23 +4,39 @@
 // ==========================================================================
 
 // Import Bootstrap 5 JavaScript components (only those actively used)
-import {
-  Collapse,
-  Dropdown,
-  Modal,
-  Tab,
-  Toast,
-  Tooltip,
-} from 'bootstrap';
+import { Collapse, Dropdown, Modal, Tab, Toast, Tooltip } from 'bootstrap';
 
 // Import our custom modules
 import { ThemeManager } from './utils/theme-manager.js';
-import { DashboardManager } from './components/dashboard.js';
 import { NotificationManager } from './utils/notifications.js';
 import { SidebarManager } from './components/sidebar.js';
 import { iconManager } from './utils/icon-manager.js';
-import { activeVariant } from './config/variants.js';
+import { activeVariant, variantStorageKey } from './config/variants.js';
 import { createDemoState } from './data/mock-data.js';
+import {
+  globalSearch,
+  projectContext,
+  homeOverview,
+  modulePreview,
+  initShellActions,
+} from './components/shell.js';
+import { dashboardView, projectsList, projectDetail } from './components/project-views.js';
+import {
+  budgetsList,
+  budgetDetail,
+  purchasesList,
+  purchaseDetail,
+} from './components/commercial-views.js';
+import { expensesList, expenseDetail } from './components/expense-views.js';
+import { personnelWorkspace, workerDetail } from './components/personnel-views.js';
+import { warehouseWorkspace, materialDetail } from './components/warehouse-views.js';
+import { costWorkspace } from './components/cost-views.js';
+import { documentsWorkspace, documentDetail } from './components/document-views.js';
+import { reportsWorkspace } from './components/report-views.js';
+import { crmWorkspace } from './components/crm-views.js';
+import { integrationsWorkspace } from './components/integration-views.js';
+import { securityWorkspace } from './components/security-views.js';
+import { administrationWorkspace } from './components/administration-views.js';
 
 // Import Alpine.js for reactive components
 import Alpine from 'alpinejs';
@@ -57,7 +73,7 @@ class AdminApp {
     try {
       // Wait for DOM to be ready
       if (document.readyState === 'loading') {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           document.addEventListener('DOMContentLoaded', resolve);
         });
       }
@@ -89,6 +105,9 @@ class AdminApp {
       // Initialize Alpine.js
       this.initAlpine();
 
+      // Shared shell actions and current-module indicator
+      initShellActions(this);
+
       this.isInitialized = true;
 
       // Deliberately no "loaded successfully" toast here. Every one of the 21
@@ -96,7 +115,6 @@ class AdminApp {
       // dismiss toasts without reading them — so the ones that carry real
       // information (a failed save, a deleted record) got ignored too. A tool
       // should not announce its own boot.
-
     } catch (error) {
       console.error('❌ Failed to initialize Admin App:', error);
     }
@@ -105,34 +123,34 @@ class AdminApp {
   // Initialize Bootstrap components
   initBootstrapComponents() {
     // Initialize dropdowns
-    document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(element => {
+    document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach((element) => {
       new Dropdown(element);
     });
 
     // Initialize modals
-    document.querySelectorAll('.modal').forEach(element => {
+    document.querySelectorAll('.modal').forEach((element) => {
       new Modal(element);
     });
 
     // Initialize collapse elements (toggle:false — don't auto-open on construction)
-    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(element => {
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach((element) => {
       new Collapse(element, { toggle: false });
     });
 
     // Initialize tabs
-    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(element => {
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach((element) => {
       new Tab(element);
     });
 
     // Initialize toasts
-    document.querySelectorAll('.toast').forEach(element => {
+    document.querySelectorAll('.toast').forEach((element) => {
       new Toast(element);
     });
   }
 
   // Initialize tooltips
   initTooltipsAndPopovers() {
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
       new Tooltip(element);
     });
   }
@@ -143,7 +161,10 @@ class AdminApp {
 
     switch (currentPage) {
       case 'dashboard':
-        this.components.set('dashboard', new DashboardManager());
+        this.components.set(
+          'dashboard',
+          new (await import('./components/dashboard.js')).DashboardManager()
+        );
         break;
       case 'users':
         await this.initUsersPage();
@@ -388,23 +409,30 @@ class AdminApp {
     // Handle submenu state persistence
     const currentPage = window.location.pathname;
     const elementsPages = [
-      '/elements', '/elements-buttons.html', '/elements-alerts.html', 
-      '/elements-badges.html', '/elements-cards.html', '/elements-modals.html',
-      '/elements-forms.html', '/elements-tables.html'
+      '/elements',
+      '/elements-buttons.html',
+      '/elements-alerts.html',
+      '/elements-badges.html',
+      '/elements-cards.html',
+      '/elements-modals.html',
+      '/elements-forms.html',
+      '/elements-tables.html',
     ];
-    
+
     // Check if current page is an Elements page
-    const isElementsPage = elementsPages.some(page => currentPage.includes(page.replace('.html', '')));
-    
+    const isElementsPage = elementsPages.some((page) =>
+      currentPage.includes(page.replace('.html', ''))
+    );
+
     if (isElementsPage) {
       // Expand Elements submenu on Elements pages
       const elementsSubmenu = document.getElementById('elementsSubmenu');
       const elementsToggle = document.querySelector('[data-bs-target="#elementsSubmenu"]');
-      
+
       if (elementsSubmenu && elementsToggle) {
         elementsSubmenu.classList.add('show');
         elementsToggle.setAttribute('aria-expanded', 'true');
-        
+
         // Mark current page as active in submenu
         const activeSubmenuLink = document.querySelector(`.nav-submenu a[href="${currentPage}"]`);
         if (activeSubmenuLink) {
@@ -412,25 +440,25 @@ class AdminApp {
         }
       }
     }
-    
+
     // Handle submenu toggle persistence
     document.addEventListener('click', (e) => {
       const toggleButton = e.target.closest('[data-bs-toggle="collapse"]');
       if (toggleButton) {
         const targetId = toggleButton.getAttribute('data-bs-target');
         const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
-        
+
         // Store submenu state
-        localStorage.setItem(`submenu-${targetId}`, (!isExpanded).toString());
+        localStorage.setItem(variantStorageKey(`submenu-${targetId}`), (!isExpanded).toString());
       }
     });
-    
+
     // Restore submenu states from localStorage
     const submenuToggles = document.querySelectorAll('[data-bs-toggle="collapse"]');
-    submenuToggles.forEach(toggle => {
+    submenuToggles.forEach((toggle) => {
       const targetId = toggle.getAttribute('data-bs-target');
-      const savedState = localStorage.getItem(`submenu-${targetId}`);
-      
+      const savedState = localStorage.getItem(variantStorageKey(`submenu-${targetId}`));
+
       if (savedState === 'true' && !isElementsPage) {
         const targetElement = document.querySelector(targetId);
         if (targetElement) {
@@ -444,63 +472,86 @@ class AdminApp {
   // Initialize Alpine.js
   initAlpine() {
     // Register Alpine data components
+    Alpine.data('globalSearch', globalSearch);
+    Alpine.data('projectContext', projectContext);
+    Alpine.data('homeOverview', homeOverview);
+    Alpine.data('modulePreview', modulePreview);
+    Alpine.data('dashboardView', dashboardView);
+    Alpine.data('projectsList', projectsList);
+    Alpine.data('projectDetail', projectDetail);
+    Alpine.data('budgetsList', budgetsList);
+    Alpine.data('budgetDetail', budgetDetail);
+    Alpine.data('purchasesList', purchasesList);
+    Alpine.data('purchaseDetail', purchaseDetail);
+    Alpine.data('expensesList', expensesList);
+    Alpine.data('expenseDetail', expenseDetail);
+    Alpine.data('personnelWorkspace', personnelWorkspace);
+    Alpine.data('workerDetail', workerDetail);
+    Alpine.data('warehouseWorkspace', warehouseWorkspace);
+    Alpine.data('materialDetail', materialDetail);
+    Alpine.data('costWorkspace', costWorkspace);
+    Alpine.data('documentsWorkspace', documentsWorkspace);
+    Alpine.data('documentDetail', documentDetail);
+    Alpine.data('reportsWorkspace', reportsWorkspace);
+    Alpine.data('crmWorkspace', crmWorkspace);
+    Alpine.data('integrationsWorkspace', integrationsWorkspace);
+    Alpine.data('securityWorkspace', securityWorkspace);
+    Alpine.data('administrationWorkspace', administrationWorkspace);
+
     Alpine.data('searchComponent', () => ({
       query: '',
       results: [],
       isLoading: false,
-      
+
       async search() {
         if (this.query.length < 2) {
           this.results = [];
           return;
         }
-        
+
         this.isLoading = true;
         // Simulate API search
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         this.results = [
           { title: 'Dashboard', url: '/', type: 'page' },
           { title: 'Users', url: '/users', type: 'page' },
           { title: 'Settings', url: '/settings', type: 'page' },
-          { title: 'Analytics', url: '/analytics', type: 'page' }
-        ].filter(item => 
-          item.title.toLowerCase().includes(this.query.toLowerCase())
-        );
-        
+          { title: 'Analytics', url: '/analytics', type: 'page' },
+        ].filter((item) => item.title.toLowerCase().includes(this.query.toLowerCase()));
+
         this.isLoading = false;
-      }
+      },
     }));
 
     Alpine.data('statsCounter', (initialValue = 0, increment = 1) => ({
       value: initialValue,
-      
+
       init() {
         // Auto-increment every 5 seconds
         setInterval(() => {
           this.value += Math.floor(Math.random() * increment) + 1;
         }, 5000);
-      }
+      },
     }));
 
     Alpine.data('themeSwitch', () => ({
       currentTheme: 'light',
-      
+
       init() {
-        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.currentTheme = window.AdminApp.themeManager.getCurrentTheme();
       },
-      
+
       toggle() {
-        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-        localStorage.setItem('theme', this.currentTheme);
-      }
+        window.AdminApp.themeManager.toggleTheme();
+        this.currentTheme = window.AdminApp.themeManager.getCurrentTheme();
+      },
     }));
 
     Alpine.data('iconDemo', () => ({
       getIcon(iconName) {
         return iconManager.get(iconName);
-      }
+      },
     }));
 
     // Quick Add Form for Dashboard
@@ -543,7 +594,7 @@ class AdminApp {
           priority: this.itemType === 'task' ? this.priority : null,
           dateTime: ['event', 'reminder'].includes(this.itemType) ? this.dateTime : null,
           assignee: this.itemType === 'task' ? this.assignee : null,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
 
         // In a real app, this would send to an API
@@ -554,7 +605,7 @@ class AdminApp {
           task: 'Task',
           note: 'Note',
           event: 'Event',
-          reminder: 'Reminder'
+          reminder: 'Reminder',
         };
 
         window.AdminApp.notificationManager.success(
@@ -563,7 +614,7 @@ class AdminApp {
 
         // Reset form for next use
         this.resetForm();
-      }
+      },
     }));
 
     // Start Alpine.js
@@ -577,8 +628,8 @@ class AdminApp {
       this.notificationManager.info('New user registered', {
         action: {
           text: 'View',
-          handler: 'window.location.href="/users"'
-        }
+          handler: 'window.location.href="/users"',
+        },
       });
     }, 3000);
 
@@ -593,7 +644,7 @@ class AdminApp {
 
   // Cleanup method
   destroy() {
-    this.components.forEach(component => {
+    this.components.forEach((component) => {
       if (component.destroy) {
         component.destroy();
       }
@@ -617,4 +668,4 @@ window.AdminApp = app;
 window.IconManager = iconManager;
 
 // Export the app instance for module imports
-export default app; 
+export default app;

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Presupuestos y cotizaciones de proyectos" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Presupuestos y Cotizaciones</title>
+  </head>
+  <body data-page="budgets-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace commercial-workspace"
+            x-data="budgetsList"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Presupuestos</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">GESTIÓN COMERCIAL</p>
+                <h1>Presupuestos y Cotizaciones</h1>
+                <p class="shell-page-subtitle">
+                  Versiones, importes y estado de aprobación por proyecto.
+                </p>
+              </div>
+              <span class="shell-demo-label"
+                ><i class="bi bi-info-circle" aria-hidden="true"></i> Datos de demostración</span
+              >
+            </div>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h2>Módulo no incluido</h2>
+                  <p>Esta presentación no habilita Presupuestos.</p>
+                  <a class="btn btn-primary" href="./projects.html">Ver proyectos</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed"
+              ><section class="card" aria-labelledby="budgets-list-heading">
+                <div class="card-body">
+                  <div class="shell-section-header">
+                    <h2 id="budgets-list-heading">Presupuestos registrados</h2>
+                    <span
+                      class="text-muted small"
+                      aria-live="polite"
+                      x-text="`${filtered.length} de ${budgets.length} presupuestos`"
+                    ></span>
+                  </div>
+                  <div class="workspace-filters mb-3">
+                    <div>
+                      <label class="form-label" for="budgets-search">Buscar</label
+                      ><input
+                        id="budgets-search"
+                        class="form-control"
+                        type="search"
+                        placeholder="Código, proyecto o cliente"
+                        x-model="search"
+                        @input="updateUrl()"
+                      />
+                    </div>
+                    <div>
+                      <label class="form-label" for="budgets-project">Proyecto</label
+                      ><select
+                        id="budgets-project"
+                        class="form-select"
+                        x-model="projectFilter"
+                        @change="updateUrl()"
+                      >
+                        <option value="">Todos</option>
+                        <template x-for="item in projects" :key="item.id"
+                          ><option :value="item.id" x-text="item.id"></option
+                        ></template>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label" for="budgets-status">Estado</label
+                      ><select
+                        id="budgets-status"
+                        class="form-select"
+                        x-model="statusFilter"
+                        @change="updateUrl()"
+                      >
+                        <option value="">Todos</option>
+                        <option>Borrador</option>
+                        <option>En revisión</option>
+                        <option>Aprobado</option>
+                      </select>
+                    </div>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      x-show="search || projectFilter || statusFilter"
+                      @click="clearFilters()"
+                    >
+                      Limpiar
+                    </button>
+                  </div>
+                  <div class="table-responsive workspace-project-table commercial-table">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col">Código</th>
+                          <th scope="col">Proyecto</th>
+                          <th scope="col">Cliente</th>
+                          <th scope="col">Versión</th>
+                          <th scope="col">Monto total</th>
+                          <th scope="col">Estado</th>
+                          <th scope="col"><span class="visually-hidden">Acción</span></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template x-for="item in filtered" :key="item.id"
+                          ><tr>
+                            <td><a :href="detailHref(item)" x-text="item.id"></a></td>
+                            <td x-text="projectName(item.projectId)"></td>
+                            <td x-text="clientName(item.clientId)"></td>
+                            <td x-text="`V${latest(item).version}`"></td>
+                            <td x-text="formatMoney(item.amount)"></td>
+                            <td>
+                              <span
+                                class="badge"
+                                :class="statusClass(latest(item).status)"
+                                x-text="latest(item).status"
+                              ></span>
+                            </td>
+                            <td>
+                              <a
+                                :href="detailHref(item)"
+                                :aria-label="`Abrir presupuesto ${item.id}`"
+                                ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                              ></a>
+                            </td></tr
+                        ></template>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="workspace-project-cards">
+                    <template x-for="item in filtered" :key="item.id"
+                      ><a class="workspace-project-card" :href="detailHref(item)"
+                        ><span class="workspace-project-card-top"
+                          ><strong x-text="item.id"></strong
+                          ><span
+                            class="badge"
+                            :class="statusClass(latest(item).status)"
+                            x-text="latest(item).status"
+                          ></span></span
+                        ><span
+                          class="workspace-project-card-name"
+                          x-text="projectName(item.projectId)"
+                        ></span
+                        ><small x-text="clientName(item.clientId)"></small
+                        ><span class="workspace-project-card-metrics"
+                          ><span
+                            ><small>Versión</small
+                            ><strong x-text="`V${latest(item).version}`"></strong></span
+                          ><span
+                            ><small>Total</small
+                            ><strong x-text="formatMoney(item.amount)"></strong></span></span
+                        ><span class="workspace-project-card-end">Abrir presupuesto →</span></a
+                      ></template
+                    >
+                  </div>
+                  <div class="workspace-empty" x-show="filtered.length === 0" role="status">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <p>No se encontraron presupuestos.</p>
+                    <button
+                      class="btn btn-outline-primary btn-sm"
+                      type="button"
+                      @click="clearFilters()"
+                    >
+                      Mostrar todos
+                    </button>
+                  </div>
+                </div>
+              </section></template
+            >
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

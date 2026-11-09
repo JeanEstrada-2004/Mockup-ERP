@@ -1,0 +1,343 @@
+.personnel-workspace {
+  .personnel-primary-action {
+    min-height: 44px;
+  }
+  .personnel-demo-note {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: 0.84rem;
+  }
+  .personnel-kpis,
+  .personnel-worker-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .personnel-worker-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .personnel-kpis .card-body,
+  .personnel-worker-summary .card-body {
+    display: grid;
+    gap: 0.2rem;
+  }
+  .personnel-kpis small,
+  .personnel-worker-summary small {
+    color: var(--bs-secondary-color);
+  }
+  .personnel-kpis strong,
+  .personnel-worker-summary strong {
+    font-size: 1.35rem;
+  }
+  .personnel-tabs {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    margin-bottom: 0.8rem;
+  }
+  .personnel-tabs button {
+    flex: none;
+    min-height: 44px;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.45rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .personnel-tabs button.active,
+  .personnel-tabs button:focus-visible {
+    border-color: var(--brand-accent);
+    color: var(--brand-accent);
+    background: var(--bs-tertiary-bg);
+  }
+  .personnel-filter-card,
+  .personnel-panel,
+  .personnel-worker-content > .card {
+    margin-bottom: 1rem;
+  }
+  .personnel-filters {
+    display: grid;
+    grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(120px, 1fr)) auto;
+    gap: 0.65rem;
+    align-items: end;
+  }
+  .personnel-filters .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+  }
+  .personnel-data-table {
+    overflow-x: auto;
+  }
+  .personnel-data-table table {
+    min-width: 750px;
+    font-size: 0.81rem;
+  }
+  .personnel-data-table th {
+    white-space: nowrap;
+  }
+  .personnel-cards {
+    display: none;
+  }
+  .personnel-cards--always {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+  .personnel-mobile-card {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+    padding: 0.85rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    text-decoration: none;
+  }
+  .personnel-mobile-card > span:first-child,
+  .personnel-linked-list > div > span:first-child,
+  .personnel-incident > span:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: start;
+  }
+  .personnel-mobile-card strong,
+  .personnel-mobile-card a,
+  .personnel-mobile-card small {
+    overflow-wrap: anywhere;
+  }
+  .personnel-mobile-card small,
+  .personnel-linked-list small {
+    color: var(--bs-secondary-color);
+  }
+  .personnel-mobile-card b {
+    color: var(--brand-accent);
+    font-size: 0.8rem;
+  }
+  .personnel-hours {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: baseline;
+    margin-block: 0.2rem;
+    font-size: 1rem;
+  }
+  .personnel-highlight {
+    background: var(--bs-primary-bg-subtle);
+    border-color: var(--brand-accent);
+  }
+  .personnel-bio-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .personnel-bio-summary > div {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.4rem;
+  }
+  .personnel-bio-summary small {
+    color: var(--bs-secondary-color);
+  }
+  .personnel-incidents {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .personnel-incident {
+    display: grid;
+    gap: 0.35rem;
+    max-width: 700px;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+  .personnel-incident p {
+    margin: 0.4rem 0;
+  }
+  .personnel-incident-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .personnel-incident-actions .btn {
+    min-height: 42px;
+  }
+  .personnel-manual-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .personnel-manual-form .personnel-wide {
+    grid-column: 1 / -1;
+  }
+  .personnel-hours-preview {
+    display: grid;
+    align-content: center;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.35rem;
+  }
+  .personnel-hours-preview small {
+    color: var(--bs-secondary-color);
+  }
+  .personnel-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+  }
+  .personnel-flow span,
+  .personnel-flow a {
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.4rem;
+    background: var(--bs-body-bg);
+  }
+  .personnel-worker-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .personnel-worker-content h2 {
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+  }
+  .personnel-facts {
+    margin: 0;
+  }
+  .personnel-facts > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    font-size: 0.83rem;
+  }
+  .personnel-facts dt {
+    color: var(--bs-secondary-color);
+    font-weight: 400;
+  }
+  .personnel-facts dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .personnel-linked-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .personnel-linked-list > div {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    font-size: 0.83rem;
+  }
+  .personnel-linked-list > div:last-child {
+    border: 0;
+  }
+  .personnel-cost-row {
+    grid-template-columns: minmax(80px, 0.6fr) minmax(0, 2fr) auto auto;
+    align-items: center;
+    gap: 0.7rem !important;
+  }
+  .personnel-cost-row > span {
+    display: grid !important;
+  }
+}
+@media (max-width: 1199.98px) {
+  .personnel-workspace .personnel-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767.98px) {
+  .personnel-workspace {
+    .personnel-kpis,
+    .personnel-worker-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .personnel-worker-grid,
+    .personnel-bio-summary {
+      grid-template-columns: 1fr;
+    }
+    .personnel-filters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .personnel-data-table {
+      display: none;
+    }
+    .personnel-cards {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .personnel-cards--always {
+      grid-template-columns: 1fr;
+    }
+    .personnel-cost-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+@media (max-width: 575.98px) {
+  .personnel-workspace {
+    .shell-page-heading > .btn {
+      width: 100%;
+    }
+    .personnel-manual-form,
+    .personnel-worker-summary {
+      grid-template-columns: 1fr;
+    }
+    .personnel-filters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .personnel-filters > div:first-child,
+    .personnel-filters > .btn {
+      grid-column: 1 / -1;
+    }
+    .personnel-kpis {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .personnel-kpis .card-body {
+      padding: 0.65rem;
+    }
+    .personnel-kpis small {
+      font-size: 0.67rem;
+    }
+    .personnel-kpis strong {
+      font-size: 1rem;
+    }
+    .personnel-panel .shell-section-header {
+      flex-wrap: wrap;
+    }
+    .personnel-panel .shell-section-header > .btn,
+    .personnel-incident-actions .btn {
+      width: 100%;
+    }
+    .personnel-flow {
+      gap: 0.25rem;
+    }
+    .personnel-flow span,
+    .personnel-flow a {
+      padding: 0.35rem 0.45rem;
+    }
+  }
+  #personnel-manual-modal,
+  #personnel-incident-modal {
+    .modal-footer .btn {
+      min-height: 44px;
+      width: 100%;
+    }
+  }
+}

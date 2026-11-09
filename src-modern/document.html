@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ficha documental de demostración" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Ficha documental</title>
+  </head>
+  <body data-page="document-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace"
+            x-data="documentDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./documents.html">Documentos</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="document?.id || 'No encontrado'"
+                ></li>
+              </ol>
+            </nav>
+            <template x-if="!document"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Documento no encontrado</h1>
+                  <p>El código no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./documents.html">Ver documentos</a>
+                </div>
+              </div></template
+            >
+            <template x-if="document"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <p class="shell-eyebrow">FICHA DOCUMENTAL · DEMOSTRACIÓN</p>
+                    <h1 x-text="document.id"></h1>
+                    <p class="shell-page-subtitle" x-text="document.fileName"></p>
+                  </div>
+                  <a class="btn btn-outline-primary" :href="backHref" x-text="`← ${backLabel}`"></a>
+                </div>
+                <div class="alert alert-info" role="note">
+                  Esta ficha representa metadatos y versionado visual. No existe un PDF descargable
+                  ni un archivo procesado.
+                </div>
+                <div class="d9-actions mb-3">
+                  <button type="button" class="btn btn-primary" @click="openPreview()">
+                    Vista previa de metadatos</button
+                  ><button type="button" class="btn btn-outline-primary" @click="openVersion()">
+                    Nueva versión visual</button
+                  ><a class="btn btn-outline-secondary" :href="originHref"
+                    >Abrir operación de origen</a
+                  ><a class="btn btn-outline-secondary" :href="projectHref">Abrir proyecto</a>
+                </div>
+                <div class="row g-3">
+                  <div class="col-xl-7">
+                    <section class="card h-100" aria-labelledby="document-facts-title">
+                      <div class="card-body">
+                        <h2 class="workspace-subheading mt-0" id="document-facts-title">
+                          Datos relacionados
+                        </h2>
+                        <div class="d9-facts">
+                          <div><small>Código</small><strong x-text="document.id"></strong></div>
+                          <div><small>Tipo</small><strong x-text="document.type"></strong></div>
+                          <div>
+                            <small>Proyecto</small
+                            ><a :href="projectHref" x-text="project?.name"></a>
+                          </div>
+                          <div>
+                            <small>Módulo origen</small
+                            ><strong x-text="moduleName(document.module)"></strong>
+                          </div>
+                          <div>
+                            <small>Operación origen</small
+                            ><a :href="originHref" x-text="document.operationId"></a>
+                          </div>
+                          <div>
+                            <small>Responsable ficticio</small
+                            ><strong x-text="workerName(document.responsibleId)"></strong>
+                          </div>
+                          <div>
+                            <small>Fecha de ejemplo</small
+                            ><strong x-text="formatDate(document.date)"></strong>
+                          </div>
+                          <div>
+                            <small>Versión visible</small
+                            ><strong x-text="`V${latestVersion}`"></strong>
+                          </div>
+                          <div><small>Estado</small><strong x-text="document.status"></strong></div>
+                          <div>
+                            <small>Nombre de referencia</small
+                            ><strong x-text="document.fileName"></strong>
+                          </div>
+                        </div>
+                        <p class="workspace-caption mt-3" x-text="document.description"></p>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="col-xl-5">
+                    <section class="card h-100" aria-labelledby="document-history-title">
+                      <div class="card-body">
+                        <div class="shell-section-header">
+                          <h2 id="document-history-title">Historial de versiones</h2>
+                          <span
+                            class="workspace-caption"
+                            x-text="`${versions.length} versiones`"
+                          ></span>
+                        </div>
+                        <div class="d9-history">
+                          <template x-for="item in versions" :key="item.version"
+                            ><div>
+                              <span
+                                class="badge text-bg-secondary"
+                                x-text="`V${item.version}`"
+                              ></span>
+                              <div>
+                                <strong x-text="item.comment"></strong
+                                ><small
+                                  x-text="`${formatDate(item.date)} · ${workerName(item.responsibleId)} · ejemplo`"
+                                ></small>
+                              </div></div
+                          ></template>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div></div
+            ></template>
+            <div
+              class="modal fade"
+              id="document-preview-modal"
+              tabindex="-1"
+              aria-labelledby="document-preview-title"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="document-preview-title">
+                      Vista previa de metadatos
+                    </h2>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>No hay contenido de archivo disponible en esta demostración.</p>
+                    <div class="d9-facts">
+                      <div><small>Documento</small><strong x-text="document?.id"></strong></div>
+                      <div>
+                        <small>Operación</small><strong x-text="document?.operationId"></strong>
+                      </div>
+                      <div>
+                        <small>Proyecto</small><strong x-text="document?.projectId"></strong>
+                      </div>
+                      <div>
+                        <small>Versión</small><strong x-text="`V${latestVersion}`"></strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="modal fade"
+              id="document-version-modal"
+              tabindex="-1"
+              aria-labelledby="document-version-title"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="document-version-title">
+                      Nueva versión visual
+                    </h2>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">
+                      Se guardará solo un comentario y un número de versión en este navegador. No se
+                      reemplaza ni crea un archivo.
+                    </p>
+                    <label class="form-label" for="document-version-comment">Comentario</label
+                    ><textarea
+                      id="document-version-comment"
+                      class="form-control"
+                      rows="3"
+                      maxlength="200"
+                      x-model="versionComment"
+                      @input="error = ''"
+                    ></textarea>
+                    <div
+                      class="alert alert-danger mt-3"
+                      x-show="error"
+                      x-text="error"
+                      role="alert"
+                    ></div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                      Cancelar</button
+                    ><button type="button" class="btn btn-primary" @click="addVersion()">
+                      Guardar versión visual
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

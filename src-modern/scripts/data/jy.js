@@ -22,8 +22,22 @@ export const jyData = {
     { id: 'PROV-JY-002', name: 'Equipos del Sur S.A.C.' },
   ],
   workers: [
-    { id: 'PER-JY-001', name: 'María Salazar', role: 'Jefa de proyecto' },
-    { id: 'PER-JY-002', name: 'José Vargas', role: 'Ingeniero de campo' },
+    {
+      id: 'PER-JY-001',
+      name: 'María Salazar',
+      dni: '00000011',
+      role: 'Jefa de proyecto',
+      area: 'Proyectos',
+      status: 'Activo',
+    },
+    {
+      id: 'PER-JY-002',
+      name: 'José Vargas',
+      dni: '00000012',
+      role: 'Ingeniero de campo',
+      area: 'Operaciones',
+      status: 'Activo',
+    },
   ],
   projects: [
     {

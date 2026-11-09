@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Personal, asistencia y tareo por proyecto" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Personal y Tareo</title>
+  </head>
+  <body data-page="personnel-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace personnel-workspace"
+            x-data="personnelWorkspace"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Personal y Tareo</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">PERSONAS Y PROYECTOS</p>
+                <h1>Personal y Tareo</h1>
+                <p class="shell-page-subtitle">
+                  Asignaciones, asistencia y horas de trabajo de demostración.
+                </p>
+              </div>
+              <button
+                class="btn btn-primary personnel-primary-action"
+                type="button"
+                @click="openManual()"
+              >
+                <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar tareo manual
+              </button>
+            </div>
+            <div class="alert alert-info personnel-demo-note" role="note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i> Los datos de trabajadores, DNI y
+              jornadas son ficticios. Las horas visibles son una muestra y no recalculan los costos
+              laborales compartidos.
+            </div>
+            <div class="personnel-kpis">
+              <div class="card">
+                <div class="card-body">
+                  <small>Trabajadores</small><strong x-text="workers.length"></strong>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <small>Asignaciones de ejemplo</small
+                  ><strong x-text="assignments.length"></strong>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <small>Jornadas mostradas</small><strong x-text="timesheets.length"></strong>
+                </div>
+              </div>
+            </div>
+            <nav class="personnel-tabs" aria-label="Secciones de Personal">
+              <template x-for="item in tabs" :key="item[0]"
+                ><button
+                  type="button"
+                  :class="tab === item[0] ? 'active' : ''"
+                  :aria-current="tab === item[0] ? 'page' : null"
+                  @click="setTab(item[0])"
+                  x-text="item[1]"
+                ></button
+              ></template>
+            </nav>
+            <p class="workspace-caption d-md-none">
+              Desliza las pestañas para ver todas las secciones.
+            </p>
+            <section class="card personnel-filter-card" aria-label="Filtros">
+              <div class="card-body">
+                <div class="personnel-filters">
+                  <div>
+                    <label class="form-label" for="personnel-search">Buscar</label
+                    ><input
+                      id="personnel-search"
+                      class="form-control"
+                      type="search"
+                      x-model="search"
+                      @input="updateUrl()"
+                      placeholder="Código, persona o proyecto"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-label" for="personnel-project">Proyecto</label
+                    ><select
+                      id="personnel-project"
+                      class="form-select"
+                      x-model="projectFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="project in projects" :key="project.id"
+                        ><option :value="project.id" x-text="project.id"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="personnel-worker">Trabajador</label
+                    ><select
+                      id="personnel-worker"
+                      class="form-select"
+                      x-model="workerFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="worker in workers" :key="worker.id"
+                        ><option :value="worker.id" x-text="worker.name"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div x-show="['asistencia','tareo','biometria','incidencias'].includes(tab)">
+                    <label class="form-label" for="personnel-period">Periodo</label
+                    ><select
+                      id="personnel-period"
+                      class="form-select"
+                      x-model="periodFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="period in periods" :key="period"
+                        ><option :value="period" x-text="period"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div x-show="['asistencia','tareo','biometria','incidencias'].includes(tab)">
+                    <label class="form-label" for="personnel-status">Estado</label
+                    ><select
+                      id="personnel-status"
+                      class="form-select"
+                      x-model="statusFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <option>Completa</option>
+                      <option>Incompleta</option>
+                      <option>Manual (demo)</option>
+                      <option>Validado (ejemplo)</option>
+                      <option>Registrado (demo)</option>
+                      <option>Pendiente</option>
+                      <option>Revisada</option>
+                      <option>Ignorada</option>
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    x-show="search || projectFilter || workerFilter || periodFilter || statusFilter || sourceOperationFilter"
+                    @click="clearFilters()"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'personal'"
+              aria-labelledby="personnel-people-title"
+            >
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="personnel-people-title">Trabajadores ficticios</h2>
+                  <span
+                    class="workspace-caption"
+                    x-text="`${filteredWorkers.length} personas`"
+                  ></span>
+                </div>
+                <div class="table-responsive personnel-data-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">DNI ficticio</th>
+                        <th scope="col">Trabajador</th>
+                        <th scope="col">Cargo</th>
+                        <th scope="col">Área</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Ficha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="worker in filteredWorkers" :key="worker.id"
+                        ><tr>
+                          <td x-text="worker.dni"></td>
+                          <td>
+                            <a :href="workerHref(worker.id)" x-text="worker.name"></a
+                            ><small class="d-block text-muted" x-text="worker.id"></small>
+                          </td>
+                          <td x-text="worker.role"></td>
+                          <td x-text="worker.area"></td>
+                          <td>
+                            <span class="badge text-bg-success" x-text="worker.status"></span>
+                          </td>
+                          <td><a :href="workerHref(worker.id)">Abrir →</a></td>
+                        </tr></template
+                      >
+                    </tbody>
+                  </table>
+                </div>
+                <div class="personnel-cards">
+                  <template x-for="worker in filteredWorkers" :key="worker.id"
+                    ><a class="personnel-mobile-card" :href="workerHref(worker.id)"
+                      ><span
+                        ><strong x-text="worker.name"></strong
+                        ><span class="badge text-bg-success" x-text="worker.status"></span></span
+                      ><small x-text="`${worker.role} · ${worker.area}`"></small
+                      ><small x-text="`DNI ficticio ${worker.dni}`"></small><b>Ver ficha →</b></a
+                    ></template
+                  >
+                </div>
+                <p class="workspace-caption" x-show="filteredWorkers.length === 0">
+                  No hay trabajadores con estos filtros.
+                </p>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'asignaciones'"
+              x-cloak
+              aria-labelledby="personnel-assignments-title"
+            >
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="personnel-assignments-title">Asignaciones a proyectos</h2>
+                  <span class="workspace-caption">Porcentajes referenciales</span>
+                </div>
+                <div class="table-responsive personnel-data-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Trabajador</th>
+                        <th>Proyecto</th>
+                        <th>Rol</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                        <th>Asignación</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filteredAssignments" :key="item.id"
+                        ><tr>
+                          <td>
+                            <a
+                              :href="workerHref(item.workerId)"
+                              x-text="workerName(item.workerId)"
+                            ></a>
+                          </td>
+                          <td>
+                            <a
+                              :href="projectHref(item.projectId)"
+                              x-text="projectName(item.projectId)"
+                            ></a>
+                          </td>
+                          <td x-text="item.role"></td>
+                          <td x-text="formatDate(item.from)"></td>
+                          <td x-text="formatDate(item.to)"></td>
+                          <td x-text="`${item.percent} %`"></td></tr
+                      ></template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="personnel-cards">
+                  <template x-for="item in filteredAssignments" :key="item.id"
+                    ><div class="personnel-mobile-card">
+                      <strong
+                        ><a
+                          :href="workerHref(item.workerId)"
+                          x-text="workerName(item.workerId)"
+                        ></a></strong
+                      ><a
+                        :href="projectHref(item.projectId)"
+                        x-text="projectName(item.projectId)"
+                      ></a
+                      ><small x-text="`${item.role} · ${item.percent} % referencial`"></small
+                      ><small
+                        x-text="`${formatDate(item.from)} – ${formatDate(item.to)}`"
+                      ></small></div
+                  ></template>
+                </div>
+                <p class="workspace-caption" x-show="filteredAssignments.length === 0">
+                  No hay asignaciones con estos filtros.
+                </p>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'asistencia'"
+              x-cloak
+              aria-labelledby="personnel-attendance-title"
+            >
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="personnel-attendance-title">Asistencia de ejemplo</h2>
+                  <span
+                    class="workspace-caption"
+                    x-text="`${filteredAttendance.length} jornadas`"
+                  ></span>
+                </div>
+                <p class="workspace-caption">
+                  Una asistencia completa se relaciona con una fila de Tareo. Los registros manuales
+                  nuevos se distinguen de la muestra base.
+                </p>
+                <div class="table-responsive personnel-data-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Trabajador</th>
+                        <th>Proyecto</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filteredAttendance" :key="item.id"
+                        ><tr>
+                          <td>
+                            <span x-text="formatDate(item.date)"></span
+                            ><small class="d-block text-muted" x-text="item.id"></small>
+                          </td>
+                          <td>
+                            <a
+                              :href="workerHref(item.workerId)"
+                              x-text="workerName(item.workerId)"
+                            ></a>
+                          </td>
+                          <td>
+                            <a
+                              :href="projectHref(item.projectId)"
+                              x-text="projectName(item.projectId)"
+                            ></a>
+                          </td>
+                          <td x-text="item.start"></td>
+                          <td x-text="item.end || '—'"></td>
+                          <td>
+                            <span
+                              class="badge"
+                              :class="statusClass(item.status)"
+                              x-text="item.status"
+                            ></span>
+                          </td></tr
+                      ></template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="personnel-cards">
+                  <template x-for="item in filteredAttendance" :key="item.id"
+                    ><div class="personnel-mobile-card">
+                      <span
+                        ><strong x-text="formatDate(item.date)"></strong
+                        ><span
+                          class="badge"
+                          :class="statusClass(item.status)"
+                          x-text="item.status"
+                        ></span></span
+                      ><small x-text="item.id"></small
+                      ><a :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a
+                      ><a
+                        :href="projectHref(item.projectId)"
+                        x-text="projectName(item.projectId)"
+                      ></a
+                      ><small
+                        x-text="`${item.start} – ${item.end || 'sin salida'} · ${item.source}`"
+                      ></small></div
+                  ></template>
+                </div>
+                <p class="workspace-caption" x-show="filteredAttendance.length === 0">
+                  No hay asistencias con estos filtros.
+                </p>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'tareo'"
+              x-cloak
+              aria-labelledby="personnel-timesheet-title"
+            >
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="personnel-timesheet-title">Tareo por jornada</h2>
+                  <button
+                    class="btn btn-primary personnel-primary-action"
+                    type="button"
+                    @click="openManual()"
+                  >
+                    + Registro manual
+                  </button>
+                </div>
+                <p class="workspace-caption">
+                  Muestra de jornadas vinculadas a operaciones TAR. No representa todas las horas
+                  del periodo ni calcula una tarifa por hora.
+                </p>
+                <div class="table-responsive personnel-data-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Trabajador</th>
+                        <th>Proyecto</th>
+                        <th>Horario</th>
+                        <th>Horas</th>
+                        <th>Estado</th>
+                        <th>Costo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filteredTimesheets" :key="item.id"
+                        ><tr
+                          :class="sourceOperationFilter && item.operationId === sourceOperationFilter ? 'personnel-highlight' : ''"
+                        >
+                          <td>
+                            <span x-text="formatDate(item.date)"></span
+                            ><small class="d-block text-muted" x-text="item.id"></small>
+                          </td>
+                          <td>
+                            <a
+                              :href="workerHref(item.workerId)"
+                              x-text="workerName(item.workerId)"
+                            ></a>
+                          </td>
+                          <td>
+                            <a
+                              :href="projectHref(item.projectId)"
+                              x-text="projectName(item.projectId)"
+                            ></a>
+                          </td>
+                          <td x-text="`${item.start}–${item.end}`"></td>
+                          <td x-text="hoursLabel(item.hours)"></td>
+                          <td>
+                            <span
+                              class="badge"
+                              :class="statusClass(item.status)"
+                              x-text="item.status"
+                            ></span>
+                          </td>
+                          <td>
+                            <a x-show="item.operationId" :href="costHref(item.operationId)"
+                              >Ver costo</a
+                            ><span x-show="!item.operationId">Sin impacto</span>
+                          </td>
+                        </tr></template
+                      >
+                    </tbody>
+                  </table>
+                </div>
+                <div class="personnel-cards">
+                  <template x-for="item in filteredTimesheets" :key="item.id"
+                    ><div
+                      class="personnel-mobile-card"
+                      :class="sourceOperationFilter && item.operationId === sourceOperationFilter ? 'personnel-highlight' : ''"
+                    >
+                      <span
+                        ><strong x-text="formatDate(item.date)"></strong
+                        ><span
+                          class="badge"
+                          :class="statusClass(item.status)"
+                          x-text="item.status"
+                        ></span></span
+                      ><small x-text="item.id"></small
+                      ><a :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a
+                      ><a
+                        :href="projectHref(item.projectId)"
+                        x-text="projectName(item.projectId)"
+                      ></a
+                      ><span class="personnel-hours"
+                        ><strong x-text="hoursLabel(item.hours)"></strong
+                        ><small x-text="`${item.start} – ${item.end}`"></small></span
+                      ><a x-show="item.operationId" :href="costHref(item.operationId)"
+                        >Ver costo laboral →</a
+                      ><small x-show="!item.operationId"
+                        >Registro manual visual · sin costo agregado</small
+                      >
+                    </div></template
+                  >
+                </div>
+                <p class="workspace-caption" x-show="filteredTimesheets.length === 0">
+                  No hay tareos con estos filtros.
+                </p>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'biometria' && hasBiometrics"
+              x-cloak
+              aria-labelledby="personnel-biometrics-title"
+            >
+              <div class="card-body">
+                <h2 id="personnel-biometrics-title">Biometría simulada</h2>
+                <div class="alert alert-warning" role="note">
+                  Escenario visual de marcaciones. No hay dispositivo conectado, sincronización,
+                  identificación biométrica ni captura real.
+                </div>
+                <div class="personnel-bio-summary">
+                  <div><small>Origen</small><strong>Marcaciones de ejemplo</strong></div>
+                  <div>
+                    <small>Registros visibles</small><strong x-text="biometricRows.length"></strong>
+                  </div>
+                  <div>
+                    <small>Incidencias</small><strong x-text="filteredIncidents.length"></strong>
+                  </div>
+                </div>
+                <div class="personnel-cards personnel-cards--always">
+                  <template x-for="item in biometricRows" :key="item.id"
+                    ><div class="personnel-mobile-card">
+                      <span
+                        ><strong x-text="workerName(item.workerId)"></strong
+                        ><span
+                          class="badge"
+                          :class="statusClass(item.status)"
+                          x-text="item.status"
+                        ></span></span
+                      ><small
+                        x-text="`${formatDate(item.date)} · ${item.start} – ${item.end || 'sin salida'}`"
+                      ></small
+                      ><a
+                        :href="projectHref(item.projectId)"
+                        x-text="projectName(item.projectId)"
+                      ></a></div
+                  ></template>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="card personnel-panel"
+              x-show="tab === 'incidencias' && hasBiometrics"
+              x-cloak
+              aria-labelledby="personnel-incidents-title"
+            >
+              <div class="card-body">
+                <h2 id="personnel-incidents-title">Incidencias de asistencia · simulación</h2>
+                <p class="workspace-caption">
+                  Las acciones guardan una decisión local con motivo. La marcación de ejemplo
+                  original permanece visible.
+                </p>
+                <div class="personnel-incidents">
+                  <template x-for="item in filteredIncidents" :key="item.id"
+                    ><article class="personnel-incident">
+                      <span
+                        ><strong x-text="`${item.id} · ${item.type}`"></strong
+                        ><span
+                          class="badge"
+                          :class="statusClass(item.status)"
+                          x-text="item.status"
+                        ></span></span
+                      ><a :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a
+                      ><a
+                        :href="projectHref(item.projectId)"
+                        x-text="projectName(item.projectId)"
+                      ></a
+                      ><small x-text="formatDate(item.date)"></small>
+                      <p
+                        x-show="item.action"
+                        x-text="`${item.action} · ${item.responsible} · ${formatDate(item.actionDate)} · ${item.reason}`"
+                      ></p>
+                      <div class="personnel-incident-actions">
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary"
+                          @click="openIncident(item.id, 'Corregir')"
+                        >
+                          Corregir</button
+                        ><button
+                          type="button"
+                          class="btn btn-outline-primary"
+                          @click="openIncident(item.id, 'Justificar')"
+                        >
+                          Justificar</button
+                        ><button
+                          type="button"
+                          class="btn btn-outline-secondary"
+                          @click="openIncident(item.id, 'Ignorar')"
+                        >
+                          Ignorar
+                        </button>
+                      </div>
+                    </article></template
+                  >
+                </div>
+                <p class="workspace-caption" x-show="filteredIncidents.length === 0">
+                  No hay incidencias con estos filtros.
+                </p>
+              </div>
+            </section>
+
+            <div
+              class="modal fade"
+              id="personnel-manual-modal"
+              tabindex="-1"
+              aria-labelledby="personnel-manual-title"
+              aria-hidden="true"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down"
+              >
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="personnel-manual-title">
+                      Registro manual de tareo · demo
+                    </h2>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">
+                      Se añadirá a Asistencia y Tareo. No altera costos ni sustituye una marcación
+                      real.
+                    </p>
+                    <div
+                      class="alert alert-danger"
+                      role="alert"
+                      x-show="formError"
+                      x-cloak
+                      x-text="formError"
+                    ></div>
+                    <div
+                      class="personnel-manual-form"
+                      @input="formError = ''"
+                      @change="formError = ''"
+                    >
+                      <div>
+                        <label class="form-label" for="manual-worker">Trabajador</label
+                        ><select
+                          id="manual-worker"
+                          class="form-select"
+                          x-model="form.workerId"
+                          @change="form.projectId = ''"
+                        >
+                          <option value="">Seleccionar</option>
+                          <template x-for="worker in workers" :key="worker.id"
+                            ><option :value="worker.id" x-text="worker.name"></option
+                          ></template>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="form-label" for="manual-project">Proyecto asignado</label
+                        ><select id="manual-project" class="form-select" x-model="form.projectId">
+                          <option value="">Seleccionar</option>
+                          <template x-for="project in formProjects" :key="project.id"
+                            ><option :value="project.id" x-text="project.name"></option
+                          ></template>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="form-label" for="manual-date">Fecha</label
+                        ><input
+                          id="manual-date"
+                          class="form-control"
+                          type="date"
+                          x-model="form.date"
+                        />
+                      </div>
+                      <div>
+                        <label class="form-label" for="manual-start">Entrada</label
+                        ><input
+                          id="manual-start"
+                          class="form-control"
+                          type="time"
+                          x-model="form.start"
+                        />
+                      </div>
+                      <div>
+                        <label class="form-label" for="manual-end">Salida</label
+                        ><input
+                          id="manual-end"
+                          class="form-control"
+                          type="time"
+                          x-model="form.end"
+                        />
+                      </div>
+                      <div class="personnel-hours-preview">
+                        <small>Horas calculadas</small
+                        ><strong x-text="hoursLabel(formHours)"></strong>
+                      </div>
+                      <div class="personnel-wide">
+                        <label class="form-label" for="manual-reason"
+                          >Motivo del registro manual</label
+                        ><input
+                          id="manual-reason"
+                          class="form-control"
+                          x-model="form.reason"
+                          placeholder="Ejemplo: jornada de campo"
+                        />
+                      </div>
+                      <div class="personnel-wide">
+                        <label class="form-label" for="manual-note">Observación opcional</label
+                        ><textarea
+                          id="manual-note"
+                          class="form-control"
+                          rows="2"
+                          x-model="form.note"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                      Cancelar</button
+                    ><button
+                      type="button"
+                      class="btn btn-primary personnel-primary-action"
+                      @click="saveManual()"
+                    >
+                      Guardar tareo visual
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="modal fade"
+              id="personnel-incident-modal"
+              tabindex="-1"
+              aria-labelledby="personnel-incident-modal-title"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h2
+                      class="modal-title fs-5"
+                      id="personnel-incident-modal-title"
+                      x-text="`${incidentForm.action} incidencia · simulación`"
+                    ></h2>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">
+                      Responsable: usuario de demostración. Fecha ficticia: 03/04/2027.
+                    </p>
+                    <div
+                      class="alert alert-danger"
+                      role="alert"
+                      x-show="incidentError"
+                      x-cloak
+                      x-text="incidentError"
+                    ></div>
+                    <label class="form-label" for="incident-reason">Motivo</label
+                    ><textarea
+                      id="incident-reason"
+                      class="form-control"
+                      rows="3"
+                      x-model="incidentForm.reason"
+                      placeholder="Explica la decisión visual"
+                    ></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                      Cancelar</button
+                    ><button
+                      type="button"
+                      class="btn btn-primary personnel-primary-action"
+                      @click="resolveIncident()"
+                    >
+                      Guardar decisión simulada
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

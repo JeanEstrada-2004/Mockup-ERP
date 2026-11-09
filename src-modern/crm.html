@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Oportunidades comerciales de demostración" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>CRM</title>
+  </head>
+  <body data-page="crm-workspace" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace crm-workspace"
+            x-data="crmWorkspace"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">CRM</li>
+              </ol>
+            </nav>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>CRM no disponible</h1>
+                  <p>Este módulo no forma parte de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <p class="shell-eyebrow">RELACIÓN COMERCIAL</p>
+                    <h1>CRM</h1>
+                    <p class="shell-page-subtitle">
+                      Oportunidades vinculadas a presupuestos y proyectos ficticios.
+                    </p>
+                  </div>
+                </div>
+                <div class="alert alert-info" role="note">
+                  Este recorrido comercial es una muestra fija. No envía mensajes, crea clientes ni
+                  modifica oportunidades reales.
+                </div>
+                <div class="d9-kpis">
+                  <div class="card">
+                    <div class="card-body">
+                      <small>Oportunidades de ejemplo</small
+                      ><strong x-text="opportunities.length"></strong>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <small>Ganadas en la muestra</small><strong x-text="wonCount"></strong>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <small>Con presupuesto y proyecto</small
+                      ><strong x-text="linkedCount"></strong>
+                    </div>
+                  </div>
+                </div>
+                <section class="card mb-3" aria-label="Filtros de oportunidades">
+                  <div class="card-body crm-filters">
+                    <div>
+                      <label class="form-label" for="crm-search">Buscar</label
+                      ><input
+                        id="crm-search"
+                        class="form-control"
+                        type="search"
+                        x-model="search"
+                        @input="updateUrl()"
+                        placeholder="Código, oportunidad o cliente"
+                      />
+                    </div>
+                    <div>
+                      <label class="form-label" for="crm-client">Cliente</label
+                      ><select
+                        id="crm-client"
+                        class="form-select"
+                        x-model="clientFilter"
+                        @change="updateUrl()"
+                      >
+                        <option value="">Todos</option>
+                        <template x-for="item in clients" :key="item.id"
+                          ><option :value="item.id" x-text="item.name"></option
+                        ></template>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label" for="crm-status">Estado</label
+                      ><select
+                        id="crm-status"
+                        class="form-select"
+                        x-model="statusFilter"
+                        @change="updateUrl()"
+                      >
+                        <option value="">Todos</option>
+                        <option value="Prospección">Prospección</option>
+                        <option value="Propuesta">Propuesta</option>
+                        <option value="Negociación">Negociación</option>
+                        <option value="Ganado">Ganado</option>
+                        <option value="Perdido">Perdido</option>
+                      </select>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" @click="clearFilters()">
+                      Limpiar
+                    </button>
+                  </div>
+                </section>
+                <div class="row g-3">
+                  <div class="col-xl-7">
+                    <section class="card h-100" aria-labelledby="crm-list-title">
+                      <div class="card-body">
+                        <div class="shell-section-header">
+                          <h2 id="crm-list-title">Oportunidades</h2>
+                          <span
+                            class="workspace-caption"
+                            x-text="`${filtered.length} registros`"
+                          ></span>
+                        </div>
+                        <div class="table-responsive d-none d-lg-block">
+                          <table class="table align-middle d9-table">
+                            <thead>
+                              <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Oportunidad</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Importe estimado</th>
+                                <th scope="col">Detalle</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <template x-for="item in filtered" :key="item.id"
+                                ><tr :class="selected?.id === item.id ? 'crm-selected' : ''">
+                                  <td x-text="item.id"></td>
+                                  <td x-text="item.name"></td>
+                                  <td x-text="clientName(item.clientId)"></td>
+                                  <td>
+                                    <span class="badge text-bg-success" x-text="item.status"></span>
+                                  </td>
+                                  <td x-text="formatMoney(item.estimatedAmount)"></td>
+                                  <td>
+                                    <button
+                                      type="button"
+                                      class="btn btn-outline-primary btn-sm"
+                                      @click="select(item.id)"
+                                    >
+                                      Ver recorrido
+                                    </button>
+                                  </td>
+                                </tr></template
+                              >
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="d9-mobile-list d-lg-none">
+                          <template x-for="item in filtered" :key="item.id"
+                            ><article class="d9-mobile-card">
+                              <div class="d9-mobile-heading">
+                                <strong x-text="item.id"></strong
+                                ><span class="badge text-bg-success" x-text="item.status"></span>
+                              </div>
+                              <span x-text="item.name"></span
+                              ><small x-text="clientName(item.clientId)"></small
+                              ><strong x-text="formatMoney(item.estimatedAmount)"></strong
+                              ><button
+                                type="button"
+                                class="btn btn-outline-primary"
+                                @click="select(item.id)"
+                              >
+                                Ver recorrido
+                              </button>
+                            </article></template
+                          >
+                        </div>
+                        <div class="d9-empty" x-show="filtered.length === 0">
+                          <i class="bi bi-search" aria-hidden="true"></i>
+                          <p>No hay oportunidades con estos filtros.</p>
+                          <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            @click="clearFilters()"
+                          >
+                            Ver todas
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="col-xl-5">
+                    <section class="card h-100" aria-labelledby="crm-detail-title">
+                      <div class="card-body">
+                        <div class="shell-section-header">
+                          <h2 id="crm-detail-title">Recorrido comercial</h2>
+                          <span class="workspace-caption">Muestra vinculada</span>
+                        </div>
+                        <template x-if="selected"
+                          ><div>
+                            <div class="d9-facts">
+                              <div>
+                                <small>Oportunidad</small><strong x-text="selected.id"></strong>
+                              </div>
+                              <div>
+                                <small>Estado</small><strong x-text="selected.status"></strong>
+                              </div>
+                              <div>
+                                <small>Cliente</small
+                                ><strong x-text="clientName(selected.clientId)"></strong>
+                              </div>
+                              <div>
+                                <small>Responsable ficticio</small
+                                ><strong x-text="workerName(selected.ownerId)"></strong>
+                              </div>
+                              <div>
+                                <small>Fecha de ejemplo</small
+                                ><strong x-text="formatDate(selected.date)"></strong>
+                              </div>
+                              <div>
+                                <small>Estimación mock</small
+                                ><strong x-text="formatMoney(selected.estimatedAmount)"></strong>
+                              </div>
+                            </div>
+                            <p class="workspace-caption mt-3" x-text="selected.description"></p>
+                            <ol class="crm-flow">
+                              <li>
+                                <span>1</span>
+                                <div>
+                                  <strong x-text="`${selected.id} · Oportunidad`"></strong
+                                  ><small x-text="selected.name"></small>
+                                </div>
+                              </li>
+                              <li>
+                                <span>2</span>
+                                <div>
+                                  <a
+                                    :href="budgetHref(selected.budgetId)"
+                                    x-text="`${selected.budgetId} · Presupuesto`"
+                                  ></a
+                                  ><small>Versión y aprobación de ejemplo</small>
+                                </div>
+                              </li>
+                              <li>
+                                <span>3</span>
+                                <div>
+                                  <a
+                                    :href="projectHref(selected.projectId)"
+                                    x-text="`${selected.projectId} · Proyecto`"
+                                  ></a
+                                  ><small x-text="selectedProject?.name"></small>
+                                </div>
+                              </li>
+                            </ol>
+                            <div class="d9-actions">
+                              <a
+                                class="btn btn-outline-primary"
+                                :href="budgetHref(selected.budgetId)"
+                                >Abrir presupuesto</a
+                              ><a class="btn btn-primary" :href="projectHref(selected.projectId)"
+                                >Abrir proyecto</a
+                              >
+                            </div>
+                          </div></template
+                        >
+                        <p class="workspace-caption" x-show="!selected">
+                          Selecciona una oportunidad disponible para ver el recorrido.
+                        </p>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div></template
+            >
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

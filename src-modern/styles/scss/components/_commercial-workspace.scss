@@ -1,0 +1,193 @@
+.commercial-workspace {
+  .shell-page-heading h1 {
+    max-width: 880px;
+  }
+  .commercial-table td {
+    white-space: normal;
+    min-width: 90px;
+  }
+  .commercial-table td:first-child {
+    min-width: 110px;
+    white-space: nowrap;
+  }
+  .commercial-table td:last-child {
+    min-width: 40px;
+  }
+  .commercial-lines-table {
+    min-width: 620px;
+    font-size: 0.78rem;
+  }
+  .commercial-lines-table th {
+    color: var(--bs-secondary-color);
+    font-weight: 600;
+  }
+  .commercial-lines-table td:nth-child(n + 4),
+  .commercial-lines-table th:nth-child(n + 4) {
+    text-align: right;
+  }
+  .commercial-lines-table td:nth-child(2) {
+    min-width: 180px;
+  }
+}
+
+body[data-page='budget-detail'] .commercial-workspace .row,
+body[data-page='purchase-detail'] .commercial-workspace .row {
+  margin-inline: 0;
+}
+
+.commercial-version-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+}
+.commercial-inline-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.commercial-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.commercial-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.25rem;
+}
+.commercial-facts > div {
+  display: grid;
+  gap: 0.18rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 0.5rem;
+  min-width: 0;
+}
+.commercial-facts span {
+  color: var(--bs-secondary-color);
+  font-size: 0.72rem;
+}
+.commercial-facts strong,
+.commercial-facts a {
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+.commercial-totals {
+  display: grid;
+}
+.commercial-totals > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.65rem;
+  padding: 0.48rem 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  font-size: 0.79rem;
+}
+.commercial-totals span {
+  color: var(--bs-secondary-color);
+}
+.commercial-totals strong {
+  white-space: nowrap;
+}
+.commercial-totals .commercial-grand-total {
+  border-bottom: 0;
+  padding-top: 0.8rem;
+  font-size: 0.98rem;
+}
+.commercial-grand-total span {
+  color: var(--bs-emphasis-color);
+  font-weight: 700;
+}
+.commercial-grand-total strong {
+  color: var(--bs-emphasis-color);
+  font-size: 1.1rem;
+}
+.commercial-history {
+  display: grid;
+  gap: 0.4rem;
+}
+.commercial-history button {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.45rem;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  text-align: left;
+}
+.commercial-history button:hover,
+.commercial-history button:focus-visible,
+.commercial-history button.active {
+  border-color: var(--brand-accent);
+  background: var(--bs-tertiary-bg);
+}
+.commercial-history button > span {
+  display: grid;
+  gap: 0.15rem;
+}
+.commercial-history button > span:last-child {
+  justify-items: end;
+  flex: none;
+}
+.commercial-history small {
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+}
+.commercial-budget-alert {
+  font-size: 0.83rem;
+}
+.commercial-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+.commercial-steps li {
+  position: relative;
+  display: grid;
+  gap: 0.1rem;
+  border-left: 2px solid var(--brand-accent);
+  margin-left: 0.25rem;
+  padding: 0 0 0.8rem 1rem;
+}
+.commercial-steps li::before {
+  content: '';
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  left: -0.3rem;
+  top: 0.2rem;
+  border-radius: 50%;
+  background: var(--brand-accent);
+}
+.commercial-steps li:last-child {
+  padding-bottom: 0;
+}
+.commercial-steps strong {
+  font-size: 0.8rem;
+}
+.commercial-steps small {
+  color: var(--bs-secondary-color);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 575.98px) {
+  .commercial-facts {
+    grid-template-columns: 1fr;
+  }
+  .commercial-action-bar > .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+  .commercial-workspace .shell-section-header {
+    align-items: start;
+  }
+  .commercial-workspace .shell-section-header > .workspace-caption {
+    text-align: right;
+  }
+}

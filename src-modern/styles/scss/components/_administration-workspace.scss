@@ -1,0 +1,127 @@
+.administration-workspace {
+  .admin-company-grid {
+    display: grid;
+    grid-template-columns: minmax(200px, 270px) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .admin-company-brand {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.8rem;
+    min-height: 180px;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg);
+    text-align: center;
+  }
+  .admin-company-brand img {
+    max-width: 100%;
+    max-height: 108px;
+    object-fit: contain;
+  }
+  .admin-company-brand .admin-logo-dark {
+    display: none;
+  }
+  .admin-company-brand p {
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.8rem;
+  }
+  .admin-company-grid .d9-facts {
+    align-content: center;
+  }
+  .admin-catalog-layout {
+    display: grid;
+    grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .admin-catalog-menu {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+  }
+  .admin-catalog-menu button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 42px;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.4rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    text-align: left;
+  }
+  .admin-catalog-menu button.active {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+  }
+  .admin-catalog-menu button:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+  .admin-catalog-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .admin-catalog-heading > div:last-child {
+    width: min(100%, 260px);
+  }
+  .admin-parameters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin: 0;
+  }
+  .admin-parameters > div {
+    padding: 0.8rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.45rem;
+  }
+  .admin-parameters dt {
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color);
+  }
+  .admin-parameters dd {
+    margin: 0.25rem 0 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+}
+[data-bs-theme='dark'] .administration-workspace {
+  .admin-company-brand .admin-logo-light {
+    display: none;
+  }
+  .admin-company-brand .admin-logo-dark {
+    display: block;
+  }
+}
+@media (max-width: 767.98px) {
+  .administration-workspace {
+    .admin-company-grid,
+    .admin-catalog-layout,
+    .admin-parameters {
+      grid-template-columns: 1fr;
+    }
+    .admin-catalog-menu {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .admin-catalog-heading {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  }
+}
+@media (max-width: 479.98px) {
+  .administration-workspace .admin-catalog-menu {
+    grid-template-columns: 1fr;
+  }
+}

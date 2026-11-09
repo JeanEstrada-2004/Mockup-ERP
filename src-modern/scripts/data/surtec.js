@@ -24,9 +24,30 @@ export const surtecData = {
     { id: 'PROV-003', name: 'ElectroData S.A.C.' },
   ],
   workers: [
-    { id: 'PER-001', name: 'Carlos Mendoza', role: 'Jefe de proyecto' },
-    { id: 'PER-002', name: 'Ana Torres', role: 'Especialista de redes' },
-    { id: 'PER-003', name: 'Luis Quispe', role: 'Técnico de campo' },
+    {
+      id: 'PER-001',
+      name: 'Carlos Mendoza',
+      dni: '00000001',
+      role: 'Jefe de proyecto',
+      area: 'Proyectos',
+      status: 'Activo',
+    },
+    {
+      id: 'PER-002',
+      name: 'Ana Torres',
+      dni: '00000002',
+      role: 'Especialista de redes',
+      area: 'Operaciones',
+      status: 'Activo',
+    },
+    {
+      id: 'PER-003',
+      name: 'Luis Quispe',
+      dni: '00000003',
+      role: 'Técnico de campo',
+      area: 'Operaciones',
+      status: 'Activo',
+    },
   ],
   projects: [
     {
@@ -75,6 +96,9 @@ export const surtecData = {
       name: 'Infraestructura tecnológica',
       status: 'Ganado',
       estimatedAmount: 185000,
+      date: '2027-01-05',
+      ownerId: 'PER-001',
+      description: 'Oportunidad ficticia convertida en presupuesto aprobado y proyecto activo.',
     },
   ],
   budgets: [
@@ -107,8 +131,26 @@ export const surtecData = {
     },
   ],
   materials: [
-    { id: 'MAT-001', name: 'Cable UTP Cat6', unit: 'm', stock: 1250, minimum: 300 },
-    { id: 'MAT-002', name: 'Conector RJ45', unit: 'und', stock: 80, minimum: 100 },
+    {
+      id: 'MAT-001',
+      name: 'Cable UTP Cat6',
+      category: 'Cableado',
+      unit: 'm',
+      stock: 1250,
+      minimum: 300,
+      warehouse: 'Principal',
+      location: 'A-01',
+    },
+    {
+      id: 'MAT-002',
+      name: 'Conector RJ45',
+      category: 'Conectividad',
+      unit: 'und',
+      stock: 80,
+      minimum: 100,
+      warehouse: 'Principal',
+      location: 'B-02',
+    },
   ],
   operations: [
     operation('OC-025', 'PR-2027-001', 'purchase', 25000, 'purchases', {
@@ -125,6 +167,14 @@ export const surtecData = {
       supplierId: 'PROV-003',
       status: 'Atendida',
       date: '2027-03-20',
+    }),
+    // Stock purchases are received into inventory. Their value becomes an
+    // executed material cost only through the related SAL operation below.
+    operation('OC-035', 'PR-2027-001', 'purchase', 16984.45, null, {
+      supplierId: 'PROV-002',
+      status: 'Atendida',
+      date: '2027-03-18',
+      inventoryLine: { materialId: 'MAT-001', quantity: 320, unitCost: 44.98 },
     }),
     operation('TAR-014', 'PR-2027-001', 'timesheet', 30362, 'personnel', {
       workerId: 'PER-002',
@@ -150,6 +200,11 @@ export const surtecData = {
       materialId: 'MAT-001',
       status: 'Registrada',
       date: '2027-03-22',
+    }),
+    operation('DEV-015', 'PR-2027-001', 'material_return', 0, null, {
+      materialId: 'MAT-001',
+      status: 'Registrada',
+      date: '2027-03-24',
     }),
     operation('AJ-001', 'PR-2027-001', 'other', 5621, 'other', {
       status: 'Registrado',
@@ -181,6 +236,12 @@ export const surtecData = {
       status: 'Atendida',
       date: '2027-04-10',
     }),
+    operation('OC-202', 'PR-2027-002', 'purchase', 11800, null, {
+      supplierId: 'PROV-003',
+      status: 'Atendida',
+      date: '2027-04-16',
+      inventoryLine: { materialId: 'MAT-002', quantity: 100, unitCost: 100 },
+    }),
     operation('TAR-201', 'PR-2027-002', 'timesheet', 20000, 'personnel', {
       workerId: 'PER-001',
       status: 'Aprobado',
@@ -205,6 +266,12 @@ export const surtecData = {
       supplierId: 'PROV-001',
       status: 'Atendida',
       date: '2027-05-10',
+    }),
+    operation('OC-302', 'PR-2027-003', 'purchase', 5900, null, {
+      supplierId: 'PROV-001',
+      status: 'Atendida',
+      date: '2027-05-16',
+      inventoryLine: { materialId: 'MAT-001', quantity: 100, unitCost: 50 },
     }),
     operation('TAR-301', 'PR-2027-003', 'timesheet', 14500, 'personnel', {
       workerId: 'PER-003',

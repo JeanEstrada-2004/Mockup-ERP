@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ficha integral de proyecto" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Ficha de proyecto</title>
+  </head>
+  <body data-page="project-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace"
+            x-data="projectDetail"
+            @project-change.window="switchProject($event.detail.projectId)"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./projects.html">Proyectos</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="project?.id || 'No encontrado'"
+                ></li>
+              </ol>
+            </nav>
+            <template x-if="!project"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  <h1>Proyecto no encontrado</h1>
+                  <p>El código solicitado no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./projects.html">Ver proyectos</a>
+                </div>
+              </div></template
+            >
+            <template x-if="project"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="shell-eyebrow" x-text="project.id"></p>
+                    <h1 x-text="project.name"></h1>
+                    <p class="shell-page-subtitle">
+                      <span x-text="projectClient(project)"></span>
+                      <span
+                        class="badge ms-2"
+                        :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                        x-text="project.status"
+                      ></span>
+                    </p>
+                  </div>
+                  <a class="btn btn-outline-primary btn-sm" :href="backHref"
+                    ><i class="bi bi-arrow-left me-1" aria-hidden="true"></i
+                    ><span x-text="backLabel"></span
+                  ></a>
+                </div>
+
+                <div class="workspace-tabs" role="tablist" aria-label="Secciones de la ficha">
+                  <button
+                    id="tab-summary"
+                    data-project-tab="summary"
+                    type="button"
+                    role="tab"
+                    aria-controls="panel-summary"
+                    :aria-selected="tab === 'summary'"
+                    :tabindex="tab === 'summary' ? 0 : -1"
+                    :class="tab === 'summary' ? 'active' : ''"
+                    @click="setTab('summary')"
+                    @keydown.arrow-right="moveTab($event, 1)"
+                    @keydown.arrow-left="moveTab($event, -1)"
+                  >
+                    Resumen e indicadores
+                  </button>
+                  <button
+                    id="tab-operations"
+                    data-project-tab="operations"
+                    type="button"
+                    role="tab"
+                    aria-controls="panel-operations"
+                    :aria-selected="tab === 'operations'"
+                    :tabindex="tab === 'operations' ? 0 : -1"
+                    :class="tab === 'operations' ? 'active' : ''"
+                    @click="setTab('operations')"
+                    @keydown.arrow-right="moveTab($event, 1)"
+                    @keydown.arrow-left="moveTab($event, -1)"
+                  >
+                    Operaciones
+                  </button>
+                  <button
+                    id="tab-documents"
+                    data-project-tab="documents"
+                    type="button"
+                    role="tab"
+                    aria-controls="panel-documents"
+                    :aria-selected="tab === 'documents'"
+                    :tabindex="tab === 'documents' ? 0 : -1"
+                    :class="tab === 'documents' ? 'active' : ''"
+                    @click="setTab('documents')"
+                    @keydown.arrow-right="moveTab($event, 1)"
+                    @keydown.arrow-left="moveTab($event, -1)"
+                  >
+                    Documentos
+                  </button>
+                </div>
+
+                <div
+                  id="panel-summary"
+                  role="tabpanel"
+                  aria-labelledby="tab-summary"
+                  x-show="tab === 'summary'"
+                  x-cloak
+                >
+                  <div class="row g-3 mb-3" aria-label="Indicadores del proyecto">
+                    <div class="col-6 col-xl-3">
+                      <div class="card h-100">
+                        <div class="card-body workspace-kpi">
+                          <p class="shell-kpi-label">Presupuesto</p>
+                          <p
+                            class="shell-kpi-value"
+                            x-text="formatMoney(financials.budgetAmount)"
+                          ></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                      <div class="card h-100">
+                        <div class="card-body workspace-kpi">
+                          <p class="shell-kpi-label">Costo ejecutado</p>
+                          <p
+                            class="shell-kpi-value"
+                            x-text="formatMoney(financials.executedCost)"
+                          ></p>
+                          <small
+                            x-text="`${financials.executionPercent} % del presupuesto`"
+                          ></small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                      <div class="card h-100">
+                        <div class="card-body workspace-kpi">
+                          <p class="shell-kpi-label">Costo comprometido</p>
+                          <p
+                            class="shell-kpi-value"
+                            x-text="formatMoney(financials.committedCost)"
+                          ></p>
+                          <small>Ejecutado más compromisos abiertos</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                      <div class="card h-100">
+                        <div class="card-body workspace-kpi">
+                          <p class="shell-kpi-label">Disponible para comprometer</p>
+                          <p
+                            class="shell-kpi-value"
+                            x-text="formatMoney(financials.availableToCommit)"
+                          ></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row g-3">
+                    <div class="col-xl-7">
+                      <section class="card h-100" aria-labelledby="budget-detail-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="budget-detail-title">Presupuesto y costos</h2>
+                            <span class="commercial-inline-links"
+                              ><a
+                                x-show="hasBudgets"
+                                :href="moduleHref('budgets', project.budgetId)"
+                                >Ver presupuesto</a
+                              ><a :href="moduleHref('costs', project.id)"
+                                >Ver costos <i class="bi bi-arrow-right" aria-hidden="true"></i></a
+                            ></span>
+                          </div>
+                          <p class="workspace-caption">
+                            Los importes proceden de las operaciones de este proyecto.
+                          </p>
+                          <div class="workspace-budget-track">
+                            <span>Ejecutado</span
+                            ><strong x-text="formatMoney(financials.executedCost)"></strong>
+                            <div
+                              class="progress"
+                              role="progressbar"
+                              :aria-valuenow="financials.executionPercent"
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                              aria-label="Porcentaje del presupuesto ejecutado"
+                            >
+                              <div class="progress-bar" :style="`width: ${executionWidth}%`"></div>
+                            </div>
+                            <small
+                              x-text="`${financials.executionPercent} % de ${formatMoney(financials.budgetAmount)}`"
+                            ></small>
+                          </div>
+                          <div class="workspace-summary-grid">
+                            <div>
+                              <span>Compromisos abiertos</span
+                              ><strong
+                                x-text="formatMoney(financials.outstandingCommitments)"
+                              ></strong>
+                            </div>
+                            <div>
+                              <span>Saldo frente al ejecutado</span
+                              ><strong
+                                x-text="formatMoney(financials.availableAgainstExecuted)"
+                              ></strong>
+                            </div>
+                            <div>
+                              <span>Disponible para comprometer</span
+                              ><strong x-text="formatMoney(financials.availableToCommit)"></strong>
+                            </div>
+                          </div>
+                          <h3 class="workspace-subheading">Costos por fuente</h3>
+                          <div class="workspace-summary-grid">
+                            <template x-for="source in sources" :key="source.id"
+                              ><div>
+                                <a
+                                  :href="`./costs.html?project=${encodeURIComponent(project.id)}&source=${encodeURIComponent(source.id)}`"
+                                  x-text="source.label"
+                                ></a
+                                ><strong x-text="formatMoney(source.amount)"></strong></div
+                            ></template>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="col-xl-5">
+                      <div class="d-grid gap-3">
+                        <section class="card" aria-labelledby="project-facts-title">
+                          <div class="card-body">
+                            <h2 id="project-facts-title" class="workspace-subheading mt-0">
+                              Datos del proyecto
+                            </h2>
+                            <div class="workspace-summary-grid">
+                              <div><span>Código</span><strong x-text="project.id"></strong></div>
+                              <div>
+                                <span>Cliente</span
+                                ><strong x-text="projectClient(project)"></strong>
+                              </div>
+                              <div>
+                                <span>Responsable</span><strong x-text="managerName"></strong>
+                              </div>
+                              <div>
+                                <span>Inicio</span
+                                ><strong x-text="formatDate(project.startDate)"></strong>
+                              </div>
+                              <div>
+                                <span>Fin previsto</span
+                                ><strong x-text="formatDate(project.endDate)"></strong>
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+                        <section class="card" aria-labelledby="indicators-title">
+                          <div class="card-body">
+                            <h2 id="indicators-title" class="workspace-subheading mt-0">
+                              Indicadores
+                            </h2>
+                            <div class="workspace-indicators">
+                              <div>
+                                <strong x-text="`${project.progressPercent} %`"></strong
+                                ><span>Avance reportado</span>
+                              </div>
+                              <div>
+                                <strong x-text="`${financials.executionPercent} %`"></strong
+                                ><span>Presupuesto ejecutado</span>
+                              </div>
+                              <div>
+                                <strong x-text="pendingCount"></strong
+                                ><span>Operaciones pendientes</span>
+                              </div>
+                              <div>
+                                <strong x-text="documents.length"></strong
+                                ><span>Documentos simulados</span>
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  id="panel-operations"
+                  role="tabpanel"
+                  aria-labelledby="tab-operations"
+                  x-show="tab === 'operations'"
+                  x-cloak
+                >
+                  <div class="row g-3">
+                    <div class="col-xl-6">
+                      <section class="card h-100" aria-labelledby="purchases-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="purchases-title">Compras</h2>
+                            <a :href="moduleHref('purchases')">Abrir módulo</a>
+                          </div>
+                          <p class="text-muted small" x-show="purchaseRows.length === 0">
+                            No hay compras registradas para este proyecto.
+                          </p>
+                          <div class="workspace-record-list">
+                            <template x-for="item in purchaseRows" :key="item.id"
+                              ><a :href="operationHref(item)">
+                                <span
+                                  ><strong x-text="item.id"></strong
+                                  ><small x-text="supplierName(item.supplierId)"></small
+                                ></span>
+                                <span
+                                  ><strong
+                                    x-text="item.type === 'material_return' ? 'Devolución · sin costo adicional' : formatMoney(item.amount)"
+                                  ></strong
+                                  ><small x-text="item.status"></small
+                                ></span> </a
+                            ></template>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="col-xl-6">
+                      <section class="card h-100" aria-labelledby="expenses-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="expenses-title">Rendiciones</h2>
+                            <a :href="moduleHref('expenses')">Abrir módulo</a>
+                          </div>
+                          <p class="text-muted small" x-show="expenseRows.length === 0">
+                            No hay rendiciones registradas para este proyecto.
+                          </p>
+                          <div class="workspace-record-list">
+                            <template x-for="item in expenseRows" :key="item.id"
+                              ><a :href="operationHref(item)">
+                                <span
+                                  ><strong x-text="item.id"></strong
+                                  ><small x-text="personName(item.workerId)"></small
+                                ></span>
+                                <span
+                                  ><strong x-text="formatMoney(item.amount)"></strong
+                                  ><small x-text="item.status"></small
+                                ></span> </a
+                            ></template>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="col-xl-6">
+                      <section class="card h-100" aria-labelledby="personnel-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="personnel-title">Personal y tareo</h2>
+                            <a :href="moduleHref('personnel')">Abrir módulo</a>
+                          </div>
+                          <p class="workspace-caption" x-text="`Responsable: ${managerName}`"></p>
+                          <p class="text-muted small" x-show="personnelRows.length === 0">
+                            No hay tareos registrados para este proyecto.
+                          </p>
+                          <div class="workspace-record-list">
+                            <template x-for="item in personnelRows" :key="item.id"
+                              ><a :href="operationHref(item)">
+                                <span
+                                  ><strong x-text="item.id"></strong
+                                  ><small x-text="personName(item.workerId)"></small
+                                ></span>
+                                <span
+                                  ><strong x-text="formatMoney(item.amount)"></strong
+                                  ><small x-text="item.status"></small
+                                ></span> </a
+                            ></template>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                    <div class="col-xl-6">
+                      <section class="card h-100" aria-labelledby="materials-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="materials-title">Materiales</h2>
+                            <a x-show="hasWarehouse" :href="moduleHref('warehouse')"
+                              >Abrir módulo</a
+                            >
+                          </div>
+                          <p class="text-muted small" x-show="materialRows.length === 0">
+                            No hay salidas de materiales registradas para este proyecto.
+                          </p>
+                          <div class="workspace-record-list">
+                            <template x-for="item in materialRows" :key="item.id"
+                              ><a :href="operationHref(item)">
+                                <span
+                                  ><strong x-text="item.id"></strong
+                                  ><small x-text="materialName(item.materialId)"></small
+                                ></span>
+                                <span
+                                  ><strong x-text="formatMoney(item.amount)"></strong
+                                  ><small x-text="item.status"></small
+                                ></span> </a
+                            ></template>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  id="panel-documents"
+                  role="tabpanel"
+                  aria-labelledby="tab-documents"
+                  x-show="tab === 'documents'"
+                  x-cloak
+                >
+                  <section class="card" aria-labelledby="documents-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <div>
+                          <h2 id="documents-title">Documentos vinculados</h2>
+                          <p class="workspace-caption">
+                            Metadatos simulados de presupuestos y operaciones; no hay archivos
+                            descargables.
+                          </p>
+                        </div>
+                        <a :href="moduleHref('documents')">Abrir módulo</a>
+                      </div>
+                      <p class="text-muted small" x-show="documents.length === 0">
+                        No hay documentos vinculados.
+                      </p>
+                      <div class="workspace-record-list">
+                        <template x-for="item in documents" :key="item.id"
+                          ><a :href="documentHref(item)">
+                            <span
+                              ><strong x-text="item.fileName"></strong
+                              ><small x-text="`Origen: ${item.operationId}`"></small
+                            ></span>
+                            <span
+                              ><small x-text="`Versión ${item.version}`"></small
+                              ><small x-text="item.id"></small
+                            ></span> </a
+                        ></template>
+                      </div>
+                    </div>
+                  </section>
+                </div></div
+            ></template>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

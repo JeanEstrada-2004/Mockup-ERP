@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ficha de trabajador ficticio y relación con proyectos" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Ficha del Trabajador</title>
+  </head>
+  <body data-page="worker-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace personnel-workspace"
+            x-data="workerDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./personnel.html">Personal y Tareo</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="worker?.name || 'No encontrado'"
+                ></li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">FICHA DEL TRABAJADOR</p>
+                <h1 x-text="worker?.name || 'Trabajador no encontrado'"></h1>
+                <p class="shell-page-subtitle" x-show="worker">
+                  <span x-text="worker?.role"></span> · <span x-text="worker?.area"></span>
+                  <span class="badge text-bg-success ms-2" x-text="worker?.status"></span>
+                </p>
+              </div>
+              <a class="btn btn-outline-primary" href="./personnel.html">← Volver a Personal</a>
+            </div>
+            <div class="alert alert-info personnel-demo-note" role="note">
+              <i class="bi bi-info-circle" aria-hidden="true"></i> Identidad, DNI, asistencia y
+              tareo ficticios. Las horas de ejemplo no generan ni modifican importes de costo.
+            </div>
+            <section class="card" x-show="!worker" aria-label="Trabajador no encontrado">
+              <div class="card-body">
+                <p>No se encontró el trabajador solicitado.</p>
+                <a href="./personnel.html">Abrir Personal y Tareo</a>
+              </div>
+            </section>
+            <template x-if="worker"
+              ><div class="personnel-worker-content">
+                <div class="personnel-worker-summary">
+                  <section class="card">
+                    <div class="card-body">
+                      <small>DNI ficticio</small><strong x-text="worker.dni"></strong>
+                    </div>
+                  </section>
+                  <section class="card">
+                    <div class="card-body">
+                      <small>Asignaciones</small><strong x-text="assignments.length"></strong>
+                    </div>
+                  </section>
+                  <section class="card">
+                    <div class="card-body">
+                      <small>Jornadas de ejemplo</small><strong x-text="timesheets.length"></strong>
+                    </div>
+                  </section>
+                  <section class="card">
+                    <div class="card-body">
+                      <small>Costo laboral base</small
+                      ><strong x-text="formatMoney(costTotal)"></strong>
+                    </div>
+                  </section>
+                </div>
+                <nav class="personnel-flow" aria-label="Recorrido del trabajador">
+                  <span>Persona</span><i class="bi bi-arrow-right" aria-hidden="true"></i
+                  ><a :href="attendanceHref">Asistencia</a
+                  ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                  ><a :href="timesheetHref">Tareo</a
+                  ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                  ><a :href="projectHref(assignments[0]?.projectId)">Proyecto</a
+                  ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                  ><a href="#worker-cost-title">Costo laboral</a>
+                </nav>
+                <div class="personnel-worker-grid">
+                  <section class="card" aria-labelledby="worker-profile-title">
+                    <div class="card-body">
+                      <h2 id="worker-profile-title">Datos de demostración</h2>
+                      <dl class="personnel-facts">
+                        <div>
+                          <dt>Código</dt>
+                          <dd x-text="worker.id"></dd>
+                        </div>
+                        <div>
+                          <dt>DNI ficticio</dt>
+                          <dd x-text="worker.dni"></dd>
+                        </div>
+                        <div>
+                          <dt>Cargo</dt>
+                          <dd x-text="worker.role"></dd>
+                        </div>
+                        <div>
+                          <dt>Área</dt>
+                          <dd x-text="worker.area"></dd>
+                        </div>
+                        <div>
+                          <dt>Estado</dt>
+                          <dd x-text="worker.status"></dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </section>
+                  <section class="card" aria-labelledby="worker-assignments-title">
+                    <div class="card-body">
+                      <h2 id="worker-assignments-title">Proyectos asignados</h2>
+                      <div class="personnel-linked-list">
+                        <template x-for="item in assignments" :key="item.id"
+                          ><div>
+                            <a
+                              :href="projectHref(item.projectId)"
+                              x-text="projectName(item.projectId)"
+                            ></a
+                            ><small
+                              x-text="`${item.percent} % referencial · ${formatDate(item.from)} – ${formatDate(item.to)}`"
+                            ></small></div
+                        ></template>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+                <div class="personnel-worker-grid">
+                  <section class="card" aria-labelledby="worker-attendance-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <h2 id="worker-attendance-title">Asistencia</h2>
+                        <a :href="attendanceHref">Ver todas →</a>
+                      </div>
+                      <p class="workspace-caption">
+                        Jornadas de ejemplo vinculadas por ID al tareo.
+                      </p>
+                      <div class="personnel-linked-list">
+                        <template x-for="item in attendance" :key="item.id"
+                          ><div>
+                            <span
+                              ><strong x-text="formatDate(item.date)"></strong
+                              ><span
+                                class="badge"
+                                :class="statusClass(item.status)"
+                                x-text="item.status"
+                              ></span></span
+                            ><small
+                              x-text="`${item.start} – ${item.end || 'sin salida'} · ${projectName(item.projectId)}`"
+                            ></small></div
+                        ></template>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="card" aria-labelledby="worker-timesheet-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <h2 id="worker-timesheet-title">Historial de Tareo</h2>
+                        <a :href="timesheetHref">Ver todos →</a>
+                      </div>
+                      <p class="workspace-caption">
+                        Las horas mostradas ilustran jornadas, no una nómina completa.
+                      </p>
+                      <div class="personnel-linked-list">
+                        <template x-for="item in timesheets" :key="item.id"
+                          ><div>
+                            <span
+                              ><strong x-text="formatDate(item.date)"></strong
+                              ><strong x-text="hoursLabel(item.hours)"></strong></span
+                            ><small
+                              x-text="`${projectName(item.projectId)} · ${item.status}`"
+                            ></small
+                            ><a :href="projectHref(item.projectId)">Abrir proyecto →</a>
+                          </div></template
+                        >
+                      </div>
+                    </div>
+                  </section>
+                </div>
+                <section class="card" aria-labelledby="worker-cost-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="worker-cost-title">Costo laboral vinculado</h2>
+                      <strong x-text="formatMoney(costTotal)"></strong>
+                    </div>
+                    <p class="workspace-caption">
+                      Importes de las operaciones TAR compartidas. No se calculan a partir de las
+                      jornadas ilustrativas ni de registros manuales.
+                    </p>
+                    <div class="personnel-linked-list">
+                      <template x-for="item in costs" :key="item.id"
+                        ><div class="personnel-cost-row">
+                          <span
+                            ><strong x-text="item.operationId"></strong
+                            ><small x-text="formatDate(item.date)"></small></span
+                          ><a
+                            :href="projectHref(item.projectId)"
+                            x-text="projectName(item.projectId)"
+                          ></a
+                          ><strong x-text="formatMoney(item.amount)"></strong
+                          ><a :href="costHref(item.operationId)">Ver en Costos →</a>
+                        </div></template
+                      >
+                    </div>
+                  </div>
+                </section>
+                <section
+                  class="card"
+                  x-show="hasBiometrics && incidents.length"
+                  aria-labelledby="worker-incidents-title"
+                >
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="worker-incidents-title">Incidencias simuladas</h2>
+                      <a href="./personnel.html?tab=incidencias">Revisar →</a>
+                    </div>
+                    <div class="personnel-linked-list">
+                      <template x-for="item in incidents" :key="item.id"
+                        ><div>
+                          <span
+                            ><strong x-text="item.type"></strong
+                            ><span
+                              class="badge"
+                              :class="statusClass(item.status)"
+                              x-text="item.status"
+                            ></span></span
+                          ><small x-text="formatDate(item.date)"></small></div
+                      ></template>
+                    </div>
+                  </div>
+                </section></div
+            ></template>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

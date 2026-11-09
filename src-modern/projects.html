@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Proyectos de la empresa" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Proyectos</title>
+  </head>
+  <body data-page="projects-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div class="container-fluid shell-page project-workspace" x-data="projectsList">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Proyectos</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">PORTAFOLIO</p>
+                <h1>Proyectos</h1>
+                <p class="shell-page-subtitle">Busca un proyecto y abre su ficha integral.</p>
+              </div>
+              <span class="shell-demo-label"
+                ><i class="bi bi-info-circle" aria-hidden="true"></i> Datos de demostración</span
+              >
+            </div>
+            <section class="card" aria-labelledby="projects-list-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="projects-list-title">Listado de proyectos</h2>
+                  <span
+                    class="text-muted small"
+                    aria-live="polite"
+                    x-text="`${filteredProjects.length} de ${projects.length} proyectos`"
+                  ></span>
+                </div>
+                <div class="workspace-filters mb-3">
+                  <div>
+                    <label class="form-label" for="projects-search">Buscar proyecto</label>
+                    <input
+                      id="projects-search"
+                      type="search"
+                      class="form-control"
+                      placeholder="Código, nombre o cliente"
+                      x-model="search"
+                      @input="updateUrl()"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-label" for="projects-status">Estado</label>
+                    <select
+                      id="projects-status"
+                      class="form-select"
+                      x-model="status"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <option value="Activo">Activo</option>
+                      <option value="En riesgo">En riesgo</option>
+                    </select>
+                  </div>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    @click="clearFilters()"
+                    x-show="search || status"
+                  >
+                    Limpiar filtros
+                  </button>
+                </div>
+                <div class="table-responsive workspace-project-table">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Avance</th>
+                        <th scope="col">Presupuesto</th>
+                        <th scope="col">Ejecutado</th>
+                        <th scope="col"><span class="visually-hidden">Acción</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="project in filteredProjects" :key="project.id"
+                        ><tr>
+                          <td>
+                            <a class="workspace-table-project" :href="detailHref(project.id)"
+                              ><strong x-text="project.id"></strong
+                              ><span x-text="project.name"></span
+                            ></a>
+                          </td>
+                          <td x-text="projectClient(project)"></td>
+                          <td>
+                            <span
+                              class="badge"
+                              :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                              x-text="project.status"
+                            ></span>
+                          </td>
+                          <td x-text="`${project.progressPercent} %`"></td>
+                          <td x-text="formatMoney(project.budgetAmount)"></td>
+                          <td x-text="formatMoney(financials(project.id).executedCost)"></td>
+                          <td>
+                            <a
+                              :href="detailHref(project.id)"
+                              :aria-label="`Abrir ficha de ${project.id}`"
+                              ><i class="bi bi-arrow-right" aria-hidden="true"></i
+                            ></a>
+                          </td></tr
+                      ></template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="workspace-project-cards">
+                  <template x-for="project in filteredProjects" :key="project.id"
+                    ><a class="workspace-project-card" :href="detailHref(project.id)">
+                      <span class="workspace-project-card-top"
+                        ><strong x-text="project.id"></strong
+                        ><span
+                          class="badge"
+                          :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                          x-text="project.status"
+                        ></span
+                      ></span>
+                      <span class="workspace-project-card-name" x-text="project.name"></span
+                      ><small x-text="projectClient(project)"></small>
+                      <span class="workspace-project-card-metrics"
+                        ><span
+                          ><small>Presupuesto</small
+                          ><strong x-text="formatMoney(project.budgetAmount)"></strong
+                        ></span>
+                        <span
+                          ><small>Ejecutado</small
+                          ><strong
+                            x-text="formatMoney(financials(project.id).executedCost)"
+                          ></strong></span
+                      ></span>
+                      <span
+                        class="workspace-project-card-end"
+                        x-text="`Avance ${project.progressPercent} % · Abrir ficha →`"
+                      ></span> </a
+                  ></template>
+                </div>
+                <div class="workspace-empty" x-show="filteredProjects.length === 0" role="status">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <p>No se encontraron proyectos con esos filtros.</p>
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    type="button"
+                    @click="clearFilters()"
+                  >
+                    Mostrar todos
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

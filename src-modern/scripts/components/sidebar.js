@@ -5,6 +5,9 @@
 // ==========================================================================
 
 import { MOBILE_BREAKPOINT_PX, RESIZE_DEBOUNCE_MS } from '../utils/constants.js';
+import { variantStorageKey } from '../config/variants.js';
+
+const collapsedKey = variantStorageKey('sidebar-collapsed');
 
 export class SidebarManager {
   constructor() {
@@ -40,6 +43,12 @@ export class SidebarManager {
       ? this.sidebar.classList.contains('show')
       : !this.wrapper.classList.contains('sidebar-collapsed');
     this.toggleButton.setAttribute('aria-expanded', String(expanded));
+    this.toggleButton.setAttribute('aria-label', this.isMobile
+      ? expanded ? 'Cerrar menú lateral' : 'Abrir menú lateral'
+      : expanded ? 'Contraer menú lateral' : 'Expandir menú lateral');
+    this.sidebar.inert = this.isMobile && !expanded;
+    if (this.isMobile && !expanded) this.sidebar.setAttribute('aria-hidden', 'true');
+    else this.sidebar.removeAttribute('aria-hidden');
   }
 
   get isMobile() {
@@ -49,7 +58,7 @@ export class SidebarManager {
   init() {
     // Restore desktop collapsed state
     if (!this.isMobile) {
-      const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+      const isCollapsed = localStorage.getItem(collapsedKey) === 'true';
       if (isCollapsed) {
         this.wrapper.classList.add('sidebar-collapsed');
         this.toggleButton.classList.add('is-active');
@@ -100,14 +109,14 @@ export class SidebarManager {
   collapseDesktop() {
     this.wrapper.classList.add('sidebar-collapsed');
     this.toggleButton.classList.add('is-active');
-    localStorage.setItem('sidebar-collapsed', 'true');
+    localStorage.setItem(collapsedKey, 'true');
     this.syncAria();
   }
 
   expandDesktop() {
     this.wrapper.classList.remove('sidebar-collapsed');
     this.toggleButton.classList.remove('is-active');
-    localStorage.setItem('sidebar-collapsed', 'false');
+    localStorage.setItem(collapsedKey, 'false');
     this.syncAria();
   }
 
@@ -125,6 +134,7 @@ export class SidebarManager {
     this.backdrop.classList.add('show');
     document.body.style.overflow = 'hidden'; // prevent background scroll
     this.syncAria();
+    this.sidebar.querySelector('a')?.focus();
   }
 
   closeMobile() {
@@ -132,6 +142,7 @@ export class SidebarManager {
     this.backdrop.classList.remove('show');
     document.body.style.overflow = '';
     this.syncAria();
+    this.toggleButton.focus();
   }
 
   // Clean up when crossing the mobile/desktop breakpoint
@@ -143,7 +154,7 @@ export class SidebarManager {
       document.body.style.overflow = '';
 
       // Restore desktop collapsed state
-      const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+      const isCollapsed = localStorage.getItem(collapsedKey) === 'true';
       if (isCollapsed) {
         this.wrapper.classList.add('sidebar-collapsed');
         this.toggleButton.classList.add('is-active');

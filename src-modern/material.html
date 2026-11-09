@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ficha y Kardex de material ficticio" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Ficha de material</title>
+  </head>
+  <body data-page="material-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace warehouse-workspace"
+            x-data="materialDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./warehouse.html">Almacén</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="material?.id || 'Material'"
+                ></li>
+              </ol>
+            </nav>
+            <template x-if="!material"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Material no disponible</h1>
+                  <p>El código no pertenece al inventario de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="material"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <p class="shell-eyebrow">FICHA DE MATERIAL · DATOS FICTICIOS</p>
+                    <h1 x-text="material.name"></h1>
+                    <p class="shell-page-subtitle">
+                      <span x-text="material.id"></span
+                      ><span
+                        class="badge ms-2"
+                        :class="lowStock ? 'text-bg-warning' : 'text-bg-success'"
+                        x-text="lowStock ? 'Stock bajo' : 'Disponible'"
+                      ></span>
+                    </p>
+                  </div>
+                  <a class="btn btn-outline-primary" href="./warehouse.html"
+                    >← Volver al inventario</a
+                  >
+                </div>
+                <div class="alert alert-warning" role="status" x-show="lowStock">
+                  El stock actual es menor que el mínimo. Esta alerta usa el saldo final del Kardex
+                  de demostración.
+                </div>
+                <div class="alert alert-info warehouse-note" role="note">
+                  La existencia y los documentos son ejemplos. Las entradas no aumentan el costo
+                  ejecutado; la salida neta vinculada a cada proyecto figura una sola vez en
+                  Materiales.
+                </div>
+                <div class="warehouse-detail-grid">
+                  <section class="card" aria-labelledby="material-facts-title">
+                    <div class="card-body">
+                      <h2 class="workspace-subheading mt-0" id="material-facts-title">
+                        Datos del material
+                      </h2>
+                      <div class="warehouse-facts">
+                        <div><small>Código</small><strong x-text="material.id"></strong></div>
+                        <div>
+                          <small>Categoría</small><strong x-text="material.category"></strong>
+                        </div>
+                        <div><small>Unidad</small><strong x-text="material.unit"></strong></div>
+                        <div>
+                          <small>Almacén / ubicación</small
+                          ><strong x-text="`${material.warehouse} · ${material.location}`"></strong>
+                        </div>
+                        <div>
+                          <small>Último costo de ingreso referencial, sin IGV</small
+                          ><strong x-text="formatAmount(latestEntry?.unitCost || 0)"></strong>
+                        </div>
+                        <div>
+                          <small>Última OC de inventario</small
+                          ><a
+                            :href="purchaseHref(latestEntry?.purchaseId)"
+                            x-text="latestEntry?.purchaseId"
+                          ></a>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="card" aria-labelledby="material-stock-title">
+                    <div class="card-body">
+                      <h2 class="workspace-subheading mt-0" id="material-stock-title">
+                        Existencia actual
+                      </h2>
+                      <div
+                        class="warehouse-stock-number"
+                        x-text="`${material.stock} ${material.unit}`"
+                      ></div>
+                      <div class="warehouse-facts">
+                        <div>
+                          <small>Mínimo</small
+                          ><strong x-text="`${material.minimum} ${material.unit}`"></strong>
+                        </div>
+                        <div>
+                          <small>Saldo inicial de muestra</small
+                          ><strong x-text="`${openingStock} ${material.unit}`"></strong>
+                        </div>
+                        <div>
+                          <small>Saldo calculado por movimientos</small
+                          ><strong x-text="`${calculatedStock} ${material.unit}`"></strong>
+                        </div>
+                        <div>
+                          <small>Movimientos</small><strong x-text="movements.length"></strong>
+                        </div>
+                      </div>
+                      <a
+                        class="btn btn-outline-primary mt-3"
+                        :href="`./warehouse.html?tab=kardex&material=${encodeURIComponent(material.id)}`"
+                        >Abrir Kardex filtrado</a
+                      >
+                    </div>
+                  </section>
+                </div>
+                <section class="card mt-3" aria-labelledby="material-kardex-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="material-kardex-title">Movimientos y saldo</h2>
+                      <span class="workspace-caption">Orden cronológico · saldo global</span>
+                    </div>
+                    <p class="workspace-caption">
+                      Existencia inicial ficticia:
+                      <strong x-text="`${openingStock} ${material.unit}`"></strong>. Cada fila
+                      enlaza su documento mock, OC y proyecto.
+                    </p>
+                    <div class="table-responsive d-none d-lg-block">
+                      <table class="table align-middle warehouse-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Código</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Documento</th>
+                            <th scope="col">Entrada</th>
+                            <th scope="col">Salida</th>
+                            <th scope="col">Saldo</th>
+                            <th scope="col">OC</th>
+                            <th scope="col">Proyecto</th>
+                            <th scope="col">Costo</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="item in movements" :key="item.id"
+                            ><tr>
+                              <td x-text="formatDate(item.date)"></td>
+                              <td><a :href="movementHref(item.id)" x-text="item.id"></a></td>
+                              <td>
+                                <span
+                                  class="badge"
+                                  :class="movementClass(item.type)"
+                                  x-text="movementNames[item.type]"
+                                ></span>
+                              </td>
+                              <td>
+                                <a
+                                  :href="documentHref(item.documentId)"
+                                  x-text="item.documentId"
+                                ></a>
+                              </td>
+                              <td x-text="item.type === 'issue' ? '—' : item.quantity"></td>
+                              <td x-text="item.type === 'issue' ? item.quantity : '—'"></td>
+                              <td class="fw-semibold" x-text="item.balance"></td>
+                              <td>
+                                <a
+                                  :href="purchaseHref(item.purchaseId)"
+                                  x-text="item.purchaseId"
+                                ></a>
+                              </td>
+                              <td>
+                                <a :href="projectHref(item.projectId)" x-text="item.projectId"></a>
+                              </td>
+                              <td>
+                                <a
+                                  x-show="item.type === 'issue'"
+                                  :href="costHref(item.id)"
+                                  x-text="formatAmount(item.executedCost)"
+                                ></a
+                                ><span x-show="item.type !== 'issue'">—</span>
+                              </td>
+                            </tr></template
+                          >
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="warehouse-mobile-list d-lg-none">
+                      <template x-for="item in movements" :key="item.id"
+                        ><article class="warehouse-mobile-card">
+                          <div class="warehouse-mobile-heading">
+                            <a :href="movementHref(item.id)" x-text="item.id"></a
+                            ><span
+                              class="badge"
+                              :class="movementClass(item.type)"
+                              x-text="movementNames[item.type]"
+                            ></span>
+                          </div>
+                          <small x-text="`${formatDate(item.date)} · ${item.documentId}`"></small>
+                          <div>
+                            <b
+                              x-text="`${item.type === 'issue' ? '−' : '+'}${item.quantity} ${material.unit}`"
+                            ></b
+                            ><span x-text="`Saldo ${item.balance}`"></span>
+                          </div>
+                          <div class="warehouse-mobile-links">
+                            <a :href="purchaseHref(item.purchaseId)" x-text="item.purchaseId"></a
+                            ><a :href="projectHref(item.projectId)" x-text="item.projectId"></a>
+                          </div>
+                          <a
+                            x-show="item.type === 'issue'"
+                            :href="costHref(item.id)"
+                            x-text="`Costo ${formatAmount(item.executedCost)} →`"
+                          ></a></article
+                      ></template>
+                    </div>
+                    <p class="workspace-caption mt-3" x-show="material.id === 'MAT-001'">
+                      SAL-015 entrega 320 m y DEV-015 devuelve 20 m utilizables. El costo neto de
+                      300 m está registrado en SAL-015; la devolución no genera otro costo.
+                    </p>
+                  </div>
+                </section>
+              </div></template
+            >
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Módulos de la plataforma de gestión de proyectos" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Módulo</title>
+  </head>
+  <body data-page="module-preview" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page"
+            x-data="modulePreview"
+            @project-change.window="selectProject($event.detail.projectId)"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="title"></li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <p class="shell-eyebrow">GESTIÓN DE PROYECTOS</p>
+                <h1 x-text="title"></h1>
+                <p class="shell-page-subtitle" x-text="description"></p>
+              </div>
+              <span class="shell-demo-label">Vista preliminar</span>
+            </div>
+            <a class="btn btn-outline-primary mb-3" x-show="costReturn" :href="costReturn"
+              >← Volver a Costos</a
+            >
+            <div class="alert alert-info" role="note" x-show="isDemoCost" x-cloak>
+              Esta relación con Costos es una simulación local. No se suma al costo ejecutado ni al
+              saldo del proyecto.
+            </div>
+            <section
+              class="card mb-3"
+              x-show="reportCosts"
+              aria-labelledby="preview-cost-summary-title"
+            >
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div>
+                    <h2 id="preview-cost-summary-title">Resumen económico del proyecto</h2>
+                    <p class="workspace-caption">
+                      Indicadores derivados del mismo conjunto de operaciones del Panel, la Ficha y
+                      Costos.
+                    </p>
+                  </div>
+                  <a :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}`"
+                    >Abrir Costos</a
+                  >
+                </div>
+                <div class="shell-project-facts" x-show="reportCosts">
+                  <div>
+                    <span>Presupuesto</span
+                    ><strong x-text="formatMoney(reportCosts?.financials.budgetAmount)"></strong>
+                  </div>
+                  <div>
+                    <span>Ejecutado</span
+                    ><strong x-text="formatMoney(reportCosts?.financials.executedCost)"></strong>
+                  </div>
+                  <div>
+                    <span>Comprometido total</span
+                    ><strong x-text="formatMoney(reportCosts?.financials.committedCost)"></strong>
+                  </div>
+                  <div>
+                    <span>Ejecución</span
+                    ><strong x-text="`${reportCosts?.financials.executionPercent} %`"></strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <div class="row g-3">
+              <div class="col-lg-8">
+                <section class="card" aria-labelledby="module-records-heading">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="module-records-heading" x-text="recordHeading"></h2>
+                      <span class="text-muted small" x-text="`${records.length} registros`"></span>
+                    </div>
+                    <template x-if="records.length === 0"
+                      ><p class="text-muted mb-0">
+                        No hay registros de demostración en esta vista.
+                      </p></template
+                    >
+                    <div class="list-group list-group-flush">
+                      <template x-for="record in records" :key="record.id"
+                        ><div
+                          class="list-group-item shell-preview-record"
+                          :class="record.id === highlightedRecord ? 'shell-preview-record--selected' : ''"
+                        >
+                          <div>
+                            <strong x-text="record.title"></strong
+                            ><small x-text="record.subtitle"></small>
+                          </div>
+                          <span class="text-muted" x-text="record.detail"></span></div
+                      ></template>
+                    </div>
+                  </div>
+                </section>
+              </div>
+              <div class="col-lg-4">
+                <section class="card" aria-labelledby="context-heading">
+                  <div class="card-body">
+                    <h2 id="context-heading" class="shell-context-heading">
+                      Contexto del proyecto
+                    </h2>
+                    <template x-if="currentProject"
+                      ><div>
+                        <p class="shell-project-code" x-text="currentProject.id"></p>
+                        <p class="fw-semibold mb-2" x-text="currentProject.name"></p>
+                        <p
+                          class="text-muted small mb-3"
+                          x-text="clientName(currentProject.clientId)"
+                        ></p>
+                        <div class="shell-project-facts">
+                          <div>
+                            <span>Presupuesto</span
+                            ><strong x-text="formatMoney(currentProject.budgetAmount)"></strong>
+                          </div>
+                          <div>
+                            <span>Costo ejecutado</span
+                            ><strong
+                              x-text="formatMoney(financials(currentProject.id).executedCost)"
+                            ></strong>
+                          </div>
+                        </div></div
+                    ></template>
+                    <a
+                      class="btn btn-outline-primary w-100 mt-4"
+                      href="./module-preview.html?module=projects"
+                      >Ir a Proyectos</a
+                    >
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

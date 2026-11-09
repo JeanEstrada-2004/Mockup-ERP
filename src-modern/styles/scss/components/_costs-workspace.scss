@@ -1,0 +1,241 @@
+.costs-workspace {
+  .costs-project-selector {
+    margin-bottom: 1rem;
+  }
+  .costs-project-selector .card-body {
+    display: flex;
+    align-items: end;
+    gap: 1rem;
+  }
+  .costs-project-selector .card-body > div {
+    flex: 1 1 420px;
+    max-width: 570px;
+  }
+  .costs-project-selector .card-body > p {
+    flex: 1 1 240px;
+  }
+  .costs-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .costs-kpis .card-body {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    min-height: 145px;
+    padding: 1rem;
+  }
+  .costs-kpis small {
+    color: var(--bs-secondary-color);
+  }
+  .costs-kpis strong {
+    font-size: clamp(1.1rem, 1.5vw, 1.55rem);
+    overflow-wrap: anywhere;
+  }
+  .costs-kpis span {
+    color: var(--bs-secondary-color);
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+  .costs-commit-summary {
+    display: flex;
+    gap: 0.65rem;
+    line-height: 1.5;
+  }
+  .costs-commit-summary .bi {
+    flex: 0 0 auto;
+  }
+  .costs-chart-values {
+    display: grid;
+    gap: 0.35rem;
+    padding-top: 0.5rem;
+  }
+  .costs-chart-values span,
+  .costs-source-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .costs-sources {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .costs-source-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 115px 18px;
+    gap: 0.65rem;
+    align-items: center;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid transparent;
+    border-radius: 0.4rem;
+    background: transparent;
+    color: var(--bs-body-color);
+    text-align: left;
+  }
+  .costs-source-row:hover,
+  .costs-source-row.active {
+    border-color: var(--bs-primary-border-subtle);
+    background: var(--bs-primary-bg-subtle);
+  }
+  .costs-source-row:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+  .costs-source-row small {
+    color: var(--bs-secondary-color);
+    text-align: right;
+  }
+  .costs-source-total {
+    margin-top: 0.5rem;
+    padding: 0.75rem 0.65rem 0;
+    border-top: 1px solid var(--bs-border-color);
+    font-weight: 700;
+  }
+  .costs-table {
+    min-width: 820px;
+    margin-bottom: 0;
+  }
+  .costs-table th {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+  .costs-table td {
+    font-size: 0.82rem;
+  }
+  .costs-selected,
+  .costs-part-over {
+    background: var(--bs-warning-bg-subtle);
+  }
+  .costs-parts-table {
+    min-width: 620px;
+  }
+  .costs-operation-detail {
+    border-color: var(--bs-primary-border-subtle);
+  }
+  .costs-operation-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem 1rem;
+  }
+  .costs-operation-facts > div {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .costs-operation-facts small {
+    color: var(--bs-secondary-color);
+  }
+  .costs-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+  }
+  .costs-commit-list {
+    display: grid;
+    gap: 0.55rem;
+  }
+  .costs-commit-list > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.5rem;
+    padding: 0.65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.45rem;
+  }
+  .costs-commit-list small {
+    grid-column: 1;
+    color: var(--bs-secondary-color);
+  }
+  .costs-commit-list strong {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  .costs-mobile-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .costs-mobile-card {
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.85rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg);
+  }
+  .costs-mobile-card > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .costs-mobile-card small {
+    color: var(--bs-secondary-color);
+  }
+  .costs-mobile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .costs-mobile-actions > * {
+    flex: 1 1 130px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .costs-workspace .costs-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .costs-workspace .costs-operation-facts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767.98px) {
+  .costs-workspace .costs-project-selector .card-body {
+    display: block;
+  }
+  .costs-workspace .costs-project-selector .card-body > p {
+    margin-top: 0.7rem;
+  }
+  .costs-workspace .costs-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .costs-workspace .costs-kpis .card-body {
+    min-height: 135px;
+  }
+  .costs-workspace .costs-operation-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .costs-workspace .costs-source-row {
+    grid-template-columns: minmax(0, 1fr) auto 18px;
+  }
+  .costs-workspace .costs-source-row small {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    text-align: left;
+  }
+  .costs-workspace .costs-source-row .bi {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+@media (max-width: 479.98px) {
+  .costs-workspace .costs-kpis strong {
+    font-size: 1.1rem;
+  }
+  .costs-workspace .costs-kpis span {
+    font-size: 0.72rem;
+  }
+  .costs-workspace .costs-operation-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+  .costs-workspace .costs-detail-actions .btn {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+}

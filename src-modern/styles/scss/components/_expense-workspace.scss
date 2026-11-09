@@ -1,0 +1,385 @@
+.expense-workspace {
+  .expense-new-button,
+  .expense-primary-action {
+    min-height: 44px;
+  }
+  .expense-demo-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.84rem;
+  }
+  .expense-filters {
+    display: grid;
+    grid-template-columns: minmax(210px, 2fr) repeat(2, minmax(155px, 1fr)) auto;
+    gap: 0.75rem;
+    align-items: end;
+  }
+  .expense-filters .btn {
+    min-height: 38px;
+  }
+  .expense-steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+  .expense-steps li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0.7rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    color: var(--bs-secondary-color);
+    background: var(--bs-body-bg);
+    font-size: 0.78rem;
+  }
+  .expense-steps li span {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--bs-tertiary-bg);
+  }
+  .expense-steps li.active {
+    border-color: var(--brand-accent);
+    color: var(--bs-emphasis-color);
+    font-weight: 700;
+  }
+  .expense-steps li.active span,
+  .expense-steps li.done span {
+    background: var(--brand-accent);
+    color: #fff;
+  }
+  .expense-context {
+    margin-bottom: 1rem;
+  }
+  .expense-follow-up {
+    display: flex;
+    flex-direction: column;
+  }
+  .expense-follow-up .expense-context {
+    order: 1;
+  }
+  .expense-follow-up .expense-status-stage {
+    order: 2;
+  }
+  .expense-follow-up .expense-review-stage {
+    order: 3;
+  }
+  .expense-follow-up .expense-history {
+    order: 4;
+  }
+  .expense-context .card-body {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+  }
+  .expense-context .card-body > div {
+    display: grid;
+    min-width: 0;
+  }
+  .expense-context small {
+    color: var(--bs-secondary-color);
+  }
+  .expense-context strong {
+    overflow-wrap: anywhere;
+  }
+  .expense-stage {
+    margin-bottom: 1rem;
+  }
+  .expense-stage h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.65rem;
+  }
+  .expense-example-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1.1rem 0 1.5rem;
+  }
+  .expense-example {
+    display: grid;
+    justify-items: start;
+    gap: 0.3rem;
+    min-height: 140px;
+    padding: 1rem;
+    text-align: left;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+  }
+  .expense-example:hover,
+  .expense-example:focus-visible {
+    border-color: var(--brand-accent);
+    background: var(--bs-tertiary-bg);
+  }
+  .expense-example i {
+    color: var(--brand-accent);
+    font-size: 1.2rem;
+  }
+  .expense-example small,
+  .expense-added-list small {
+    color: var(--bs-secondary-color);
+  }
+  .expense-added-list {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .expense-added-list > div {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .expense-added-list > div > span:first-child {
+    display: grid;
+    flex: 1;
+  }
+  .expense-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+  .expense-actions .btn {
+    min-height: 44px;
+  }
+  .expense-compare-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .expense-compare {
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+  .expense-compare h3,
+  .expense-undocumented h3 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .expense-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .expense-panel-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .expense-paper {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem;
+    border: 1px dashed var(--bs-secondary-color);
+    border-radius: 0.25rem;
+    background: var(--bs-tertiary-bg);
+    font-size: 0.82rem;
+  }
+  .expense-paper > small {
+    color: var(--bs-secondary-color);
+  }
+  .expense-paper > div,
+  .expense-total-card > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+  }
+  .expense-paper > div > span {
+    color: var(--bs-secondary-color);
+  }
+  .expense-paper p {
+    margin: 0.4rem 0;
+    padding-block: 0.5rem;
+    border-block: 1px dashed var(--bs-border-color);
+  }
+  .expense-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+  .expense-edit-grid .expense-wide {
+    grid-column: 1 / -1;
+  }
+  .expense-edit-grid .form-label {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+  }
+  .expense-undocumented {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+  }
+  .expense-undocumented-fields {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(0, 3fr);
+    gap: 0.7rem;
+  }
+  .expense-total-card {
+    display: grid;
+    gap: 0.45rem;
+    max-width: 480px;
+    margin: 1.2rem 0 0 auto;
+    font-size: 0.85rem;
+  }
+  .expense-total-card > div {
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .expense-total-card > .expense-total {
+    padding-top: 0.5rem;
+    border: 0;
+    font-size: 1.04rem;
+  }
+  .expense-observation {
+    max-width: 600px;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-warning-border-subtle);
+    border-radius: 0.5rem;
+    background: var(--bs-warning-bg-subtle);
+  }
+  .expense-history ol {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .expense-history li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.1rem 0.6rem;
+    margin-left: 0.3rem;
+    padding: 0 0 0.9rem 1.1rem;
+    border-left: 2px solid var(--brand-accent);
+    font-size: 0.82rem;
+  }
+  .expense-history li::before {
+    content: '';
+    position: absolute;
+    top: 0.25rem;
+    left: -0.28rem;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--brand-accent);
+  }
+  .expense-history li:last-child {
+    border: 0;
+    padding-bottom: 0;
+  }
+  .expense-history li small {
+    color: var(--bs-secondary-color);
+  }
+  .expense-history li p {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--bs-secondary-color);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .expense-workspace {
+    .expense-filters {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .expense-context .card-body {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .expense-compare-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .expense-workspace {
+    .expense-detail-heading .btn,
+    .expense-new-button {
+      width: 100%;
+    }
+    .expense-filters,
+    .expense-context .card-body,
+    .expense-example-grid,
+    .expense-undocumented-fields {
+      grid-template-columns: 1fr;
+    }
+    .expense-steps {
+      gap: 0.2rem;
+    }
+    .expense-steps li {
+      display: grid;
+      justify-items: center;
+      gap: 0.2rem;
+      padding: 0.4rem 0.1rem;
+      text-align: center;
+      font-size: 0.63rem;
+    }
+    .expense-steps li span {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+    .expense-stage .card-body,
+    .expense-history .card-body {
+      padding: 1rem;
+    }
+    .expense-example {
+      min-height: 72px;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 0.2rem 0.6rem;
+    }
+    .expense-example i {
+      grid-row: span 2;
+    }
+    .expense-example small {
+      grid-column: 2;
+    }
+    .expense-example > span {
+      grid-column: 3;
+      grid-row: 1 / span 2;
+    }
+    .expense-added-list > div {
+      flex-wrap: wrap;
+    }
+    .expense-added-list > div > span:first-child {
+      flex-basis: 60%;
+    }
+    .expense-added-list > div > .btn {
+      margin-left: auto;
+      min-height: 40px;
+    }
+    .expense-edit-grid {
+      grid-template-columns: 1fr;
+    }
+    .expense-edit-grid .expense-wide {
+      grid-column: 1;
+    }
+    .expense-compare {
+      padding: 0.7rem;
+    }
+    .expense-actions .btn {
+      width: 100%;
+    }
+    .expense-status-stage > .card-body > .expense-primary-action {
+      width: 100%;
+    }
+  }
+}

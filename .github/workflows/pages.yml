@@ -1,0 +1,75 @@
+name: Publicar Mockup ERP en GitHub Pages
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Preparar Chromium para las pruebas
+        run: npx playwright install --with-deps chromium
+
+      - name: Calcular subruta de Pages
+        shell: bash
+        run: |
+          repository="${GITHUB_REPOSITORY#*/}"
+          if [[ "$repository" == *.github.io ]]; then
+            echo "PAGES_BASE=/" >> "$GITHUB_ENV"
+          else
+            echo "PAGES_BASE=/$repository/" >> "$GITHUB_ENV"
+          fi
+
+      - name: Validar código y datos
+        run: |
+          npm run lint
+          npm run check:mock-data
+
+      - name: Construir las tres presentaciones
+        run: npm run build:variants
+
+      - name: Verificar escenarios, variantes y subrutas
+        run: npm run test:delivery10
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir exactamente el sitio compilado
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-pages
+
+  deploy:
+    if: github.ref_name == github.event.repository.default_branch
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

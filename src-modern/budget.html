@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ficha de presupuesto y cotización" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Ficha de presupuesto</title>
+  </head>
+  <body data-page="budget-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER -->
+        <!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace commercial-workspace"
+            x-data="budgetDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./budgets.html">Presupuestos</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="base?.id || 'No disponible'"
+                ></li>
+              </ol>
+            </nav>
+            <template x-if="!base"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Presupuesto no disponible</h1>
+                  <p>El código no pertenece a esta presentación o el módulo no está habilitado.</p>
+                  <a class="btn btn-primary" href="./projects.html">Ver proyectos</a>
+                </div>
+              </div></template
+            >
+            <template x-if="base"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="shell-eyebrow">PRESUPUESTO / COTIZACIÓN</p>
+                    <h1 x-text="base.id"></h1>
+                    <p class="shell-page-subtitle">
+                      <span x-text="project.name"></span
+                      ><span
+                        class="badge ms-2"
+                        :class="statusClass(currentVersion.status)"
+                        x-text="currentVersion.status"
+                      ></span
+                      ><span class="commercial-version-tag" x-text="`V${selectedVersion}`"></span>
+                    </p>
+                  </div>
+                  <a class="btn btn-outline-primary btn-sm" :href="backHref"
+                    ><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver a
+                    Presupuestos</a
+                  >
+                </div>
+                <div class="commercial-action-bar mb-3">
+                  <button type="button" class="btn btn-primary btn-sm" @click="openVersionModal()">
+                    <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Nueva versión</button
+                  ><button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    x-show="currentVersion.status === 'Borrador'"
+                    @click="sendReview()"
+                  >
+                    Enviar a revisión</button
+                  ><button
+                    type="button"
+                    class="btn btn-outline-success btn-sm"
+                    x-show="currentVersion.status === 'En revisión'"
+                    @click="openApprovalModal()"
+                  >
+                    Aprobar versión</button
+                  ><a class="btn btn-outline-secondary btn-sm" :href="projectHref">Abrir proyecto</a
+                  ><a class="btn btn-outline-secondary btn-sm" :href="documentHref"
+                    >Documento mock</a
+                  >
+                </div>
+                <div class="row g-3">
+                  <div class="col-xl-8">
+                    <div class="d-grid gap-3">
+                      <section class="card" aria-labelledby="budget-information-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="budget-information-title">Datos de la cotización</h2>
+                            <span class="shell-demo-label">Valores mock</span>
+                          </div>
+                          <div class="commercial-facts">
+                            <div><span>Código</span><strong x-text="base.id"></strong></div>
+                            <div>
+                              <span>Cliente</span
+                              ><strong x-text="clientName(base.clientId)"></strong>
+                            </div>
+                            <div>
+                              <span>Proyecto</span><a :href="projectHref" x-text="project.name"></a>
+                            </div>
+                            <div>
+                              <span>Responsable</span><strong x-text="managerName"></strong>
+                            </div>
+                            <div><span>Moneda</span><strong>Soles (PEN)</strong></div>
+                            <div>
+                              <span>Versión consultada</span
+                              ><strong x-text="`V${selectedVersion}`"></strong>
+                            </div>
+                          </div>
+                          <p class="workspace-caption mt-3" x-text="currentVersion.note"></p>
+                        </div>
+                      </section>
+                      <section class="card" aria-labelledby="budget-lines-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="budget-lines-title">Partidas</h2>
+                            <span class="workspace-caption"
+                              >Desglose referencial del importe mock</span
+                            >
+                          </div>
+                          <p class="workspace-caption d-sm-none">
+                            Desliza la tabla para ver todas las columnas.
+                          </p>
+                          <div
+                            class="table-responsive"
+                            tabindex="0"
+                            aria-label="Partidas del presupuesto, desplazamiento horizontal"
+                          >
+                            <table class="table align-middle commercial-lines-table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Código</th>
+                                  <th scope="col">Partida</th>
+                                  <th scope="col">Unidad</th>
+                                  <th scope="col">Cantidad</th>
+                                  <th scope="col">Precio unit.</th>
+                                  <th scope="col">Importe</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <template x-for="item in breakdown.items" :key="item.code"
+                                  ><tr>
+                                    <td x-text="item.code"></td>
+                                    <td x-text="item.description"></td>
+                                    <td x-text="item.unit"></td>
+                                    <td x-text="item.quantity"></td>
+                                    <td x-text="formatAmount(item.unitPrice)"></td>
+                                    <td
+                                      class="fw-semibold"
+                                      x-text="formatAmount(item.subtotal)"
+                                    ></td></tr
+                                ></template>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                  <div class="col-xl-4">
+                    <div class="d-grid gap-3">
+                      <section class="card" aria-labelledby="budget-total-title">
+                        <div class="card-body">
+                          <h2 id="budget-total-title" class="workspace-subheading mt-0">
+                            Resumen de importes
+                          </h2>
+                          <div class="commercial-totals">
+                            <div>
+                              <span>Subtotal</span
+                              ><strong x-text="formatAmount(breakdown.subtotal)"></strong>
+                            </div>
+                            <div>
+                              <span>Descuento</span><strong x-text="formatAmount(0)"></strong>
+                            </div>
+                            <div>
+                              <span>Valor de venta</span
+                              ><strong x-text="formatAmount(breakdown.subtotal)"></strong>
+                            </div>
+                            <div>
+                              <span>IGV + IPM (18 %)</span
+                              ><strong x-text="formatAmount(breakdown.tax)"></strong>
+                            </div>
+                            <div class="commercial-grand-total">
+                              <span>Total</span
+                              ><strong x-text="formatAmount(breakdown.total)"></strong>
+                            </div>
+                          </div>
+                          <p class="workspace-caption">
+                            El total coincide con el presupuesto del proyecto.
+                          </p>
+                        </div>
+                      </section>
+                      <section class="card" aria-labelledby="budget-history-title">
+                        <div class="card-body">
+                          <div class="shell-section-header">
+                            <h2 id="budget-history-title">Historial de versiones</h2>
+                            <span
+                              class="workspace-caption"
+                              x-text="`${versions.length} versiones`"
+                            ></span>
+                          </div>
+                          <div class="commercial-history">
+                            <template x-for="version in versions" :key="version.version"
+                              ><button
+                                type="button"
+                                @click="selectVersion(version.version)"
+                                :class="version.version === selectedVersion ? 'active' : ''"
+                              >
+                                <span
+                                  ><strong x-text="`V${version.version}`"></strong
+                                  ><small x-text="version.note"></small></span
+                                ><span
+                                  ><span
+                                    class="badge"
+                                    :class="statusClass(version.status)"
+                                    x-text="version.status"
+                                  ></span
+                                  ><small x-show="approvedVersion?.version === version.version"
+                                    >Vigente</small
+                                  ></span
+                                >
+                              </button></template
+                            >
+                          </div>
+                          <p class="workspace-caption mt-3">
+                            Crear una versión añade un registro; no reemplaza las anteriores.
+                          </p>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="modal fade"
+                  id="budget-version-modal"
+                  tabindex="-1"
+                  aria-labelledby="budget-version-modal-title"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="budget-version-modal-title">
+                          Nueva versión de presupuesto
+                        </h2>
+                        <button
+                          type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"
+                          aria-label="Cerrar"
+                        ></button>
+                      </div>
+                      <div class="modal-body">
+                        <p class="text-muted small">
+                          Se creará una copia de las partidas y del total como borrador de
+                          demostración. Las versiones anteriores se conservan.
+                        </p>
+                        <label class="form-label" for="budget-version-note"
+                          >Motivo o descripción de la revisión</label
+                        ><textarea
+                          id="budget-version-note"
+                          class="form-control"
+                          rows="3"
+                          maxlength="200"
+                          x-model="versionNote"
+                          placeholder="Ej.: revisión del alcance técnico"
+                        ></textarea>
+                        <p class="workspace-caption">
+                          Total de la nueva versión:
+                          <strong x-text="formatAmount(breakdown.total)"></strong>
+                        </p>
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary"
+                          data-bs-dismiss="modal"
+                        >
+                          Cancelar</button
+                        ><button
+                          type="button"
+                          class="btn btn-primary"
+                          :disabled="!versionNote.trim()"
+                          @click="createVersion()"
+                        >
+                          Crear versión
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="modal fade"
+                  id="budget-approval-modal"
+                  tabindex="-1"
+                  aria-labelledby="budget-approval-modal-title"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="budget-approval-modal-title">
+                          Confirmar aprobación simulada
+                        </h2>
+                        <button
+                          type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"
+                          aria-label="Cerrar"
+                        ></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>
+                          Se marcará la versión
+                          <strong x-text="`V${selectedVersion}`"></strong> como aprobada solo en
+                          este navegador. El importe base del proyecto no cambia.
+                        </p>
+                      </div>
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary"
+                          data-bs-dismiss="modal"
+                        >
+                          Cancelar</button
+                        ><button type="button" class="btn btn-success" @click="approveVersion()">
+                          Aprobar versión
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div></template
+            >
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

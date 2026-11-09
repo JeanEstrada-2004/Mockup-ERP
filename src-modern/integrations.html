@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Integraciones previstas, sin servicios conectados" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Integraciones</title>
+  </head>
+  <body data-page="integrations-workspace" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace integrations-workspace"
+            x-data="integrationsWorkspace"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Integraciones</li>
+              </ol>
+            </nav>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Integraciones no disponibles</h1>
+                  <p>Este módulo no forma parte de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <p class="shell-eyebrow">ARQUITECTURA PREVISTA</p>
+                    <h1>Integraciones</h1>
+                    <p class="shell-page-subtitle">
+                      Posibles conexiones y datos relacionados con el proyecto.
+                    </p>
+                  </div>
+                </div>
+                <div class="alert alert-warning" role="note">
+                  <strong>Solo representación visual.</strong> No hay dispositivos, correo, software
+                  contable, almacenamiento ni respaldos conectados. Ningún evento de esta página es
+                  una sincronización real.
+                </div>
+                <section class="card mb-3" aria-label="Filtro de integración">
+                  <div class="card-body integration-filters">
+                    <div>
+                      <label class="form-label" for="integration-category">Área</label
+                      ><select
+                        id="integration-category"
+                        class="form-select"
+                        x-model="categoryFilter"
+                        @change="updateUrl()"
+                      >
+                        <option value="">Todas</option>
+                        <option value="Operaciones">Operaciones</option>
+                        <option value="Finanzas">Finanzas</option>
+                        <option value="Comunicación">Comunicación</option>
+                        <option value="Documentos">Documentos</option>
+                        <option value="Sistema">Sistema</option>
+                      </select>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" @click="clearFilter()">
+                      Limpiar
+                    </button>
+                  </div>
+                </section>
+                <div class="integration-grid">
+                  <section class="card" aria-labelledby="integration-list-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <h2 id="integration-list-title">Conexiones propuestas</h2>
+                        <span
+                          class="workspace-caption"
+                          x-text="`${filtered.length} opciones`"
+                        ></span>
+                      </div>
+                      <div class="integration-list">
+                        <template x-for="item in filtered" :key="item.id"
+                          ><button
+                            type="button"
+                            :class="selected?.id === item.id ? 'active' : ''"
+                            @click="select(item.id)"
+                          >
+                            <i class="bi" :class="item.icon" aria-hidden="true"></i
+                            ><span
+                              ><strong x-text="item.name"></strong
+                              ><small x-text="item.category"></small></span
+                            ><span class="badge text-bg-secondary">No configurada</span>
+                          </button></template
+                        >
+                      </div>
+                      <div class="d9-empty" x-show="filtered.length === 0">
+                        <p>No hay integraciones en esta área.</p>
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary"
+                          @click="clearFilter()"
+                        >
+                          Ver todas
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+                  <section class="card" aria-labelledby="integration-detail-title">
+                    <div class="card-body">
+                      <h2 id="integration-detail-title" class="workspace-subheading mt-0">
+                        Flujo previsto
+                      </h2>
+                      <template x-if="selected"
+                        ><div>
+                          <p class="fs-5 fw-semibold" x-text="selected.name"></p>
+                          <p x-text="selected.scope"></p>
+                          <div class="d9-facts">
+                            <div><small>Estado</small><strong>No configurada · demo</strong></div>
+                            <div>
+                              <small>Área</small><strong x-text="selected.category"></strong>
+                            </div>
+                            <div>
+                              <small>Entrada propuesta</small
+                              ><strong x-text="selected.input"></strong>
+                            </div>
+                            <div>
+                              <small>Resultado propuesto</small
+                              ><strong x-text="selected.output"></strong>
+                            </div>
+                          </div>
+                          <div class="integration-flow-note mt-3">
+                            <strong>Escenario de ejemplo</strong>
+                            <p>
+                              Se revisaría la identidad del registro, su proyecto y el resultado
+                              antes de cualquier envío. Esta pantalla no ejecuta conexiones ni
+                              conserva historial de sincronización.
+                            </p>
+                          </div>
+                          <a class="btn btn-outline-primary mt-3" :href="selected.next"
+                            >Ver módulo relacionado →</a
+                          >
+                        </div></template
+                      >
+                      <p class="workspace-caption" x-show="!selected">
+                        Selecciona una integración para ver el flujo previsto.
+                      </p>
+                    </div>
+                  </section>
+                </div>
+              </div></template
+            >
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

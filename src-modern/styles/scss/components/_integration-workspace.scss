@@ -1,0 +1,76 @@
+.integrations-workspace {
+  .integration-filters {
+    display: flex;
+    gap: 0.7rem;
+    align-items: end;
+  }
+  .integration-filters > div {
+    flex: 1 1 240px;
+    max-width: 400px;
+  }
+  .integration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .integration-list {
+    display: grid;
+    gap: 0.45rem;
+  }
+  .integration-list button {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    color: var(--bs-body-color);
+    background: var(--bs-body-bg);
+    text-align: left;
+  }
+  .integration-list button.active,
+  .integration-list button:hover {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary-bg-subtle);
+  }
+  .integration-list button > .bi {
+    color: var(--bs-primary);
+    font-size: 1.25rem;
+  }
+  .integration-list button > span:nth-child(2) {
+    display: grid;
+    gap: 0.1rem;
+    flex: 1 1 auto;
+  }
+  .integration-list small {
+    color: var(--bs-secondary-color);
+  }
+  .integration-flow-note {
+    padding: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    background: var(--bs-tertiary-bg);
+  }
+  .integration-flow-note p {
+    margin: 0.25rem 0 0;
+    color: var(--bs-secondary-color);
+  }
+}
+@media (max-width: 991.98px) {
+  .integrations-workspace .integration-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 479.98px) {
+  .integrations-workspace .integration-list button {
+    flex-wrap: wrap;
+    min-height: 56px;
+  }
+  .integrations-workspace .integration-list button .badge {
+    margin-left: 2rem;
+  }
+  .integrations-workspace .integration-filters .btn {
+    min-height: 44px;
+  }
+}
