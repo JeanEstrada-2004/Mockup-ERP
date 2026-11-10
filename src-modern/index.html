@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Panel de gestión de proyectos" />
+    <meta name="description" content="Panel general de proyectos y operaciones" />
     <meta name="theme-color" content="#1A365D" />
     <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
     <title>Panel General</title>
@@ -17,208 +17,179 @@
         <div class="sidebar-backdrop" aria-hidden="true"></div>
         <main id="main-content" class="admin-main">
           <div
-            class="container-fluid shell-page project-workspace"
+            class="container-fluid shell-page project-workspace dashboard-workspace"
             x-data="dashboardView"
             @project-change.window="selectProject($event.detail.projectId)"
           >
-            <div class="shell-page-heading">
+            <div class="shell-page-heading dashboard-greeting">
               <div>
-<h1>Panel General</h1>
-                <p class="shell-page-subtitle">Estado de los proyectos y operaciones recientes</p>
+                <h1 x-text="greeting"></h1>
+                <p
+                  class="shell-page-subtitle"
+                  x-text="`Corte al ${cutoffDate} · ${portfolio.activeProjectCount} proyectos en ejecución en ${clientCount} clientes`"
+                ></p>
               </div>
               <div class="workspace-heading-actions">
-<a class="btn btn-primary btn-sm" href="./projects.html">Ver proyectos</a>
+                <a class="btn btn-outline-primary" href="./expense.html?new=1">+ Nueva rendición</a
+                ><a class="btn btn-primary" href="./projects.html?new=1">+ Nuevo proyecto</a>
               </div>
             </div>
-
-            <section class="kpi-strip kpi-strip--4" aria-label="Indicadores del portafolio">
-              <a class="kpi" href="./projects.html">
-                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Proyectos en ejecución</span>
-                <span class="kpi-value" x-count="portfolio.activeProjectCount"></span>
-                <span class="kpi-foot">
-                  <span
+            <section class="kpi-strip" aria-label="Indicadores del portafolio">
+              <a class="kpi" href="./projects.html"
+                ><span class="kpi-label"
+                  ><i class="kpi-dot" aria-hidden="true"></i>Proyectos activos</span
+                ><span class="kpi-value" x-count="portfolio.activeProjectCount"></span
+                ><span class="kpi-foot"
+                  ><span
                     class="splitbar"
                     role="img"
                     :aria-label="`${portfolio.activeProjectCount - riskCount} activos, ${riskCount} en riesgo`"
-                  >
-                    <span class="kpi-seg kpi-seg--ok" :style="`flex: ${portfolio.activeProjectCount - riskCount}`"></span>
-                    <span class="kpi-seg kpi-seg--risk" :style="`flex: ${riskCount}`"></span>
-                  </span>
-                  <span class="text-nowrap" x-text="`${riskCount} en riesgo`"></span>
-                </span>
-              </a>
-              <a class="kpi" href="./projects.html">
-                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Presupuesto activo</span>
-                <span class="kpi-value" x-count.money="portfolio.budgetAmount"></span>
-                <span class="kpi-foot" x-text="`${portfolio.activeProjectCount} proyectos · ${clientCount} clientes`"></span>
-              </a>
-              <a class="kpi" href="./costs.html">
-                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Costo ejecutado</span>
-                <span class="kpi-value" x-count.money="portfolio.executedCost"></span>
-                <span class="kpi-foot">
-                  <span class="pill pill-info" x-text="`${executedPercentLabel} ejecutado`"></span>
-                </span>
-              </a>
-              <a class="kpi" href="./costs.html">
-                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Saldo por ejecutar</span>
-                <span class="kpi-value" x-count.money="availableBudget"></span>
-                <span class="kpi-foot">Presupuesto menos costo ejecutado</span>
-              </a>
+                    ><span
+                      class="kpi-seg kpi-seg--ok"
+                      :style="`flex:${portfolio.activeProjectCount - riskCount}`"
+                    ></span
+                    ><span class="kpi-seg kpi-seg--risk" :style="`flex:${riskCount}`"></span></span
+                  ><span x-text="`${riskCount} en riesgo`"></span></span
+              ></a>
+              <a class="kpi" href="./projects.html"
+                ><span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Presupuesto activo</span
+                ><span class="kpi-value" x-count.money="portfolio.budgetAmount"></span
+                ><span
+                  class="kpi-foot"
+                  x-text="`${portfolio.activeProjectCount} proyectos · ${clientCount} clientes`"
+                ></span
+              ></a>
+              <a class="kpi" href="./costs.html"
+                ><span class="kpi-label"
+                  ><i class="kpi-dot" aria-hidden="true"></i>Costo acumulado</span
+                ><span class="kpi-value" x-count.money="portfolio.executedCost"></span
+                ><span class="kpi-foot"
+                  ><span id="dashboard-spark" aria-hidden="true"></span
+                  ><span x-text="`${executedPercentLabel} ejecutado`"></span></span
+              ></a>
+              <a class="kpi" href="./expenses.html"
+                ><span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Rendiciones</span
+                ><span class="kpi-value" x-count="expensePendingCount"></span
+                ><span class="kpi-foot"
+                  ><span class="pill pill-warn">Pendientes de revisión</span></span
+                ></a
+              >
+              <a class="kpi" href="./purchases.html"
+                ><span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Órdenes de compra</span
+                ><span class="kpi-value" x-count="purchasePendingCount"></span
+                ><span class="kpi-foot"><span class="pill pill-info">Por aprobar</span></span></a
+              >
+              <button
+                class="kpi"
+                type="button"
+                @click="openNotifications()"
+                :disabled="alerts.length === 0"
+              >
+                <span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--bad" aria-hidden="true"></i>Alertas</span
+                ><span class="kpi-value" x-count="alerts.length"></span
+                ><span class="kpi-foot"
+                  ><span
+                    class="pill pill-bad"
+                    x-text="alerts.length ? 'Ver alertas' : 'Sin alertas'"
+                  ></span
+                ></span>
+              </button>
             </section>
-
-            <nav class="workspace-quick-actions mb-3" aria-label="Acciones rápidas">
-              <span>Acciones rápidas</span>
-              <a :href="projectHref(selectedProjectId)"
-                ><i class="bi bi-folder2-open" aria-hidden="true"></i> Abrir proyecto</a
-              >
-              <a href="./purchases.html"
-                ><i class="bi bi-bag-check" aria-hidden="true"></i> Compras</a
-              >
-              <a href="./documents.html"
-                ><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Documentos</a
-              >
-            </nav>
-
-            <div class="row g-3 mb-3">
-              <div class="col-xl-7">
-                <section class="card h-100" aria-labelledby="budget-chart-title">
-                  <div class="card-body">
-                    <div class="shell-section-header">
-                      <div>
-                        <h2 id="budget-chart-title">Presupuesto vs. costo</h2>
-                        <p class="workspace-caption">Comparación por proyecto, en soles</p>
-                      </div>
-                    </div>
-                    <div
-                      id="dashboard-budget-chart"
-                      role="img"
-                      aria-label="Gráfico de presupuesto y costo ejecutado por proyecto"
-                    ></div>
-                    <details class="workspace-chart-details">
-                      <summary>Ver importes por proyecto</summary>
-                      <div class="workspace-chart-values" aria-label="Valores del gráfico">
-                        <template x-for="project in projects" :key="project.id"
-                          ><span
-                            ><strong x-text="project.id"></strong>
-                            <small
-                              x-text="`Presupuesto ${formatMoney(project.budgetAmount)} · Ejecutado ${formatMoney(dataFinancials(project.id).executedCost)}`"
-                            ></small></span
-                        ></template>
-                      </div>
-                    </details>
-                  </div>
-                </section>
-              </div>
-              <div class="col-xl-5">
-                <section class="card h-100" aria-labelledby="sources-chart-title">
-                  <div class="card-body">
-                    <div class="shell-section-header">
-                      <div>
-                        <h2 id="sources-chart-title">Costos por fuente</h2>
-                        <p
-                          class="workspace-caption"
-                          x-text="currentProject ? `${currentProject.id} · ${currentProject.name}` : ''"
-                        ></p>
-                      </div>
-                      <a :href="projectHref(selectedProjectId)">Abrir ficha</a>
-                    </div>
-                    <div
-                      id="dashboard-source-chart"
-                      role="img"
-                      aria-label="Distribución del costo ejecutado por fuente"
-                    ></div>
-                    <div class="workspace-source-list">
-                      <template x-for="source in sources" :key="source.id"
-                        ><div>
-                          <a
-                            :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}&source=${encodeURIComponent(source.id)}`"
-                            x-text="source.label"
-                          ></a
-                          ><strong x-text="formatMoney(source.amount)"></strong></div
-                      ></template>
-                    </div>
-                  </div>
-                </section>
-              </div>
-            </div>
-
-            <div class="row g-3">
-              <div class="col-xl-7">
-                <section class="card" aria-labelledby="relevant-projects-title">
-                  <div class="card-body">
-                    <div class="shell-section-header">
-                      <h2 id="relevant-projects-title">Proyectos relevantes</h2>
-                      <a href="./projects.html"
-                        >Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i
-                      ></a>
-                    </div>
-                    <div class="workspace-project-list">
-                      <template x-for="project in projects.slice(0, 5)" :key="project.id"
-                        ><a class="workspace-project-row" :href="projectHref(project.id)">
-                          <span
-                            ><strong x-text="project.id"></strong><span x-text="project.name"></span
-                            ><small x-text="projectClient(project)"></small
-                          ></span>
-                          <span class="workspace-project-metrics"
-                            ><span
-                              class="badge"
-                              :class="$statusClass(project.status)"
-                              x-text="project.status"
-                            ></span>
-                            <small
-                              x-text="`${dataFinancials(project.id).executionPercent} % del presupuesto ejecutado`"
-                            ></small
-                          ></span> </a
-                      ></template>
-                    </div>
-                  </div>
-                </section>
-              </div>
-              <div class="col-xl-5">
-                <div class="d-grid gap-3">
-                  <section class="card" aria-labelledby="activity-title">
-                    <div class="card-body">
-                      <div class="shell-section-header">
-                        <h2 id="activity-title">Actividad reciente</h2>
-                        <span class="workspace-caption">Registros mock</span>
-                      </div>
-                      <div class="workspace-compact-list">
-                        <template x-for="item in activity" :key="item.id"
-                          ><a :href="item.href">
-                            <span
-                              ><strong x-text="`${item.kind} ${item.id}`"></strong
-                              ><small x-text="`${item.projectId} · ${item.status}`"></small
-                            ></span>
-                            <time :datetime="item.date" x-text="formatDate(item.date)"></time> </a
-                        ></template>
-                      </div>
-                    </div>
-                  </section>
-                  <section class="card" aria-labelledby="alerts-title">
-                    <div class="card-body">
-                      <div class="shell-section-header">
-                        <h2 id="alerts-title">Alertas</h2>
-                        <span class="badge text-bg-warning" x-text="alerts.length"></span>
-                      </div>
-                      <p class="text-muted small mb-0" x-show="alerts.length === 0">
-                        No hay alertas pendientes.
-                      </p>
-                      <div class="workspace-compact-list">
-                        <template x-for="item in alerts" :key="item.id"
-                          ><a :href="item.href">
-                            <span
-                              ><i
-                                class="bi bi-exclamation-circle text-warning me-2"
-                                aria-hidden="true"
-                              ></i
-                              ><span x-text="item.text"></span
-                            ></span>
-                            <i class="bi bi-chevron-right" aria-hidden="true"></i> </a
-                        ></template>
-                      </div>
-                    </div>
-                  </section>
+            <div class="panel-grid panel-grid--hero dashboard-main-grid">
+              <section class="hero-panel" aria-labelledby="dashboard-approvals-title">
+                <canvas class="hero-net" aria-hidden="true"></canvas>
+                <div class="hero-top">
+                  <span
+                    class="hero-figure"
+                    x-show="approvals.length"
+                    x-count="approvals.length"
+                  ></span>
+                  <h2
+                    id="dashboard-approvals-title"
+                    x-text="approvals.length === 0 ? 'No hay aprobaciones pendientes' : approvals.length === 1 ? 'aprobación espera tu revisión' : 'aprobaciones esperan tu revisión'"
+                  ></h2>
                 </div>
+                <p
+                  x-text="approvals.length ? 'Revisa los registros pendientes antes de continuar con el proyecto.' : 'El equipo no tiene registros esperando aprobación.'"
+                ></p>
+                <div class="hero-list">
+                  <template x-for="item in oldestApprovals" :key="item.id"
+                    ><a :href="item.href"
+                      ><span class="hero-tag" x-text="item.kind"></span
+                      ><span
+                        ><strong x-text="item.id"></strong
+                        ><small x-text="item.projectId"></small></span
+                      ><strong x-text="formatMoney(item.amount)"></strong></a
+                  ></template>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-light"
+                  x-show="approvals.length"
+                  @click="openApprovals()"
+                >
+                  Abrir bandeja
+                </button>
+              </section>
+              <section class="panel" aria-labelledby="dashboard-flow-title">
+                <div class="panel-head">
+                  <div>
+                    <h2
+                      id="dashboard-flow-title"
+                      x-text="`Trazabilidad del costo · ${selectedProjectId}`"
+                    ></h2>
+                    <p>De qué fuente viene el costo ejecutado y cuánto presupuesto queda</p>
+                  </div>
+                  <span class="commercial-inline-links"
+                    ><a :href="projectHref(selectedProjectId)">Abrir ficha</a
+                    ><a :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}`"
+                      >Ver costos →</a
+                    ></span
+                  >
+                </div>
+                <div id="dashboard-flow" class="chart"></div>
+              </section>
+            </div>
+            <div class="panel-grid panel-grid--wide dashboard-secondary-grid">
+              <section class="panel" aria-labelledby="dashboard-execution-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="dashboard-execution-title">Ejecución frente al avance</h2>
+                    <p>Costo ejecutado sobre el presupuesto, comparado con el avance físico</p>
+                  </div>
+                  <a href="./projects.html">Ver proyectos →</a>
+                </div>
+                <div id="dashboard-execution" class="chart"></div>
+              </section>
+              <div class="panel-stack">
+                <section class="panel" aria-labelledby="dashboard-monthly-title">
+                  <div class="panel-head">
+                    <div>
+                      <h2 id="dashboard-monthly-title">Costo mensual del portafolio</h2>
+                      <p>Operaciones ejecutadas de proyectos en curso</p>
+                    </div>
+                  </div>
+                  <div id="dashboard-monthly" class="chart"></div>
+                </section>
+                <section class="panel" aria-labelledby="dashboard-activity-title">
+                  <div class="panel-head">
+                    <div><h2 id="dashboard-activity-title">Actividad reciente</h2></div>
+                    <a href="./projects.html">Ver proyectos →</a>
+                  </div>
+                  <div class="workspace-compact-list">
+                    <template x-for="item in activity" :key="item.id"
+                      ><a :href="item.href"
+                        ><span
+                          ><strong x-text="`${item.kind} ${item.id}`"></strong
+                          ><small x-text="`${item.projectId} · ${item.status}`"></small></span
+                        ><time :datetime="item.date" x-text="formatDate(item.date)"></time></a
+                    ></template>
+                  </div>
+                </section>
               </div>
             </div>
           </div>

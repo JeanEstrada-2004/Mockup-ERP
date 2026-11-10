@@ -186,12 +186,9 @@ async function checkVariant(variant, projectId) {
   }
   await page.goto(url(variant, 'index.html'));
   await ready();
-  await page.locator('.workspace-chart-details summary').click();
-  const dashboard = await page
-    .locator('#budget-chart-title')
-    .locator('xpath=ancestor::section')
-    .innerText();
-  assert.ok(dashboard.includes(projectId));
+  await page.locator('#dashboard-flow .chart-svg').waitFor();
+  assert.ok((await page.locator('#dashboard-flow-title').innerText()).includes(projectId));
+  const dashboard = await page.locator('#dashboard-flow').innerText();
   assert.ok(
     dashboard.includes(
       `S/ ${Math.round(financials.executedCost)

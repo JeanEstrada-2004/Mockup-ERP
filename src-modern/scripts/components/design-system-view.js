@@ -9,6 +9,7 @@ import {
   getCostBySource,
   getDataForVariant,
   getPendingApprovals,
+  getMonthlyExecutedCost,
   getPortfolioFinancials,
   getProject,
   getProjectFinancials,
@@ -25,50 +26,14 @@ const SOURCE_NAMES = {
   materials: 'Materiales',
   other: 'Otros',
 };
-const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic'];
-const MONTH_NAMES = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Setiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
-];
-
 const inExecution = (project) => project.status === 'Activo' || project.status === 'En riesgo';
-
-/** Executed cost per month across the projects in execution (operation dates). */
-function monthlyCost() {
-  const ids = new Set(data.projects.filter(inExecution).map((project) => project.id));
-  const totals = new Map();
-  data.operations
-    .filter((operation) => operation.costSource && ids.has(operation.projectId) && operation.date)
-    .forEach((operation) => {
-      const key = operation.date.slice(0, 7);
-      totals.set(key, (totals.get(key) || 0) + operation.amount);
-    });
-  return [...totals.keys()].sort().map((key) => {
-    const [year, month] = key.split('-').map(Number);
-    return {
-      label: MONTHS[month - 1],
-      title: `${MONTH_NAMES[month - 1]} ${year}`,
-      value: totals.get(key),
-    };
-  });
-}
 
 export function designSystemView() {
   const portfolio = getPortfolioFinancials(data);
   const projects = data.projects.filter(inExecution);
   const riskCount = projects.filter((project) => project.status === 'En riesgo').length;
   const approvals = getPendingApprovals(data, activeVariant);
-  const months = monthlyCost();
+  const months = getMonthlyExecutedCost(data);
   let cumulative = 0;
   const cumulativeMonths = months.map((month) => (cumulative += month.value));
 

@@ -77,7 +77,11 @@ async function openVariant(variant, expectedName, expectedProjects) {
   assert.ok(
     await page.locator('.shell-logo--light').evaluate((img) => img.complete && img.naturalWidth > 0)
   );
-  assert.equal(await page.locator('.shell-page-heading h1').innerText(), 'Panel General');
+  assert.match(
+    await page.locator('.shell-page-heading h1').innerText(),
+    /^(Buenos días|Buenas tardes|Buenas noches), Jean$/
+  );
+  assert.equal(await page.title().then((title) => title.includes('Panel General')), true);
   assert.equal(await page.locator('.sidebar-nav a[href="#"]').count(), 0);
   assert.ok(
     await page
@@ -109,9 +113,11 @@ async function verifyProjectFlow(variant, projectId) {
   const financials = getProjectFinancials(data, projectId);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(pageUrl(variant));
-  // Entrega 2: Panel charts are drawn with the D3 kit (bars + donut).
+  // Entrega 3: flow and monthly charts are SVG; execution is accessible linked rows.
   await page.waitForFunction(
-    () => document.querySelectorAll('#dashboard-budget-chart .chart-svg, #dashboard-source-chart .chart-svg').length === 2
+    () =>
+      document.querySelectorAll('#dashboard-flow .chart-svg, #dashboard-monthly .chart-svg')
+        .length === 2 && document.querySelectorAll('#dashboard-execution .exec-row').length > 0
   );
   // KPI figures count up (~650 ms); read them once they settle.
   await page.waitForTimeout(900);
@@ -163,8 +169,10 @@ async function verifyProjectFlow(variant, projectId) {
     }
     await page.locator('[title="Cambiar tema"]').click();
   }
-  await page.locator('.workspace-heading-actions a').click();
-  await page.waitForURL(/projects\.html$/);
+  await page.locator('.workspace-heading-actions a[href*="projects.html"]').click();
+  await page.waitForURL(/projects\.html\?new=1$/);
+  await page.locator('#project-create-modal').waitFor({ state: 'visible' });
+  await page.locator('#project-create-modal [data-bs-dismiss="modal"]').last().click();
   if (process.env.VISUAL === '1' && variant === 'surtec-peti') {
     await page.screenshot({
       path: path.join(root, 'tmp', 'shell-review', 'projects-desktop.png'),
@@ -184,6 +192,7 @@ async function verifyProjectFlow(variant, projectId) {
   await page.locator('.workspace-project-table .data-code').first().click();
   await page.waitForURL(/project\.html\?id=/);
   assert.equal(await page.locator('.workspace-detail-heading h1').innerText(), project.name);
+  assert.equal(await page.locator('[role="tab"]').count(), 9);
   assert.equal(await page.locator('#global-project-select').inputValue(), projectId);
   assert.ok(
     (await page.locator('#panel-summary').innerText()).includes(
@@ -198,16 +207,25 @@ async function verifyProjectFlow(variant, projectId) {
   }
   await page.locator('#tab-summary').focus();
   await page.keyboard.press('ArrowRight');
-  await page.locator('#panel-operations').waitFor({ state: 'visible' });
-  assert.ok((await page.locator('#panel-operations').innerText()).includes('Compras'));
-  await page.locator('#panel-operations .workspace-record-list a').first().click();
+  await page.keyboard.press('ArrowRight');
+  await page.locator('#panel-purchases').waitFor({ state: 'visible' });
+  assert.equal(new URL(page.url()).hash, '#purchases');
+  assert.ok((await page.locator('#panel-purchases').innerText()).includes('Compras'));
+  await page.locator('#panel-purchases .workspace-record-list a').first().click();
   await page.waitForURL(/purchase\.html\?id=/);
   assert.equal(
     await page.locator('.shell-page-heading h1').innerText(),
     data.operations.find((item) => item.projectId === projectId && item.type === 'purchase').id
   );
   await page.goBack();
-  await page.locator('#panel-operations').waitFor({ state: 'visible' });
+  await page.locator('#panel-purchases').waitFor({ state: 'visible' });
+  await page.locator('#tab-materials').click();
+  await page.locator('#panel-materials').waitFor({ state: 'visible' });
+  if (variant === 'surtec-peti') {
+    assert.ok((await page.locator('#panel-materials .workspace-record-list a').count()) > 0);
+  } else {
+    assert.match(await page.locator('#panel-materials').innerText(), /no está habilitado/);
+  }
   await page.locator('#tab-documents').click();
   await page.locator('#panel-documents').waitFor({ state: 'visible' });
   assert.equal(
@@ -244,7 +262,7 @@ async function verifyProjectFlow(variant, projectId) {
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
   );
   assert.ok((await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 1);
-  await page.locator('#tab-operations').click();
+  await page.locator('#tab-purchases').click();
   assert.ok((await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 1);
   if (process.env.VISUAL === '1' && variant === 'surtec-peti') {
     const out = path.join(root, 'tmp', 'shell-review');
@@ -252,7 +270,12 @@ async function verifyProjectFlow(variant, projectId) {
     await page.screenshot({ path: path.join(out, 'project-mobile.png'), fullPage: true });
   }
   await page.goto(pageUrl(variant));
-  await page.locator('.workspace-quick-actions a').first().click();
+  await page
+    .locator('#dashboard-flow-title')
+    .locator('..')
+    .locator('..')
+    .getByRole('link', { name: 'Abrir ficha' })
+    .click();
   await page.waitForURL(/project\.html\?id=.*from=home/);
   await page.locator('.workspace-detail-heading a').click();
   await page.waitForURL(/index\.html$/);
@@ -280,15 +303,11 @@ try {
 
   await page.selectOption('#global-project-select', 'PR-2027-002');
   await page.waitForFunction(() =>
-    document
-      .querySelector('#sources-chart-title + .workspace-caption')
-      ?.textContent?.includes('PR-2027-002')
+    document.querySelector('#dashboard-flow-title')?.textContent?.includes('PR-2027-002')
   );
   await page.reload();
   await page.waitForFunction(() =>
-    document
-      .querySelector('#sources-chart-title + .workspace-caption')
-      ?.textContent?.includes('PR-2027-002')
+    document.querySelector('#dashboard-flow-title')?.textContent?.includes('PR-2027-002')
   );
 
   await page.locator('#global-search').fill('OC-025');

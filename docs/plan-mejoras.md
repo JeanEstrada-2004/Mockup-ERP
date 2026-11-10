@@ -17,7 +17,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 |---|---|---|---|
 | 1. Base técnica: datos, estados, tabla, header | **Terminada** (10/11/2026) | `Entrega 1: base del sistema de diseño` | Ver "Notas de la Entrega 1" |
 | 2. Sistema visual "Red de Integración" + kit D3 | **Terminada** (10/11/2026) | `Entrega 2: sistema visual Red de Integración y kit D3` | Ver "Notas de la Entrega 2" |
-| 3. Panel General, Proyectos y Ficha Integral | Pendiente | — | — |
+| 3. Panel General, Proyectos y Ficha Integral | **Terminada** (10/11/2026) | `Entrega 3: panel, proyectos y ficha integral` | Ver "Notas de la Entrega 3" |
 | 4. Aprobaciones, Rendiciones, Presupuestos, Compras | Pendiente | — | — |
 | 5. Personal, Almacén y Costos | Pendiente | — | — |
 | 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | Pendiente | — | — |
@@ -88,6 +88,29 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
   `smoke-test.mjs` (esperan el SVG del kit en vez de ApexCharts).
 - **Capturas:** `npm run build:variants` y luego `node scripts/capture-views.mjs <etiqueta>`
   (PowerShell, `PAGES_BASE='/Mockup-ERP/'`); variables en la cabecera del script.
+
+### Notas de la Entrega 3 (para las siguientes)
+
+- **Panel:** seis KPI derivados del conjunto mock, bloque de aprobaciones, flujo D3 del
+  proyecto seleccionado, ejecución de los 12 proyectos en curso, serie mensual y actividad.
+  Los conteos pendientes son los de los registros existentes, no los ejemplos fijos de la
+  especificación. `getMonthlyExecutedCost()` vive en `mock-data.js` y también alimenta
+  `design-system.html`.
+- **Proyectos:** filtros por búsqueda, estado, cliente, responsable y periodo. El modal de
+  tres secciones crea copias locales con código `PR-DEMO-NNN`, persistidas con
+  `variantStorageKey('demo-projects')`. No alteran los KPI ni las operaciones base.
+  Los registros base se pueden duplicar; su acción Editar explica que la edición local
+  se hace sobre una copia. La ficha de una copia no enlaza a costos inexistentes.
+- **Ficha:** nueve pestañas con hash y teclado, seis KPI, cronograma resumido, operaciones,
+  documentos y enlaces al módulo correspondiente. Materiales explica su ausencia en J&Y.
+  El regreso conserva filtros de la lista.
+- **Pruebas ajustadas por el cambio intencional de estructura:** `shell-interaction-test.mjs`
+  y `cost-interaction-test.mjs`. `npm run lint`, `check:mock-data`, `build:variants`,
+  `test:shell`, `test:costs` y `test:delivery10` pasan. Las capturas comparativas están en
+  `screenshots/entregas/entrega-3-antes/` y `entrega-3-despues/` (ignoradas por Git).
+- **Para la Entrega 4:** crear `approvals.html` y conectar el botón "Abrir bandeja" del
+  Panel. Hoy abre el desplegable de aprobaciones del header. Mantener separados los
+  cambios visuales de aprobación y los costos ejecutados del conjunto base.
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

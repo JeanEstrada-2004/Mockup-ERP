@@ -93,6 +93,56 @@ export function getPortfolioFinancials(data) {
   };
 }
 
+// Executed costs only, grouped by the date of their source operation. Keeping
+// this query here lets the Panel and the visual reference use the same series.
+export function getMonthlyExecutedCost(data) {
+  const inExecution = new Set(
+    data.projects
+      .filter((project) => ['Activo', 'En riesgo'].includes(project.status))
+      .map((project) => project.id)
+  );
+  const totals = new Map();
+  for (const operation of data.operations) {
+    if (!operation.costSource || !operation.date || !inExecution.has(operation.projectId)) continue;
+    const month = operation.date.slice(0, 7);
+    totals.set(month, (totals.get(month) || 0) + operation.amount);
+  }
+  const shortMonths = [
+    'Ene',
+    'Feb',
+    'Mar',
+    'Abr',
+    'May',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Oct',
+    'Nov',
+    'Dic',
+  ];
+  const monthNames = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Setiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+  return [...totals]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => {
+      const [year, month] = key.split('-').map(Number);
+      return { label: shortMonths[month - 1], title: `${monthNames[month - 1]} ${year}`, value };
+    });
+}
+
 export function getDocuments(data) {
   const budgetDocuments = data.budgets.map((budget) => {
     const project = getProject(data, budget.projectId);

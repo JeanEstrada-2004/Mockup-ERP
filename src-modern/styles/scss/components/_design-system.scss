@@ -60,6 +60,181 @@
   --bs-info-border-subtle: var(--brand-accent-border);
 }
 
+// Entrega 3: apply the shared visual language to the three core project views.
+.dashboard-workspace {
+  .dashboard-greeting {
+    margin-bottom: 20px;
+
+    h1 {
+      font-size: var(--fs-page);
+    }
+  }
+
+  .kpi-value {
+    font-size: clamp(1.4rem, 1.7vw, var(--fs-kpi));
+  }
+
+  .hero-panel {
+    min-height: 330px;
+  }
+  .hero-list a > span:nth-child(2) {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .hero-list small {
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .hero-list a > strong {
+    white-space: nowrap;
+  }
+  #dashboard-flow {
+    min-height: 250px;
+  }
+  #dashboard-execution {
+    min-height: 420px;
+  }
+  #dashboard-monthly {
+    min-height: 200px;
+  }
+  #dashboard-spark {
+    display: inline-flex;
+    min-width: 72px;
+  }
+}
+
+button.kpi {
+  width: 100%;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--panel-2);
+  }
+}
+
+.project-detail-workspace {
+  .kpi-value {
+    font-size: clamp(1.35rem, 1.65vw, 1.75rem);
+  }
+  .project-code {
+    margin: 0 0 4px;
+    color: var(--accent);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+  }
+  .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+  }
+  .project-tab-panel {
+    min-height: 260px;
+  }
+  .project-tab-panel.panel {
+    margin-bottom: 20px;
+  }
+  .project-budget-visual {
+    display: grid;
+    gap: 12px;
+    padding: 14px 0;
+    > div:not(.progress) {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--ink-2);
+      strong {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+    }
+  }
+  .project-indicator-bars {
+    display: grid;
+    gap: 24px;
+    max-width: 720px;
+    > div {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px 16px;
+    }
+    .progress {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.project-create-form {
+  display: grid;
+  gap: 24px;
+
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    & + fieldset {
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+  }
+  legend {
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+  }
+}
+
+.workspace-project-table table {
+  min-width: 1080px;
+  table-layout: auto;
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+  td.data-primary {
+    min-width: 280px;
+    white-space: normal;
+  }
+  td:nth-child(3) {
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-workspace {
+    .dashboard-greeting .workspace-heading-actions {
+      display: flex;
+      width: 100%;
+    }
+    .dashboard-greeting .workspace-heading-actions .btn {
+      flex: 1;
+    }
+    .hero-panel {
+      min-height: 0;
+    }
+    #dashboard-execution {
+      min-height: 0;
+    }
+  }
+  .project-detail-workspace .project-tab-panel {
+    min-height: 0;
+  }
+}
+
 // --------------------------------------------------------------------------
 // 1. Base
 // --------------------------------------------------------------------------

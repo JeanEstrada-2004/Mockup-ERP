@@ -245,8 +245,8 @@ El workflow `.github/workflows/pages.yml` usa las acciones oficiales
 configurarse en GitHub con **Settings → Pages → Source: GitHub Actions**.
 El workflow calcula la subruta desde el nombre real del repositorio; si es
 un repositorio de usuario terminado en `.github.io`, usa la raíz `/`.
-No hay un remoto Git configurado ni una publicación confirmada en este
-equipo.
+El remoto `origin` apunta actualmente a `JeanEstrada-2004/Mockup-ERP`. Esta
+revisión local no comprueba el estado público de la publicación.
 
 Para una comprobación local equivalente a Pages en PowerShell:
 
@@ -332,7 +332,8 @@ descargas reales, autenticación, integración, biometría, MFA, auditoría
 persistente ni respaldos. Las ediciones locales de Rendiciones y Documentos
 no constituyen asientos contables ni modifican el conjunto base.
 
-No hay repositorio remoto configurado ni sitio publicado. El build muestra una
+El remoto `origin` está configurado; el estado público de Pages no se comprobó
+en esta revisión local. El build muestra una
 advertencia por el tamaño del paquete de ApexCharts; la carga de gráficos ya es
 diferida hasta abrir el Panel General. `npm run format:check` sigue reportando
 archivos originales de Metis; los archivos nuevos de esta entrega sí se
@@ -397,3 +398,21 @@ API del kit en `DESIGN.md`.
   7 patrones con datos reales de la variante. Es la referencia de las Entregas 3–7.
 - **Capturas:** `scripts/capture-views.mjs` → `screenshots/entregas/entrega-2-antes/` y
   `entrega-2-despues/`.
+
+## Mejoras — Entrega 3: Panel, Proyectos y Ficha Integral (10/11/2026)
+
+El Panel aplica la composición aprobada: seis KPI con cifras derivadas, aprobaciones
+pendientes, trazabilidad D3 del proyecto elegido, comparación entre ejecución económica y
+avance físico de los doce proyectos en curso, costo mensual calculado desde las fechas de
+operación y actividad reciente. La referencia visual solo guía la composición; sus cifras
+ilustrativas no se copiaron al producto.
+
+Proyectos conserva la tabla compartida y añade filtros de periodo y un modal de tres
+secciones. Los proyectos creados allí son copias de demostración en `localStorage` por
+variante y no modifican los totales del portafolio. La Ficha usa nueve pestañas con hash,
+teclado, indicadores, cronograma, relaciones operativas y documentos; J&Y muestra un estado
+explicativo donde Almacén no está habilitado.
+
+La prueba del shell cubre el nuevo recorrido y las nueve pestañas. La de Costos comprueba
+el flujo D3 del Panel. Los cinco escenarios de `test:delivery10` siguen pasando en las
+tres variantes bajo la subruta de Pages.

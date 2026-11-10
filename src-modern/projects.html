@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="es" data-bs-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,10 +25,13 @@
             </nav>
             <div class="shell-page-heading">
               <div>
-<h1>Proyectos</h1>
+                <h1>Proyectos</h1>
                 <p class="shell-page-subtitle">Gestión integral de proyectos</p>
               </div>
-</div>
+              <button class="btn btn-primary" type="button" @click="openProjectModal()">
+                + Nuevo proyecto
+              </button>
+            </div>
             <section class="card" aria-labelledby="projects-list-title">
               <div class="card-body">
                 <div class="shell-section-header">
@@ -76,32 +79,84 @@
                     <i class="bi bi-sliders" aria-hidden="true"></i> Más filtros
                   </button>
                 </div>
-                <div class="data-toolbar-extra" id="projects-more-filters" x-show="moreFilters" x-cloak>
+                <div
+                  class="data-toolbar-extra"
+                  id="projects-more-filters"
+                  x-show="moreFilters"
+                  x-cloak
+                >
                   <div>
                     <label class="form-label" for="projects-client">Cliente</label>
-                    <select id="projects-client" class="form-select" x-model="client" @change="updateUrl()">
+                    <select
+                      id="projects-client"
+                      class="form-select"
+                      x-model="client"
+                      @change="updateUrl()"
+                    >
                       <option value="">Todos los clientes</option>
                       <template x-for="item in clients" :key="item.id"
-                        ><option :value="item.id" x-text="item.name" :selected="item.id === client"></option
+                        ><option
+                          :value="item.id"
+                          x-text="item.name"
+                          :selected="item.id === client"
+                        ></option
                       ></template>
                     </select>
                   </div>
                   <div>
                     <label class="form-label" for="projects-manager">Responsable</label>
-                    <select id="projects-manager" class="form-select" x-model="manager" @change="updateUrl()">
+                    <select
+                      id="projects-manager"
+                      class="form-select"
+                      x-model="manager"
+                      @change="updateUrl()"
+                    >
                       <option value="">Todos los responsables</option>
                       <template x-for="item in managers" :key="item.id"
-                        ><option :value="item.id" x-text="item.name" :selected="item.id === manager"></option
+                        ><option
+                          :value="item.id"
+                          x-text="item.name"
+                          :selected="item.id === manager"
+                        ></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="projects-period">Periodo de inicio</label
+                    ><select
+                      id="projects-period"
+                      class="form-select"
+                      x-model="period"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos los periodos</option>
+                      <template
+                        x-for="year in [...new Set(projects.map(project => project.startDate?.slice(0,4)).filter(Boolean))].sort().reverse()"
+                        :key="year"
+                        ><option :value="year" x-text="year"></option
                       ></template>
                     </select>
                   </div>
                 </div>
-                <div class="filter-chips" x-show="activeChips().length" x-cloak aria-label="Filtros aplicados">
+                <div
+                  class="filter-chips"
+                  x-show="activeChips().length"
+                  x-cloak
+                  aria-label="Filtros aplicados"
+                >
                   <template x-for="chip in activeChips()" :key="chip.key"
-                    ><button type="button" class="filter-chip" @click="clearChip(chip.key)" :aria-label="`Quitar filtro ${chip.label}: ${chip.value}`"
-                      ><span x-text="`${chip.label}: ${chip.value}`"></span><i class="bi bi-x" aria-hidden="true"></i></button
+                    ><button
+                      type="button"
+                      class="filter-chip"
+                      @click="clearChip(chip.key)"
+                      :aria-label="`Quitar filtro ${chip.label}: ${chip.value}`"
+                    >
+                      <span x-text="`${chip.label}: ${chip.value}`"></span
+                      ><i class="bi bi-x" aria-hidden="true"></i></button
                   ></template>
-                  <button type="button" class="filter-chip-clear" @click="clearFilters()">Limpiar filtros</button>
+                  <button type="button" class="filter-chip-clear" @click="clearFilters()">
+                    Limpiar filtros
+                  </button>
                 </div>
                 <div class="table-responsive workspace-project-table data-table">
                   <table class="table table-hover align-middle mb-0">
@@ -115,30 +170,49 @@
                             :aria-sort="ariaSort(column[0])"
                             :class="{ 'text-end': ['progress','budget','cost'].includes(column[0]), 'data-col-wide': column[0] === 'manager' }"
                           >
-                            <button type="button" class="data-sort" @click="sortBy(column[0])"
-                              ><span x-text="column[1]"></span><i class="bi" :class="sortIcon(column[0])" aria-hidden="true"></i></button
-                          ></th
+                            <button type="button" class="data-sort" @click="sortBy(column[0])">
+                              <span x-text="column[1]"></span
+                              ><i class="bi" :class="sortIcon(column[0])" aria-hidden="true"></i>
+                            </button></th
                         ></template>
-                        <th scope="col" class="data-actions-col"><span class="visually-hidden">Acciones</span></th>
+                        <th scope="col" class="data-actions-col">
+                          <span class="visually-hidden">Acciones</span>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       <template x-for="project in visibleProjects" :key="project.id"
                         ><tr>
                           <td>
-                            <a class="data-code" :href="detailHref(project.id)" x-text="project.id"></a>
+                            <a
+                              class="data-code"
+                              :href="detailHref(project.id)"
+                              x-text="project.id"
+                            ></a>
                           </td>
-                          <td class="data-primary" x-text="project.name"></td>
+                          <td class="data-primary">
+                            <span x-text="project.name"></span
+                            ><small class="badge text-bg-secondary ms-2" x-show="project.demo"
+                              >Demostración</small
+                            >
+                          </td>
                           <td x-text="projectClient(project)"></td>
                           <td class="data-col-wide" x-text="projectManager(project)"></td>
                           <td class="text-end">
                             <span class="data-progress"
-                              ><span class="data-progress-bar"><span :style="`width:${project.progressPercent}%`"></span></span
+                              ><span class="data-progress-bar"
+                                ><span :style="`width:${project.progressPercent}%`"></span></span
                               ><span x-text="`${project.progressPercent} %`"></span
                             ></span>
                           </td>
-                          <td class="text-end data-money" x-text="formatMoney(project.budgetAmount)"></td>
-                          <td class="text-end data-money" x-text="formatMoney(financials(project.id).executedCost)"></td>
+                          <td
+                            class="text-end data-money"
+                            x-text="formatMoney(project.budgetAmount)"
+                          ></td>
+                          <td
+                            class="text-end data-money"
+                            x-text="formatMoney(financials(project.id).executedCost)"
+                          ></td>
                           <td>
                             <span
                               class="badge"
@@ -159,13 +233,43 @@
                                 <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
                               </button>
                               <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" :href="detailHref(project.id)"><i class="bi bi-eye" aria-hidden="true"></i> Ver ficha</a></li>
-                                <li><a class="dropdown-item" :href="costsHref(project.id)"><i class="bi bi-graph-up" aria-hidden="true"></i> Ver costos</a></li>
-                                <li><a class="dropdown-item" :href="documentsHref(project.id)"><i class="bi bi-folder2-open" aria-hidden="true"></i> Ver documentos</a></li>
+                                <li>
+                                  <a class="dropdown-item" :href="detailHref(project.id)"
+                                    ><i class="bi bi-eye" aria-hidden="true"></i> Ver ficha</a
+                                  >
+                                </li>
+                                <li>
+                                  <button
+                                    class="dropdown-item"
+                                    type="button"
+                                    @click="editProject(project)"
+                                  >
+                                    Editar
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    class="dropdown-item"
+                                    type="button"
+                                    @click="openProjectModal(project)"
+                                  >
+                                    Duplicar
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    class="dropdown-item"
+                                    type="button"
+                                    @click="showHistory(project)"
+                                  >
+                                    Historial
+                                  </button>
+                                </li>
                               </ul>
                             </div>
-                          </td></tr
-                      ></template>
+                          </td>
+                        </tr></template
+                      >
                     </tbody>
                   </table>
                 </div>
@@ -181,7 +285,10 @@
                         ></span
                       ></span>
                       <span class="workspace-project-card-name" x-text="project.name"></span
-                      ><small x-text="projectClient(project)"></small>
+                      ><small x-text="projectClient(project)"></small
+                      ><small class="badge text-bg-secondary" x-show="project.demo"
+                        >Demostración</small
+                      >
                       <span class="workspace-project-card-metrics"
                         ><span
                           ><small>Presupuesto</small
@@ -199,18 +306,45 @@
                       ></span> </a
                   ></template>
                 </div>
-                <nav class="data-pagination" x-show="filteredProjects.length" aria-label="Paginación de proyectos">
+                <nav
+                  class="data-pagination"
+                  x-show="filteredProjects.length"
+                  aria-label="Paginación de proyectos"
+                >
                   <span class="data-pagination-range" x-text="rangeLabel(filteredProjects)"></span>
                   <ul class="pagination pagination-sm mb-0">
                     <li class="page-item" :class="page === 1 && 'disabled'">
-                      <button class="page-link" type="button" @click="goToPage(page - 1, filteredProjects)" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                      <button
+                        class="page-link"
+                        type="button"
+                        @click="goToPage(page - 1, filteredProjects)"
+                        aria-label="Página anterior"
+                      >
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                      </button>
                     </li>
                     <template x-for="number in pageNumbers(filteredProjects)" :key="number"
-                      ><li class="page-item" :class="number === page && 'active'"
-                        ><button class="page-link" type="button" @click="goToPage(number, filteredProjects)" :aria-current="number === page ? 'page' : null" x-text="number"></button></li
+                      ><li class="page-item" :class="number === page && 'active'">
+                        <button
+                          class="page-link"
+                          type="button"
+                          @click="goToPage(number, filteredProjects)"
+                          :aria-current="number === page ? 'page' : null"
+                          x-text="number"
+                        ></button></li
                     ></template>
-                    <li class="page-item" :class="page === pageCount(filteredProjects) && 'disabled'">
-                      <button class="page-link" type="button" @click="goToPage(page + 1, filteredProjects)" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    <li
+                      class="page-item"
+                      :class="page === pageCount(filteredProjects) && 'disabled'"
+                    >
+                      <button
+                        class="page-link"
+                        type="button"
+                        @click="goToPage(page + 1, filteredProjects)"
+                        aria-label="Página siguiente"
+                      >
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                      </button>
                     </li>
                   </ul>
                 </nav>
@@ -227,6 +361,226 @@
                 </div>
               </div>
             </section>
+            <div
+              class="modal fade"
+              id="project-create-modal"
+              tabindex="-1"
+              aria-labelledby="project-create-title"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <div>
+                      <h2
+                        class="modal-title fs-5"
+                        id="project-create-title"
+                        x-text="editingId ? 'Editar proyecto' : 'Nuevo proyecto'"
+                      ></h2>
+                      <p class="text-muted mb-0">
+                        Completa los datos esenciales; este registro queda solo en tu navegador.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Cerrar"
+                    ></button>
+                  </div>
+                  <form id="project-create-form" @submit.prevent="saveProject()">
+                    <div class="modal-body project-create-form">
+                      <fieldset>
+                        <legend>Información principal</legend>
+                        <div class="row g-3">
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-id">Código</label
+                            ><input
+                              id="new-project-id"
+                              class="form-control"
+                              x-model="form.id"
+                              readonly
+                            />
+                          </div>
+                          <div class="col-sm-8">
+                            <label class="form-label" for="new-project-name"
+                              >Nombre del proyecto</label
+                            ><input
+                              id="new-project-name"
+                              class="form-control"
+                              x-model.trim="form.name"
+                              required
+                              maxlength="120"
+                            />
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="new-project-client">Cliente</label
+                            ><select
+                              id="new-project-client"
+                              class="form-select"
+                              x-model="form.clientId"
+                              required
+                            >
+                              <option value="">Selecciona un cliente</option>
+                              <template x-for="item in dataClients" :key="item.id"
+                                ><option :value="item.id" x-text="item.name"></option
+                              ></template>
+                            </select>
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="new-project-manager">Responsable</label
+                            ><select
+                              id="new-project-manager"
+                              class="form-select"
+                              x-model="form.managerId"
+                              required
+                            >
+                              <option value="">Selecciona un responsable</option>
+                              <template x-for="item in dataWorkers" :key="item.id"
+                                ><option :value="item.id" x-text="item.name"></option
+                              ></template>
+                            </select>
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label" for="new-project-description"
+                              >Descripción</label
+                            ><textarea
+                              id="new-project-description"
+                              class="form-control"
+                              rows="2"
+                              x-model.trim="form.description"
+                            ></textarea>
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="new-project-location">Ubicación</label
+                            ><input
+                              id="new-project-location"
+                              class="form-control"
+                              x-model.trim="form.location"
+                            />
+                          </div>
+                          <div class="col-sm-3">
+                            <label class="form-label" for="new-project-start">Inicio</label
+                            ><input
+                              id="new-project-start"
+                              type="date"
+                              class="form-control"
+                              x-model="form.startDate"
+                              required
+                            />
+                          </div>
+                          <div class="col-sm-3">
+                            <label class="form-label" for="new-project-end">Fin previsto</label
+                            ><input
+                              id="new-project-end"
+                              type="date"
+                              class="form-control"
+                              x-model="form.endDate"
+                              :min="form.startDate"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </fieldset>
+                      <fieldset>
+                        <legend>Información económica</legend>
+                        <div class="row g-3">
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-budget"
+                              >Presupuesto base (S/)</label
+                            ><input
+                              id="new-project-budget"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              class="form-control"
+                              x-model="form.budgetAmount"
+                              required
+                            />
+                          </div>
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-currency">Moneda</label
+                            ><select
+                              id="new-project-currency"
+                              class="form-select"
+                              x-model="form.currency"
+                            >
+                              <option value="PEN">Soles (PEN)</option>
+                            </select>
+                          </div>
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-center"
+                              >Centro de costo</label
+                            ><input
+                              id="new-project-center"
+                              class="form-control"
+                              x-model.trim="form.costCenter"
+                            />
+                          </div>
+                        </div>
+                      </fieldset>
+                      <fieldset>
+                        <legend>Información complementaria</legend>
+                        <div class="row g-3">
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-contract"
+                              >N.º de contrato</label
+                            ><input
+                              id="new-project-contract"
+                              class="form-control"
+                              x-model.trim="form.contractNumber"
+                            />
+                          </div>
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-contact"
+                              >Responsable del cliente</label
+                            ><input
+                              id="new-project-contact"
+                              class="form-control"
+                              x-model.trim="form.clientRepresentative"
+                            />
+                          </div>
+                          <div class="col-sm-4">
+                            <label class="form-label" for="new-project-status">Estado</label
+                            ><select
+                              id="new-project-status"
+                              class="form-select"
+                              x-model="form.status"
+                            >
+                              <template x-for="item in statuses" :key="item"
+                                ><option :value="item" x-text="item"></option
+                              ></template>
+                            </select>
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label" for="new-project-notes">Observaciones</label
+                            ><textarea
+                              id="new-project-notes"
+                              class="form-control"
+                              rows="2"
+                              x-model.trim="form.notes"
+                            ></textarea>
+                          </div>
+                        </div>
+                      </fieldset>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        data-bs-dismiss="modal"
+                      >
+                        Cancelar</button
+                      ><button
+                        class="btn btn-primary"
+                        type="submit"
+                        x-text="editingId ? 'Guardar cambios' : 'Guardar proyecto'"
+                      ></button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
         <!-- APP_FOOTER -->
