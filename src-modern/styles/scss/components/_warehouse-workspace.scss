@@ -23,7 +23,7 @@
     color: var(--bs-secondary-color);
   }
   .warehouse-kpis strong {
-    font-size: 1.35rem;
+    font-size: var(--fs-xl);
   }
   .warehouse-tabs {
     display: flex;
@@ -80,10 +80,10 @@
   }
   .warehouse-table th {
     white-space: nowrap;
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
   }
   .warehouse-table td {
-    font-size: 0.83rem;
+    font-size: var(--fs-sm);
     vertical-align: middle;
   }
   .warehouse-highlight {
@@ -135,7 +135,7 @@
     gap: 1rem;
   }
   .warehouse-stock-number {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--bs-primary);
     margin: 0.45rem 0 1rem;
@@ -204,7 +204,7 @@
 }
 @media (max-width: 479.98px) {
   .warehouse-workspace .warehouse-kpis strong {
-    font-size: 1.15rem;
+    font-size: var(--fs-lg);
   }
   .warehouse-workspace .warehouse-modal-grid,
   .warehouse-workspace .warehouse-facts {

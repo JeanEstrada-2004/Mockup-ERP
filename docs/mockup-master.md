@@ -342,3 +342,24 @@ desarrollo de ESLint/`minimatch`; su corrección automática exige una
 migración mayor de ESLint que no se hizo en esta entrega. Las comprobaciones
 de accesibilidad cubren estructura, nombres y etiquetas básicas, pero no
 equivalen a una auditoría WCAG completa.
+
+## Mejoras — Entrega 1: base del sistema de diseño (10/11/2026)
+
+Plan completo y estado en `docs/plan-mejoras.md`; especificación original en
+`docs/especificacion/`; contexto de producto y sistema visual en `PRODUCT.md` y `DESIGN.md`.
+
+- **Marca por variante:** `app-shell-template.mjs` deriva de `theme.primary/accent` una paleta
+  clara y oscura (`--brand-*`) que gobierna Bootstrap: botón principal en Azul Corporativo
+  `#1A365D`, enlaces, foco y activo en Azul Integración `#0066CC` para SurTec.
+- **Tipografía:** escala 12/13/14/16/18/20/28 px (`--fs-*`); 210 tamaños sueltos convertidos.
+  Ningún texto del ERP queda bajo 12 px. Cifras tabulares.
+- **Header:** logos oficiales recortados a su área dibujada sin modificar los archivos,
+  selector con nombre corto, un único distintivo "Datos de demostración", Aprobaciones con
+  contador, notificaciones por categoría, usuario Jean Estrada · Administrador.
+- **Componentes compartidos:** `utils/status.js` (5 tonos de estado), `utils/data-table.js`
+  (orden, paginación, chips de filtros), capa `_design-system.scss` (tabla, menú `⋮`,
+  tooltip de ayuda, movimiento breve, superficies del navegador). Referencia: Proyectos.
+- **Datos:** 15 proyectos SurTec; los 12 en ejecución suman S/ 1 245 000 y S/ 768 400.
+  Reportes y BI abren con el mismo alcance que el Panel.
+- **Avisos:** se retiraron las alertas "no es real" de cada página y las etiquetas
+  "ficticio/simulado" de títulos y columnas; la reglas funcionales se conservaron.

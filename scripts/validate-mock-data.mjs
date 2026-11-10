@@ -277,11 +277,19 @@ assert.notEqual(
 );
 
 const surtec = getDataForVariant('surtec-peti');
+// Dashboard totals required by the functional specification (punto 6).
 assert.deepEqual(getPortfolioFinancials(surtec), {
-  activeProjectCount: 3,
-  budgetAmount: 426000,
-  executedCost: 243150,
+  activeProjectCount: 12,
+  budgetAmount: 1245000,
+  executedCost: 768400,
 });
+assert.equal(surtec.projects.length, 15);
+for (const status of ['Planificado', 'Activo', 'En riesgo', 'Suspendido', 'Cerrado']) {
+  assert.ok(
+    surtec.projects.some((project) => project.status === status),
+    `Falta un proyecto en estado ${status}`
+  );
+}
 assert.deepEqual(getProjectFinancials(surtec, 'PR-2027-001'), {
   projectId: 'PR-2027-001',
   budgetAmount: 185000,

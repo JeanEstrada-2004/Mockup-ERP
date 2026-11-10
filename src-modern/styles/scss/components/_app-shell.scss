@@ -60,7 +60,7 @@
     margin-left: 0.45rem;
     color: var(--brand-primary);
     font-weight: 700;
-    font-size: 1.08rem;
+    font-size: var(--fs-base);
     white-space: nowrap;
   }
 }
@@ -122,7 +122,7 @@
   padding-right: 0.75rem;
   border-color: var(--bs-border-color);
   background: var(--bs-tertiary-bg);
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 .shell-search-icon {
   position: absolute;
@@ -150,7 +150,7 @@
   margin: 0;
   padding: 0.8rem;
   color: var(--bs-secondary-color);
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
 }
 .shell-search-result {
   display: flex;
@@ -160,7 +160,7 @@
   color: var(--bs-body-color);
   text-decoration: none;
   border-bottom: 1px solid var(--bs-border-color);
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 
   &:last-child {
     border-bottom: 0;
@@ -185,7 +185,7 @@
 .shell-search-kind {
   color: var(--bs-secondary-color);
   white-space: nowrap;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 }
 
 .shell-project {
@@ -194,14 +194,14 @@
 .shell-project label {
   display: block;
   color: var(--bs-secondary-color);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   line-height: 1.1;
   margin-bottom: 0.1rem;
 }
 .shell-project select {
   height: 33px;
   border-color: var(--bs-border-color);
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--bs-emphasis-color);
 }
@@ -235,10 +235,10 @@
   padding-inline: 0.5rem;
 }
 .shell-user-label {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 .shell-user-chevron {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   color: var(--bs-secondary-color);
 }
 .shell-notification-count {
@@ -251,7 +251,7 @@
   border-radius: 1rem;
   background: var(--brand-accent);
   color: white;
-  font-size: 0.63rem;
+  font-size: var(--fs-xs);
   line-height: 1rem;
   font-weight: 700;
 }
@@ -286,7 +286,7 @@
   display: block;
   padding: 0.7rem 0.75rem 0.35rem;
   color: var(--bs-secondary-color);
-  font-size: 0.63rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -306,7 +306,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   color: var(--bs-secondary-color);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 }
 
 .shell-page {
@@ -321,7 +321,7 @@
   margin-bottom: 1.5rem;
 }
 .shell-page-heading h1 {
-  font-size: 1.55rem;
+  font-size: var(--fs-2xl);
   margin: 0;
 }
 .shell-page-subtitle {
@@ -330,13 +330,10 @@
 }
 .shell-eyebrow {
   color: var(--brand-primary);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   margin-bottom: 0.35rem;
-}
-[data-bs-theme='dark'] .shell-eyebrow {
-  color: #93c5fd;
 }
 .shell-demo-label {
   display: inline-flex;
@@ -346,17 +343,17 @@
   border: 1px solid var(--bs-border-color);
   border-radius: 0.4rem;
   color: var(--bs-secondary-color);
-  font-size: 0.73rem;
+  font-size: var(--fs-xs);
 }
 .shell-kpi-label {
   color: var(--bs-secondary-color);
   margin: 0 0 0.45rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 .shell-kpi-value {
   margin: 0;
   color: var(--bs-emphasis-color);
-  font-size: 1.5rem;
+  font-size: var(--fs-2xl);
   font-weight: 700;
 }
 .shell-section-header {
@@ -368,22 +365,22 @@
 }
 .shell-section-header h2,
 .shell-context-heading {
-  font-size: 1rem;
+  font-size: var(--fs-base);
   margin: 0;
 }
 .shell-section-header a {
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   text-decoration: none;
   white-space: nowrap;
 }
 .shell-project-code {
   color: var(--brand-accent);
   font-weight: 700;
-  font-size: 0.76rem;
+  font-size: var(--fs-xs);
   margin: 0 0 0.3rem;
 }
 .shell-current-project-name {
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   margin-bottom: 0.35rem;
 }
 .shell-project-facts {
@@ -394,14 +391,14 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 .shell-project-facts span {
   color: var(--bs-secondary-color);
 }
 .shell-breadcrumb {
   margin-bottom: 1.3rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 .shell-preview-record {
   display: flex;
@@ -444,7 +441,7 @@
 }
 .shell-project-mobile strong {
   color: var(--brand-accent);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 }
 .shell-project-mobile > span:first-child span {
   margin-top: 0.2rem;
@@ -455,7 +452,7 @@
   white-space: nowrap;
 }
 .shell-project-mobile small {
-  font-size: 0.73rem;
+  font-size: var(--fs-xs);
   color: var(--bs-secondary-color);
 }
 
@@ -501,7 +498,7 @@
     max-width: 105px;
   }
   .shell-header .shell-brand-name {
-    font-size: 0.95rem;
+    font-size: var(--fs-base);
   }
   .shell-header .shell-project {
     width: 100%;
@@ -523,7 +520,7 @@
     margin-bottom: 1rem;
   }
   .shell-page-heading h1 {
-    font-size: 1.3rem;
+    font-size: var(--fs-xl);
   }
   .shell-preview-record {
     flex-direction: column;

@@ -36,7 +36,7 @@
   }
   .integration-list button > .bi {
     color: var(--bs-primary);
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
   }
   .integration-list button > span:nth-child(2) {
     display: grid;

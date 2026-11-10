@@ -33,8 +33,7 @@
             </nav>
             <div class="shell-page-heading expense-detail-heading">
               <div>
-                <p class="shell-eyebrow">RENDICIÓN DE GASTOS</p>
-                <h1 x-text="record?.id || 'Nueva rendición'"></h1>
+<h1 x-text="record?.id || 'Nueva rendición'"></h1>
                 <p class="shell-page-subtitle" x-show="record">
                   <span x-text="projectName(record?.projectId)"></span>
                   <span
@@ -45,12 +44,6 @@
                 </p>
               </div>
               <a class="btn btn-outline-primary" :href="backHref">← Volver a Rendiciones</a>
-            </div>
-
-            <div class="alert alert-info expense-demo-note" role="note">
-              <i class="bi bi-info-circle" aria-hidden="true"></i>
-              Recorrido de demostración. Seleccionas comprobantes de ejemplo; no se toma una foto,
-              no se sube un archivo y no se ejecuta OCR.
             </div>
 
             <div
@@ -92,7 +85,7 @@
                 <p class="shell-eyebrow">PASO 1 DE 4</p>
                 <h2 id="expense-project-title">Selecciona el proyecto</h2>
                 <p class="workspace-caption">
-                  La rendición quedará vinculada a este proyecto durante la demostración.
+                  La rendición quedará vinculada a este proyecto.
                 </p>
                 <label class="form-label" for="expense-project">Proyecto</label>
                 <select id="expense-project" class="form-select" x-model="projectChoice">
@@ -247,7 +240,7 @@
                             </div>
                             <div class="expense-proposal">
                               <span class="expense-panel-label"
-                                >Propuesta OCR simulada · sin análisis de archivo</span
+                                >Datos propuestos por OCR</span
                               >
                               <div class="expense-edit-grid">
                                 <div>
@@ -468,7 +461,7 @@
                       x-cloak
                     >
                       <label class="form-label" for="expense-observation-note"
-                        >Motivo de la observación simulada</label
+                        >Motivo de la observación</label
                       >
                       <textarea
                         id="expense-observation-note"

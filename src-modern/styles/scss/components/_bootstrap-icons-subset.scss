@@ -34,6 +34,7 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-arrow-clockwise::before { content: "\f116"; }
 .bi-arrow-counterclockwise::before { content: "\f117"; }
 .bi-arrow-down::before { content: "\f128"; }
+.bi-arrow-down-up::before { content: "\f127"; }
 .bi-arrow-left::before { content: "\f12f"; }
 .bi-arrow-repeat::before { content: "\f130"; }
 .bi-arrow-right::before { content: "\f138"; }
@@ -138,6 +139,7 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-list-ul::before { content: "\f478"; }
 .bi-lock::before { content: "\f47b"; }
 .bi-lock-fill::before { content: "\f47a"; }
+.bi-moon::before { content: "\f497"; }
 .bi-moon-fill::before { content: "\f494"; }
 .bi-palette::before { content: "\f4b1"; }
 .bi-paperclip::before { content: "\f4b3"; }
@@ -168,11 +170,14 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-shield-check::before { content: "\f52f"; }
 .bi-shield-exclamation::before { content: "\f530"; }
 .bi-shield-lock::before { content: "\f538"; }
+.bi-sliders::before { content: "\f56b"; }
 .bi-sort-down::before { content: "\f575"; }
+.bi-sort-up::before { content: "\f57b"; }
 .bi-speedometer2::before { content: "\f580"; }
 .bi-square::before { content: "\f584"; }
 .bi-star::before { content: "\f588"; }
 .bi-sticky::before { content: "\f58d"; }
+.bi-sun::before { content: "\f5a2"; }
 .bi-sun-fill::before { content: "\f5a1"; }
 .bi-table::before { content: "\f5aa"; }
 .bi-tablet::before { content: "\f5ae"; }
@@ -193,3 +198,4 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-x::before { content: "\f62a"; }
 .bi-x-circle::before { content: "\f623"; }
 .bi-x-lg::before { content: "\f659"; }
+.bi-x-octagon::before { content: "\f627"; }

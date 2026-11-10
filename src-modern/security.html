@@ -38,16 +38,11 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-                    <p class="shell-eyebrow">CONTROL DE ACCESO PROPUESTO</p>
-                    <h1>Seguridad</h1>
+<h1>Seguridad</h1>
                     <p class="shell-page-subtitle">
                       Perfiles, permisos y trazas de ejemplo para revisar el diseño.
                     </p>
                   </div>
-                </div>
-                <div class="alert alert-warning" role="note">
-                  <strong>Simulación visual.</strong> No existe autenticación, MFA, sesiones,
-                  aplicación de permisos, auditoría ni respaldos reales.
                 </div>
                 <nav class="d9-tabs" aria-label="Secciones de Seguridad">
                   <template x-for="item in tabs" :key="item[0]"
@@ -71,7 +66,7 @@
                   <div class="card-body">
                     <div class="shell-section-header">
                       <div>
-                        <h2 id="security-users-title">Perfiles ficticios</h2>
+                        <h2 id="security-users-title">Usuarios</h2>
                         <p class="workspace-caption">
                           Los nombres provienen de trabajadores de ejemplo, sin cuentas activas.
                         </p>
@@ -94,7 +89,7 @@
                         />
                       </div>
                       <div>
-                        <label class="form-label" for="security-role">Rol ilustrativo</label
+                        <label class="form-label" for="security-role">Rol</label
                         ><select
                           id="security-role"
                           class="form-select"
@@ -120,7 +115,7 @@
                           <tr>
                             <th scope="col">Código</th>
                             <th scope="col">Nombre</th>
-                            <th scope="col">Alias ficticio</th>
+                            <th scope="col">Usuario</th>
                             <th scope="col">Rol propuesto</th>
                             <th scope="col">Área</th>
                             <th scope="col">Estado</th>
@@ -195,7 +190,7 @@
                 >
                   <div class="card-body">
                     <div class="shell-section-header">
-                      <h2 id="security-permissions-title">Matriz de permisos ilustrativa</h2>
+                      <h2 id="security-permissions-title">Matriz de permisos</h2>
                       <span class="workspace-caption">No restringe la navegación</span>
                     </div>
                     <p class="workspace-caption">
@@ -285,7 +280,7 @@
                         <thead>
                           <tr>
                             <th scope="col">Fecha</th>
-                            <th scope="col">Actor ficticio</th>
+                            <th scope="col">Usuario</th>
                             <th scope="col">Referencia</th>
                             <th scope="col">Módulo</th>
                             <th scope="col">Registro</th>

@@ -154,6 +154,56 @@ export function getDocument(data, documentId) {
   return getDocuments(data).find((document) => document.id === documentId) || null;
 }
 
+// Short label for compact places such as the header project selector:
+// "Implementación de Infraestructura Tecnológica" → "Infraestructura Tecnológica".
+export function projectShortName(name) {
+  const short = String(name).replace(
+    /^(Implementación|Sistema|Modernización|Renovación|Ampliación|Automatización|Migración|Supervisión|Elaboración) de (la |el |los |las )?/i,
+    ''
+  );
+  return short.charAt(0).toUpperCase() + short.slice(1);
+}
+
+// Records waiting for someone's approval. Shared by the header and, from
+// Entrega 3, by the approvals inbox.
+export function getPendingApprovals(data, variant) {
+  const items = [];
+  for (const budget of data.budgets) {
+    if (budget.status === 'En revisión') {
+      items.push({
+        id: budget.id,
+        kind: 'Presupuesto',
+        moduleId: 'budgets',
+        projectId: budget.projectId,
+        amount: budget.amount,
+      });
+    }
+  }
+  for (const operation of data.operations) {
+    if (operation.type === 'purchase' && operation.status === 'Pendiente') {
+      items.push({
+        id: operation.id,
+        kind: 'Orden de compra',
+        moduleId: 'purchases',
+        projectId: operation.projectId,
+        amount: operation.amount,
+      });
+    }
+    if (operation.type === 'expense' && operation.status === 'En revisión') {
+      items.push({
+        id: operation.id,
+        kind: 'Rendición',
+        moduleId: 'expenses',
+        projectId: operation.projectId,
+        amount: operation.amount,
+      });
+    }
+  }
+  return items.filter((item) => variant.enabledModules.includes(item.moduleId));
+}
+
+// Notification categories follow punto 106: Aprobación, Advertencia, Error,
+// Información y Sistema. `level` drives the colour, `category` the label.
 export function getShellNotifications(data, variant) {
   const notifications = [];
 
@@ -164,7 +214,8 @@ export function getShellNotifications(data, variant) {
         text: `${operation.id} requiere aprobación.`,
         moduleId: 'purchases',
         recordId: operation.id,
-        level: 'warning',
+        level: 'approval',
+        category: 'Aprobación',
       });
     }
     if (operation.type === 'expense' && operation.status === 'En revisión') {
@@ -173,7 +224,8 @@ export function getShellNotifications(data, variant) {
         text: `Rendición ${operation.id} pendiente de revisión.`,
         moduleId: 'expenses',
         recordId: operation.id,
-        level: 'info',
+        level: 'approval',
+        category: 'Aprobación',
       });
     }
   }
@@ -183,10 +235,11 @@ export function getShellNotifications(data, variant) {
     if (project.status === 'En riesgo' && executionPercent >= 80) {
       notifications.push({
         id: `notification-${project.id}`,
-        text: `${project.id} ejecutó ${executionPercent} % de su presupuesto.`,
+        text: `${project.id} supera el 80 % del presupuesto (${String(executionPercent).replace('.', ',')} % ejecutado).`,
         moduleId: 'projects',
         recordId: project.id,
         level: 'warning',
+        category: 'Advertencia',
       });
     }
   }
@@ -196,13 +249,25 @@ export function getShellNotifications(data, variant) {
       if (material.stock < material.minimum) {
         notifications.push({
           id: `notification-${material.id}`,
-          text: `Stock bajo: ${material.name}.`,
+          text: `Stock bajo: ${material.name} (${material.stock} de mínimo ${material.minimum}).`,
           moduleId: 'warehouse',
           recordId: material.id,
           level: 'warning',
+          category: 'Advertencia',
         });
       }
     }
+  }
+
+  if (variant.enabledModules.includes('biometrics')) {
+    notifications.push({
+      id: 'notification-biometric-sync',
+      text: 'Error de sincronización biométrica: 2 registros sin asociar.',
+      moduleId: 'personnel',
+      href: './personnel.html?tab=incidencias',
+      level: 'error',
+      category: 'Error',
+    });
   }
 
   return notifications.filter((notification) =>

@@ -317,13 +317,13 @@
 // Button sizes
 .btn-sm {
   padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-md);
   border-radius: var(--border-radius-sm);
 }
 
 .btn-lg {
   padding: 1rem 2rem;
-  font-size: 1.125rem;
+  font-size: var(--fs-lg);
   border-radius: var(--border-radius);
 }
 

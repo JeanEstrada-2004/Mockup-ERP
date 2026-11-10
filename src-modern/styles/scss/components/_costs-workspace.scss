@@ -36,7 +36,7 @@
   }
   .costs-kpis span {
     color: var(--bs-secondary-color);
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     line-height: 1.4;
   }
   .costs-commit-summary {
@@ -99,11 +99,11 @@
     margin-bottom: 0;
   }
   .costs-table th {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     white-space: nowrap;
   }
   .costs-table td {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
   }
   .costs-selected,
   .costs-part-over {
@@ -226,10 +226,10 @@
 }
 @media (max-width: 479.98px) {
   .costs-workspace .costs-kpis strong {
-    font-size: 1.1rem;
+    font-size: var(--fs-lg);
   }
   .costs-workspace .costs-kpis span {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
   }
   .costs-workspace .costs-operation-facts {
     grid-template-columns: 1fr 1fr;

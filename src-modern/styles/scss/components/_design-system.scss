@@ -1,0 +1,876 @@
+// ==========================================================================
+// Design system layer (Entrega 1) — see DESIGN.md
+// ==========================================================================
+// Imported last so the shared rules win over legacy Metis partials. Colours
+// come from the variant palette injected by scripts/app-shell-template.mjs
+// (--brand-*); type sizes come from the --fs-* scale in _variables.scss.
+
+// --------------------------------------------------------------------------
+// 1. Brand → Bootstrap bridge
+// --------------------------------------------------------------------------
+:root,
+[data-bs-theme='dark'] {
+  --bs-primary: var(--brand-accent);
+  --bs-primary-rgb: var(--brand-accent-rgb);
+  --bs-link-color: var(--brand-accent);
+  --bs-link-color-rgb: var(--brand-accent-rgb);
+  --bs-link-hover-color: var(--brand-accent-hover);
+  --bs-link-hover-color-rgb: var(--brand-accent-rgb);
+  --bs-primary-text-emphasis: var(--brand-accent-hover);
+  --bs-primary-bg-subtle: var(--brand-accent-subtle);
+  --bs-primary-border-subtle: var(--brand-accent-border);
+  --bs-focus-ring-color: rgba(var(--brand-accent-rgb), 0.3);
+}
+
+a {
+  text-underline-offset: 0.18em;
+}
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--brand-solid);
+  --bs-btn-border-color: var(--brand-solid);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-solid-hover);
+  --bs-btn-hover-border-color: var(--brand-solid-hover);
+  --bs-btn-focus-shadow-rgb: var(--brand-solid-rgb);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-solid-active);
+  --bs-btn-active-border-color: var(--brand-solid-active);
+  --bs-btn-disabled-color: #fff;
+  --bs-btn-disabled-bg: var(--brand-solid);
+  --bs-btn-disabled-border-color: var(--brand-solid);
+  color: var(--bs-btn-color);
+  background-color: var(--bs-btn-bg);
+  border-color: var(--bs-btn-border-color);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bs-btn-hover-color);
+    background-color: var(--bs-btn-hover-bg);
+    border-color: var(--bs-btn-hover-border-color);
+  }
+  &:active,
+  &.active {
+    background-color: var(--bs-btn-active-bg);
+    border-color: var(--bs-btn-active-border-color);
+  }
+}
+
+// Secondary actions: quiet outline in the accent colour.
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-accent);
+  --bs-btn-border-color: var(--brand-accent-border);
+  --bs-btn-hover-color: var(--brand-accent-hover);
+  --bs-btn-hover-bg: var(--brand-accent-subtle);
+  --bs-btn-hover-border-color: var(--brand-accent);
+  --bs-btn-focus-shadow-rgb: var(--brand-accent-rgb);
+  --bs-btn-active-color: var(--brand-accent-hover);
+  --bs-btn-active-bg: var(--brand-accent-subtle);
+  --bs-btn-active-border-color: var(--brand-accent);
+  --bs-btn-disabled-color: var(--brand-accent);
+  --bs-btn-disabled-border-color: var(--brand-accent-border);
+  color: var(--bs-btn-color);
+  border-color: var(--bs-btn-border-color);
+  background-color: transparent;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bs-btn-hover-color);
+    background-color: var(--bs-btn-hover-bg);
+    border-color: var(--bs-btn-hover-border-color);
+  }
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.18);
+}
+
+.form-check-input:checked {
+  background-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+}
+
+.progress,
+.progress-stacked {
+  --bs-progress-bar-bg: var(--brand-accent);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--brand-solid);
+}
+
+.pagination {
+  --bs-pagination-color: var(--brand-accent);
+  --bs-pagination-hover-color: var(--brand-accent-hover);
+  --bs-pagination-focus-color: var(--brand-accent-hover);
+  --bs-pagination-focus-box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.2);
+  --bs-pagination-active-bg: var(--brand-solid);
+  --bs-pagination-active-border-color: var(--brand-solid);
+}
+
+.dropdown-menu {
+  --bs-dropdown-font-size: var(--fs-md);
+  --bs-dropdown-link-active-bg: var(--brand-accent-subtle);
+  --bs-dropdown-link-active-color: var(--brand-primary);
+}
+
+// --------------------------------------------------------------------------
+// 2. Status badges (punto 145) — one tone per meaning, always with text
+// --------------------------------------------------------------------------
+.badge {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 0.3em 0.65em;
+  border-radius: 999px;
+}
+
+.status-badge,
+.badge.text-bg-primary,
+.badge.text-bg-secondary,
+.badge.text-bg-success,
+.badge.text-bg-warning,
+.badge.text-bg-danger,
+.badge.text-bg-info,
+.badge.text-bg-light {
+  --status-bg: #eef1f5;
+  --status-ink: #4a5568;
+  color: var(--status-ink) !important;
+  background-color: var(--status-bg) !important;
+}
+
+.status-badge--info,
+.badge.text-bg-primary,
+.badge.text-bg-info {
+  --status-bg: var(--brand-accent-subtle);
+  --status-ink: var(--brand-accent-hover);
+}
+.status-badge--success,
+.badge.text-bg-success {
+  --status-bg: #e6f4ea;
+  --status-ink: #17643a;
+}
+.status-badge--warning,
+.badge.text-bg-warning {
+  --status-bg: #fdf1dc;
+  --status-ink: #8a4a06;
+}
+.status-badge--danger,
+.badge.text-bg-danger {
+  --status-bg: #fde7e7;
+  --status-ink: #a8231b;
+}
+
+[data-bs-theme='dark'] {
+  .status-badge,
+  .badge.text-bg-secondary,
+  .badge.text-bg-light {
+    --status-bg: #2a3546;
+    --status-ink: #d4dbe5;
+  }
+  .status-badge--info,
+  .badge.text-bg-primary,
+  .badge.text-bg-info {
+    --status-bg: var(--brand-accent-subtle);
+    --status-ink: var(--brand-primary);
+  }
+  .status-badge--success,
+  .badge.text-bg-success {
+    --status-bg: rgba(34, 197, 94, 0.16);
+    --status-ink: #9be8b4;
+  }
+  .status-badge--warning,
+  .badge.text-bg-warning {
+    --status-bg: rgba(245, 158, 11, 0.18);
+    --status-ink: #fcd77f;
+  }
+  .status-badge--danger,
+  .badge.text-bg-danger {
+    --status-bg: rgba(239, 68, 68, 0.18);
+    --status-ink: #fcb1b1;
+  }
+}
+
+// --------------------------------------------------------------------------
+// 3. Page structure and type
+// --------------------------------------------------------------------------
+.shell-page-heading h1 {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--bs-emphasis-color);
+}
+
+.shell-page-subtitle {
+  font-size: var(--fs-base);
+}
+
+.shell-section-header h2,
+.shell-context-heading,
+.project-workspace h2 {
+  font-size: var(--fs-lg);
+}
+
+.shell-page :is(.table, .form-control, .form-select, .btn) {
+  font-size: var(--fs-md);
+}
+
+.shell-page .form-label {
+  font-size: var(--fs-md);
+}
+
+.shell-page small,
+.shell-page .small {
+  font-size: var(--fs-sm);
+}
+
+// Figures line up in columns and do not jump while filtering.
+.table td,
+.shell-kpi-value,
+.data-money,
+.costs-kpis strong {
+  font-variant-numeric: tabular-nums;
+}
+
+// --------------------------------------------------------------------------
+// 4. Header
+// --------------------------------------------------------------------------
+.shell-header {
+  --logo-h: 50px;
+}
+
+// Desktop: the menu toggle sits absolutely on the sidebar's right edge
+// (_hamburger.scss), so the logo column spans the sidebar width and the
+// search starts in line with the content.
+@media (min-width: 992px) {
+  .shell-header .shell-header-grid {
+    // sidebar width minus the grid's side padding and one gap
+    grid-template-columns:
+      calc(var(--sidebar-width) - 2.25rem) minmax(200px, 1fr) minmax(230px, 300px)
+      auto;
+    gap: 1rem;
+  }
+  .shell-header .shell-brand {
+    grid-column: 1;
+  }
+  .shell-header .shell-search {
+    grid-column: 2;
+  }
+  .shell-header .shell-project {
+    grid-column: 3;
+  }
+  .shell-header .shell-header-actions {
+    grid-column: 4;
+  }
+}
+
+.shell-brand {
+  .shell-logo-frame {
+    position: relative;
+    display: block;
+    height: var(--logo-h);
+    overflow: hidden;
+    flex: none;
+  }
+  .shell-logo {
+    position: absolute;
+    max-width: none;
+    height: auto;
+  }
+  .shell-logo-frame--dark {
+    display: none;
+  }
+}
+
+[data-bs-theme='dark'] .shell-brand {
+  .shell-logo-frame--light {
+    display: none;
+  }
+  .shell-logo-frame--dark {
+    display: block;
+    border-radius: 0.375rem;
+  }
+}
+
+.shell-project label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.shell-project select {
+  font-size: var(--fs-md);
+  text-overflow: ellipsis;
+}
+
+.shell-search .form-control {
+  font-size: var(--fs-md);
+}
+
+.shell-header-actions {
+  gap: 0.35rem;
+}
+
+.shell-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--brand-accent-border);
+  border-radius: 999px;
+  color: var(--brand-accent-hover);
+  background: var(--brand-accent-subtle);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: default;
+}
+[data-bs-theme='dark'] .shell-demo-badge {
+  color: var(--brand-primary);
+}
+.shell-demo-badge-short {
+  display: none;
+}
+
+.shell-notification-count {
+  min-width: 1.15rem;
+  height: 1.15rem;
+  font-size: var(--fs-xs);
+  line-height: 1.15rem;
+  background: var(--brand-solid);
+  box-shadow: 0 0 0 2px var(--surface-panel);
+}
+
+.shell-user-button {
+  gap: 0.55rem;
+  padding-inline: 0.4rem 0.6rem;
+  border-radius: 999px;
+  text-align: left;
+}
+.shell-user-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--brand-solid);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: none;
+}
+.shell-user-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-size: var(--fs-sm);
+
+  strong {
+    font-weight: 600;
+    color: var(--bs-emphasis-color);
+  }
+  small {
+    color: var(--bs-secondary-color);
+    font-size: var(--fs-xs);
+  }
+}
+.shell-user-chevron {
+  font-size: var(--fs-xs);
+}
+
+.shell-notification-menu,
+.shell-approval-menu {
+  width: min(360px, calc(100vw - 1rem));
+  padding-block: 0.4rem;
+}
+.dropdown-header {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+.shell-notification {
+  gap: 0.7rem;
+  padding: 0.6rem 1rem;
+  font-size: var(--fs-md);
+
+  > i {
+    margin-top: 0.1rem;
+    font-size: var(--fs-base);
+    color: var(--brand-accent);
+  }
+  small {
+    display: block;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+  }
+}
+.shell-notification--warning > i {
+  color: #b45309;
+}
+.shell-notification--error > i {
+  color: #c2261d;
+}
+[data-bs-theme='dark'] {
+  .shell-notification--warning > i {
+    color: #fcd77f;
+  }
+  .shell-notification--error > i {
+    color: #fcb1b1;
+  }
+}
+.shell-approval {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  white-space: normal;
+
+  small {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--bs-secondary-color);
+  }
+  strong {
+    font-size: var(--fs-md);
+  }
+}
+.shell-approval-amount {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+// Active navigation item.
+.admin-sidebar .sidebar-nav .nav-link.active {
+  background: var(--brand-accent-subtle);
+  color: var(--brand-primary);
+  font-weight: 600;
+
+  i {
+    color: var(--brand-accent);
+  }
+}
+.shell-nav-group > small {
+  font-size: var(--fs-xs);
+}
+
+@media (max-width: 1399.98px) {
+  .shell-demo-badge-long {
+    display: none;
+  }
+  .shell-demo-badge-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .shell-user-label {
+    display: none;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .shell-header .shell-header-grid {
+    grid-template-columns: 42px minmax(100px, 1fr) auto;
+  }
+  .shell-header .shell-project {
+    width: 260px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .shell-header {
+    --logo-h: 38px;
+  }
+  .shell-demo-badge {
+    display: none;
+  }
+  .shell-header .shell-project {
+    width: 100%;
+  }
+}
+
+// --------------------------------------------------------------------------
+// 5. Data table (DESIGN.md › Tabla)
+// --------------------------------------------------------------------------
+.data-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.data-toolbar-search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 420px;
+
+  > i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: var(--bs-secondary-color);
+    pointer-events: none;
+  }
+  .form-control {
+    padding-left: 2.35rem;
+  }
+}
+.data-toolbar-field {
+  flex: 0 1 220px;
+}
+.data-toolbar-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  &[aria-expanded='true'] {
+    color: var(--brand-accent-hover);
+    background: var(--brand-accent-subtle);
+    border-color: var(--brand-accent-border);
+  }
+}
+.data-toolbar-extra {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 260px));
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--border-radius);
+  background: var(--surface-sunken);
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.45rem 0.3rem 0.75rem;
+  border: 1px solid var(--brand-accent-border);
+  border-radius: 999px;
+  background: var(--brand-accent-subtle);
+  color: var(--brand-primary);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+
+  i {
+    font-size: var(--fs-base);
+    opacity: 0.75;
+  }
+  &:hover {
+    background: rgba(var(--brand-accent-rgb), 0.16);
+  }
+  &:active {
+    transform: scale(0.97);
+  }
+}
+.filter-chip-clear {
+  padding: 0.3rem 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--bs-secondary-color);
+  font-size: var(--fs-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    color: var(--bs-emphasis-color);
+  }
+}
+
+.data-table {
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--border-radius);
+
+  .table {
+    margin: 0;
+  }
+  thead th {
+    padding-block: 0.6rem;
+    font-size: var(--fs-sm) !important;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    border-bottom-width: 1px;
+  }
+  tbody td {
+    padding-block: 0.75rem;
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+.data-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+
+  i {
+    font-size: var(--fs-xs);
+    opacity: 0.45;
+  }
+  &:hover i,
+  th[aria-sort='ascending'] & i,
+  th[aria-sort='descending'] & i {
+    opacity: 1;
+    color: var(--brand-accent);
+  }
+}
+th.text-end .data-sort {
+  flex-direction: row-reverse;
+}
+.data-code {
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+.data-primary {
+  min-width: 14rem;
+  color: var(--bs-emphasis-color);
+  font-weight: 500;
+}
+.data-money {
+  white-space: nowrap;
+}
+.data-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.data-progress-bar {
+  display: block;
+  width: 3.5rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+
+  > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--brand-accent);
+  }
+}
+.data-actions-col {
+  width: 3rem;
+  text-align: right;
+}
+.data-row-menu {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  color: var(--bs-secondary-color);
+
+  &:hover,
+  &[aria-expanded='true'] {
+    color: var(--bs-emphasis-color);
+    background: var(--surface-hover);
+  }
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  > i {
+    color: var(--bs-secondary-color);
+  }
+}
+.data-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+
+  .page-link {
+    min-width: 2.1rem;
+    text-align: center;
+  }
+}
+.data-pagination-range {
+  color: var(--bs-secondary-color);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+// Secondary columns and the inline progress bar appear only on wide screens,
+// so the table fits a 1440px laptop without horizontal scrolling. The same
+// information stays reachable through filters and the record's own page.
+@media (max-width: 1599.98px) {
+  .data-col-wide,
+  .data-progress-bar {
+    display: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .data-toolbar-search,
+  .data-toolbar-field {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
+
+// --------------------------------------------------------------------------
+// 6. Help tooltip "?" (punto 148) — CSS only, keyboard reachable
+// --------------------------------------------------------------------------
+.help-tip {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-left: 0.3rem;
+  padding: 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+  background: var(--surface-panel);
+  color: var(--bs-secondary-color);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: help;
+
+  &::after {
+    content: attr(data-tip);
+    position: absolute;
+    z-index: 1090;
+    bottom: calc(100% + 0.5rem);
+    left: 50%;
+    width: max-content;
+    max-width: 260px;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.5rem;
+    background: #1f2937;
+    color: #f9fafb;
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+    box-shadow: var(--box-shadow-lg);
+    opacity: 0;
+    transform: translate(-50%, 4px);
+    transform-origin: bottom center;
+    pointer-events: none;
+    transition:
+      opacity var(--motion-fast) var(--ease-out),
+      transform var(--motion-fast) var(--ease-out);
+  }
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+// --------------------------------------------------------------------------
+// 7. Browser surfaces
+// --------------------------------------------------------------------------
+::selection {
+  background: rgba(var(--brand-accent-rgb), 0.22);
+}
+:root {
+  accent-color: var(--brand-accent);
+  caret-color: var(--brand-accent);
+  scrollbar-color: rgba(var(--brand-solid-rgb), 0.28) transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+  outline: none;
+}
+
+// --------------------------------------------------------------------------
+// 8. Motion (emil-design-eng): short, ease-out, transform/opacity only
+// --------------------------------------------------------------------------
+.btn {
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+}
+
+// Popper positions menus with `transform`; the individual `translate` and
+// `scale` properties compose with it instead of overriding it.
+@keyframes ds-menu-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+    scale: 0.98;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+.dropdown-menu.show {
+  transform-origin: top right;
+  animation: ds-menu-in var(--motion-base) var(--ease-out);
+}
+.dropdown-menu-start.show,
+.dropdown-menu:not(.dropdown-menu-end).show {
+  transform-origin: top left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu.show,
+  .help-tip::after,
+  .filter-chip,
+  .btn {
+    animation: none;
+    transition: none;
+  }
+  .btn:active:not(:disabled),
+  .filter-chip:active {
+    transform: none;
+  }
+}

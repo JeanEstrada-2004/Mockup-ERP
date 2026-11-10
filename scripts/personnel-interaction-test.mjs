@@ -206,10 +206,10 @@ try {
   assert.equal(await page.locator('.personnel-incident').count(), 1);
   await page.getByRole('button', { name: 'Justificar' }).click();
   await page.locator('#personnel-incident-modal').waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: 'Guardar decisión simulada' }).click();
+  await page.getByRole('button', { name: 'Guardar decisión' }).click();
   await page.locator('#personnel-incident-modal .alert-danger').waitFor({ state: 'visible' });
   await page.locator('#incident-reason').fill('Salida omitida en el escenario de ejemplo');
-  await page.getByRole('button', { name: 'Guardar decisión simulada' }).click();
+  await page.getByRole('button', { name: 'Guardar decisión' }).click();
   await page.locator('#personnel-incident-modal').waitFor({ state: 'hidden' });
   assert.ok((await page.locator('.personnel-incident').innerText()).includes('Revisada'));
   assert.ok(

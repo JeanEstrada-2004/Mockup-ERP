@@ -20,7 +20,7 @@
   .apexcharts-text.apexcharts-yaxis-title-text {
     fill: var(--ink-muted);
     font-family: inherit !important;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
 
   // Gridlines and axis rules are the most recessive marks on the chart.
@@ -38,7 +38,7 @@
   .apexcharts-legend-text {
     color: var(--ink-secondary) !important;
     font-family: inherit !important;
-    font-size: 0.75rem !important;
+    font-size: var(--fs-xs) !important;
   }
 
   // The value a radialBar or donut prints in its own centre.

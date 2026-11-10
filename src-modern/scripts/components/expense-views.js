@@ -1,3 +1,4 @@
+import { statusClass } from '../utils/status.js';
 import { activeVariant } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
@@ -76,13 +77,6 @@ function allExpenses() {
       base: false,
     })),
   ];
-}
-
-function statusClass(status) {
-  if (status === 'Aprobada') return 'text-bg-success';
-  if (status === 'Observada') return 'text-bg-danger';
-  if (status === 'En revisión') return 'text-bg-warning';
-  return 'text-bg-secondary';
 }
 
 function workerName(workerId) {

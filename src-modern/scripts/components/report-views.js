@@ -11,6 +11,8 @@ import { formatDate } from './project-views.js';
 import { formatMoney, writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
+const REPORT_STATUSES = ['Planificado', 'Activo', 'En riesgo', 'Suspendido', 'Cerrado'];
+const IN_EXECUTION = ['Activo', 'En riesgo'];
 const allowed = isModuleEnabled('reports');
 const hasBI = isModuleEnabled('bi');
 const reportDefs = [
@@ -63,9 +65,10 @@ export function reportsWorkspace() {
     clientFilter: data.clients.some((item) => item.id === params.get('client'))
       ? params.get('client')
       : '',
-    statusFilter: ['Activo', 'En riesgo'].includes(params.get('status'))
+    // Default scope = projects in execution, the same set the Panel General sums.
+    statusFilter: [...REPORT_STATUSES, 'todos'].includes(params.get('status'))
       ? params.get('status')
-      : '',
+      : 'ejecucion',
     periodFilter: months.includes(params.get('period')) ? params.get('period') : '',
     selectedSource: '',
     budgetChart: null,
@@ -80,7 +83,10 @@ export function reportsWorkspace() {
         (item) =>
           (!this.projectFilter || item.id === this.projectFilter) &&
           (!this.clientFilter || item.clientId === this.clientFilter) &&
-          (!this.statusFilter || item.status === this.statusFilter)
+          (this.statusFilter === 'todos' ||
+            (this.statusFilter === 'ejecucion'
+              ? IN_EXECUTION.includes(item.status)
+              : item.status === this.statusFilter))
       );
     },
     get projectIds() {
@@ -234,7 +240,7 @@ export function reportsWorkspace() {
     clearFilters() {
       this.projectFilter = '';
       this.clientFilter = '';
-      this.statusFilter = '';
+      this.statusFilter = 'ejecucion';
       this.periodFilter = '';
       this.updateFilters();
     },
@@ -246,7 +252,7 @@ export function reportsWorkspace() {
       for (const [key, value] of [
         ['project', this.projectFilter],
         ['client', this.clientFilter],
-        ['status', this.statusFilter],
+        ['status', this.statusFilter === 'ejecucion' ? '' : this.statusFilter],
         ['period', this.periodFilter],
       ])
         if (value) query.set(key, value);

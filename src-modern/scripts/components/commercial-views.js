@@ -1,3 +1,4 @@
+import { statusClass } from '../utils/status.js';
 import { Modal } from 'bootstrap';
 import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
@@ -85,13 +86,6 @@ function versionHistory(base, extra) {
     },
     ...extra.filter((item) => item.budgetId === base.id),
   ].sort((a, b) => b.version - a.version);
-}
-
-function statusClass(status) {
-  if (status === 'Aprobado' || status === 'Atendida') return 'text-bg-success';
-  if (status === 'Pendiente' || status === 'En revisión' || status === 'Aprobada')
-    return 'text-bg-warning';
-  return 'text-bg-secondary';
 }
 
 function modal(id) {

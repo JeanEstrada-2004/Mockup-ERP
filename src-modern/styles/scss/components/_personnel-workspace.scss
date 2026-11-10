@@ -6,7 +6,7 @@
     display: flex;
     gap: 0.6rem;
     align-items: flex-start;
-    font-size: 0.84rem;
+    font-size: var(--fs-sm);
   }
   .personnel-kpis,
   .personnel-worker-summary {
@@ -29,7 +29,7 @@
   }
   .personnel-kpis strong,
   .personnel-worker-summary strong {
-    font-size: 1.35rem;
+    font-size: var(--fs-xl);
   }
   .personnel-tabs {
     display: flex;
@@ -47,7 +47,7 @@
     background: var(--bs-body-bg);
     color: var(--bs-body-color);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--fs-md);
   }
   .personnel-tabs button.active,
   .personnel-tabs button:focus-visible {
@@ -68,14 +68,14 @@
   }
   .personnel-filters .form-label {
     margin-bottom: 0.25rem;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
   .personnel-data-table {
     overflow-x: auto;
   }
   .personnel-data-table table {
     min-width: 750px;
-    font-size: 0.81rem;
+    font-size: var(--fs-sm);
   }
   .personnel-data-table th {
     white-space: nowrap;
@@ -118,7 +118,7 @@
   }
   .personnel-mobile-card b {
     color: var(--brand-accent);
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
   }
   .personnel-hours {
     display: flex;
@@ -126,7 +126,7 @@
     gap: 0.5rem;
     align-items: baseline;
     margin-block: 0.2rem;
-    font-size: 1rem;
+    font-size: var(--fs-base);
   }
   .personnel-highlight {
     background: var(--bs-primary-bg-subtle);
@@ -196,7 +196,7 @@
     flex-wrap: wrap;
     gap: 0.4rem;
     margin: 0 0 1rem;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
   }
   .personnel-flow span,
   .personnel-flow a {
@@ -213,7 +213,7 @@
   }
   .personnel-worker-content h2 {
     margin-bottom: 0.8rem;
-    font-size: 1rem;
+    font-size: var(--fs-base);
   }
   .personnel-facts {
     margin: 0;
@@ -224,7 +224,7 @@
     gap: 1rem;
     padding: 0.45rem 0;
     border-bottom: 1px solid var(--bs-border-color);
-    font-size: 0.83rem;
+    font-size: var(--fs-sm);
   }
   .personnel-facts dt {
     color: var(--bs-secondary-color);
@@ -243,7 +243,7 @@
     gap: 0.25rem;
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--bs-border-color);
-    font-size: 0.83rem;
+    font-size: var(--fs-sm);
   }
   .personnel-linked-list > div:last-child {
     border: 0;
@@ -313,10 +313,10 @@
       padding: 0.65rem;
     }
     .personnel-kpis small {
-      font-size: 0.67rem;
+      font-size: var(--fs-xs);
     }
     .personnel-kpis strong {
-      font-size: 1rem;
+      font-size: var(--fs-base);
     }
     .personnel-panel .shell-section-header {
       flex-wrap: wrap;

@@ -3,10 +3,10 @@
 // ==========================================================================
 
 // Icon size utilities
-.icon-sm { font-size: 0.875rem; }
-.icon-md { font-size: 1rem; }
-.icon-lg { font-size: 1.25rem; }
-.icon-xl { font-size: 1.5rem; }
+.icon-sm { font-size: var(--fs-md); }
+.icon-md { font-size: var(--fs-base); }
+.icon-lg { font-size: var(--fs-xl); }
+.icon-xl { font-size: var(--fs-2xl); }
 
 // Icon animations
 .icon-spin { animation: spin 1s linear infinite; }
@@ -23,11 +23,11 @@
 }
 
 // Context-specific styling
-.navbar .bi { font-size: 1.125rem; }
-.sidebar-nav .bi { font-size: 1rem; width: 1.25rem; }
+.navbar .bi { font-size: var(--fs-lg); }
+.sidebar-nav .bi { font-size: var(--fs-base); width: 1.25rem; }
 // Icon-to-label gap only when the icon precedes other content. Icon-only
 // buttons (the icon is the last/only child) get no trailing margin, so the
 // glyph stays centered instead of being nudged left.
-.btn .bi { font-size: 0.875rem; }
+.btn .bi { font-size: var(--fs-md); }
 .btn .bi:not(:last-child) { margin-right: 0.375rem; }
-.stats-icon .bi { font-size: 1.25rem; } 
+.stats-icon .bi { font-size: var(--fs-xl); } 

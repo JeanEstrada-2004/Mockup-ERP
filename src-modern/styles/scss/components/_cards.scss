@@ -26,7 +26,7 @@
   }
 
   .card-title {
-    font-size: 1.0625rem;
+    font-size: var(--fs-base);
     font-weight: 600;
     letter-spacing: -0.01em;
     margin-bottom: 0;
@@ -63,7 +63,7 @@
   // Label — the markup uses `<p class="h6 text-muted">`, so it has to be
   // overridden here rather than in each of the 21 pages.
   .card-body p.h6 {
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -73,7 +73,7 @@
 
   // Value
   .card-body .h3 {
-    font-size: 1.9rem;
+    font-size: var(--fs-2xl);
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.15;
@@ -85,7 +85,7 @@
 
   // Delta
   .card-body small {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
@@ -98,7 +98,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: var(--fs-base);
     background-color: var(--surface-sunken) !important;
     color: var(--bs-primary) !important;
     border: 1px solid var(--bs-border-color);
@@ -106,7 +106,7 @@
     @media (min-width: 992px) {
       width: 2.5rem;
       height: 2.5rem;
-      font-size: 1.0625rem;
+      font-size: var(--fs-base);
     }
   }
 }
@@ -185,7 +185,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8125rem;
+      font-size: var(--fs-sm);
       margin-right: 0.75rem;
       flex-shrink: 0;
       background-color: var(--surface-sunken) !important;
@@ -198,7 +198,7 @@
 
       p {
         margin-bottom: 0.125rem;
-        font-size: 0.8125rem;
+        font-size: var(--fs-sm);
         line-height: 1.45;
         color: var(--ink-primary);
       }
@@ -207,7 +207,7 @@
       // is obvious the moment they are stacked in a scrolling list.
       small {
         display: block;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
         color: var(--ink-muted);
         white-space: nowrap;
         overflow: hidden;

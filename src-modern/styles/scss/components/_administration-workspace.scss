@@ -27,7 +27,7 @@
   .admin-company-brand p {
     margin: 0;
     color: var(--bs-secondary-color);
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
   }
   .admin-company-grid .d9-facts {
     align-content: center;
@@ -87,7 +87,7 @@
     border-radius: 0.45rem;
   }
   .admin-parameters dt {
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     color: var(--bs-secondary-color);
   }
   .admin-parameters dd {

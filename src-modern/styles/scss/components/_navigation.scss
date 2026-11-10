@@ -17,13 +17,13 @@
       margin-bottom: 0.125rem;
       display: flex;
       align-items: center;
-      font-size: 0.875rem;
+      font-size: var(--fs-md);
       transition: background-color 0.12s ease, color 0.12s ease;
 
       i {
         width: 1.25rem;
         margin-right: 0.75rem;
-        font-size: 1rem;
+        font-size: var(--fs-base);
         color: var(--bs-secondary-color);
         transition: color 0.15s ease;
       }
@@ -72,7 +72,7 @@
       &[data-bs-toggle="collapse"] {
         .bi-chevron-down {
           transition: transform 0.2s ease;
-          font-size: 0.75rem;
+          font-size: var(--fs-xs);
           color: var(--bs-secondary-color);
         }
 
@@ -88,7 +88,7 @@
     > .nav-item small {
       display: block;
       padding: 0.5rem 0.75rem 0.25rem;
-      font-size: 0.6875rem;
+      font-size: var(--fs-xs);
       letter-spacing: 0.06em;
       color: var(--bs-secondary-color);
     }
@@ -120,7 +120,7 @@
     .nav-link {
       padding: 0.4rem 1rem 0.4rem 2.25rem !important;
       margin-bottom: 0 !important;
-      font-size: 0.85rem !important;
+      font-size: var(--fs-md) !important;
       display: flex !important;
       align-items: center !important;
       width: 100% !important;
@@ -133,7 +133,7 @@
       i {
         width: 1rem;
         margin-right: 0.5rem;
-        font-size: 0.8rem;
+        font-size: var(--fs-sm);
         opacity: 0.7;
         flex-shrink: 0;
       }
@@ -183,14 +183,14 @@
 .admin-header {
   .navbar-brand {
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
 
     img {
       margin-right: 0.5rem;
     }
 
     .h4 {
-      font-size: 1.125rem;
+      font-size: var(--fs-lg);
       letter-spacing: -0.01em;
     }
   }
@@ -254,13 +254,13 @@
       transition: background-color 0.15s ease, color 0.15s ease;
 
       i {
-        font-size: 1.05rem;
+        font-size: var(--fs-base);
         line-height: 1;
       }
 
       // Notification dot
       .badge {
-        font-size: 0.6rem;
+        font-size: var(--fs-xs);
         padding: 0.2em 0.4em;
       }
     }
@@ -319,7 +319,7 @@
 
           i {
             margin-right: 0;
-            font-size: 1.1rem;
+            font-size: var(--fs-lg);
           }
         }
 
@@ -394,7 +394,7 @@
 
           i {
             margin-right: 0.75rem;
-            font-size: 1rem;
+            font-size: var(--fs-base);
           }
         }
 
@@ -424,7 +424,7 @@
 
     .navbar-brand {
       h1 {
-        font-size: 1.125rem;
+        font-size: var(--fs-lg);
       }
     }
 

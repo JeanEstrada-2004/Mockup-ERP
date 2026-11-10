@@ -221,6 +221,33 @@ $dark-primary: $primary;
 // Runtime custom properties
 // --------------------------------------------------------------------------
 :root {
+  // Type scale (DESIGN.md). Every ERP font size uses one of these steps; the
+  // smallest readable step is 12px so projected screens stay legible.
+  --fs-xs: 0.75rem; //   12px · captions, eyebrows, counters
+  --fs-sm: 0.8125rem; // 13px · secondary metadata, badges
+  --fs-md: 0.875rem; //  14px · tables, forms, buttons, body copy in panels
+  --fs-base: 1rem; //    16px · reading text, sidebar
+  --fs-lg: 1.125rem; //  18px · panel and section titles
+  --fs-xl: 1.25rem; //   20px · sub-page headings
+  --fs-2xl: 1.75rem; //  28px · page titles, headline figures
+
+  // Brand fallbacks; the build injects the variant palette over these.
+  --brand-primary: #1a365d;
+  --brand-accent: #0066cc;
+  --brand-accent-rgb: 0, 102, 204;
+  --brand-accent-hover: #0052a3;
+  --brand-accent-subtle: #e6f0fa;
+  --brand-accent-border: #b3d1f0;
+  --brand-solid: #1a365d;
+  --brand-solid-rgb: 26, 54, 93;
+  --brand-solid-hover: #152c4c;
+  --brand-solid-active: #132743;
+
+  // Motion (emil-design-eng): short, ease-out, transform/opacity only.
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --motion-fast: 140ms;
+  --motion-base: 180ms;
+
   --sidebar-width: #{$sidebar-width};
   --sidebar-mini-width: #{$sidebar-mini-width};
   --header-height: #{$header-height};

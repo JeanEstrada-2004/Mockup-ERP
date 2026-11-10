@@ -5,7 +5,12 @@ import {
   moduleHref,
   moduleLabel,
 } from '../src-modern/scripts/config/modules.js';
-import { getDataForVariant, getShellNotifications } from '../src-modern/scripts/data/mock-data.js';
+import {
+  getDataForVariant,
+  getPendingApprovals,
+  getShellNotifications,
+  projectShortName,
+} from '../src-modern/scripts/data/mock-data.js';
 
 const escapeHtml = (value) =>
   String(value).replace(
@@ -20,27 +25,109 @@ const escapeHtml = (value) =>
       })[character]
   );
 
+const formatMoney = (amount) =>
+  `S/ ${Math.round(amount)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
+
+// --------------------------------------------------------------------------
+// Brand palette. Each variant declares two colours (primary, accent); the
+// rest of the palette is derived here so light and dark themes stay legible.
+// --------------------------------------------------------------------------
+const hexToRgb = (hex) => {
+  const value = hex.replace('#', '');
+  return [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16));
+};
+const rgbToHex = (rgb) =>
+  `#${rgb.map((channel) => Math.round(channel).toString(16).padStart(2, '0')).join('')}`;
+const mix = (hex, target, amount) => {
+  const from = hexToRgb(hex);
+  const to = hexToRgb(target);
+  return rgbToHex(from.map((channel, index) => channel + (to[index] - channel) * amount));
+};
+const rgbList = (hex) => hexToRgb(hex).join(', ');
+
+function brandTokens(theme) {
+  const { primary, accent } = theme;
+  const light = {
+    // Text and identity (titles, eyebrow, active nav label).
+    'brand-primary': primary,
+    // Interaction signal: links, active indicator, focus, chart series 1.
+    'brand-accent': accent,
+    'brand-accent-rgb': rgbList(accent),
+    'brand-accent-hover': mix(accent, '#000000', 0.2),
+    'brand-accent-subtle': mix(accent, '#ffffff', 0.9),
+    'brand-accent-border': mix(accent, '#ffffff', 0.7),
+    // Solid fill for the primary button.
+    'brand-solid': primary,
+    'brand-solid-rgb': rgbList(primary),
+    'brand-solid-hover': mix(primary, '#000000', 0.18),
+    'brand-solid-active': mix(primary, '#000000', 0.28),
+    'brand-surface': theme.surface,
+  };
+  const dark = {
+    'brand-primary': mix(accent, '#ffffff', 0.72),
+    'brand-accent': mix(accent, '#ffffff', 0.38),
+    'brand-accent-rgb': rgbList(mix(accent, '#ffffff', 0.38)),
+    'brand-accent-hover': mix(accent, '#ffffff', 0.58),
+    'brand-accent-subtle': mix(accent, '#111827', 0.78),
+    'brand-accent-border': mix(accent, '#111827', 0.45),
+    'brand-solid': accent,
+    'brand-solid-rgb': rgbList(accent),
+    'brand-solid-hover': mix(accent, '#ffffff', 0.12),
+    'brand-solid-active': mix(accent, '#ffffff', 0.2),
+  };
+  const declarations = (tokens) =>
+    Object.entries(tokens)
+      .map(([name, value]) => `--${name}:${value}`)
+      .join(';');
+  return `:root{${declarations(light)}}html[data-bs-theme="dark"]{${declarations(dark)}}`;
+}
+
+// The supplied logo files keep wide empty margins. The image itself is shown
+// unaltered; its frame clips the margins away. Sizes scale with --logo-h.
+function logoTokens(company) {
+  const rule = (theme, [x, y, width, height, imageWidth]) =>
+    `.shell-brand .shell-logo-frame--${theme}{width:calc(var(--logo-h) * ${(width / height).toFixed(4)})}` +
+    `.shell-brand .shell-logo-frame .shell-logo--${theme}{width:calc(var(--logo-h) * ${(imageWidth / height).toFixed(4)});height:auto;max-width:none;` +
+    `left:calc(var(--logo-h) * -${(x / height).toFixed(4)});top:calc(var(--logo-h) * -${(y / height).toFixed(4)})}`;
+  return rule('light', company.logoLightBox) + rule('dark', company.logoDarkBox);
+}
+
+const NOTIFICATION_ICONS = {
+  approval: 'bi-check2-square',
+  warning: 'bi-exclamation-triangle',
+  error: 'bi-x-octagon',
+  info: 'bi-info-circle',
+  system: 'bi-gear',
+};
+
+function renderNotificationItem(item) {
+  const href = item.href || moduleHref(item.moduleId, item.recordId);
+  return `<li><a class="dropdown-item shell-notification shell-notification--${escapeHtml(item.level)}" href="${href}"><i class="bi ${NOTIFICATION_ICONS[item.level] || NOTIFICATION_ICONS.info}" aria-hidden="true"></i><span><small>${escapeHtml(item.category)}</small>${escapeHtml(item.text)}</span></a></li>`;
+}
+
+function renderApprovalItem(item) {
+  return `<li><a class="dropdown-item shell-approval" href="${moduleHref(item.moduleId, item.id)}"><span><small>${escapeHtml(item.kind)} · ${escapeHtml(item.projectId)}</small><strong>${escapeHtml(item.id)}</strong></span><span class="shell-approval-amount">${formatMoney(item.amount)}</span></a></li>`;
+}
+
 function renderHeader(variant, data) {
   const notifications = getShellNotifications(data, variant);
+  const approvals = getPendingApprovals(data, variant);
   const company = variant.company;
+  const user = variant.user;
   const projectOptions = data.projects
     .map(
       (project) =>
-        `<option value="${escapeHtml(project.id)}">${escapeHtml(project.id)} · ${escapeHtml(project.name)}</option>`
+        `<option value="${escapeHtml(project.id)}" title="${escapeHtml(project.name)}">${escapeHtml(project.id)} · ${escapeHtml(projectShortName(project.name))}</option>`
     )
     .join('');
   const notificationItems = notifications.length
-    ? notifications
-        .map(
-          (item) =>
-            `<li><a class="dropdown-item shell-notification" href="${moduleHref(item.moduleId, item.recordId)}"><span class="shell-notification-dot shell-notification-dot--${escapeHtml(item.level)}" aria-hidden="true"></span><span>${escapeHtml(item.text)}</span></a></li>`
-        )
-        .join('')
-    : '<li><span class="dropdown-item-text text-muted">No hay avisos pendientes.</span></li>';
-  const brandName =
-    variant.id === 'surtec-peti'
-      ? `<span class="shell-brand-name">${escapeHtml(company.shortName)}</span>`
-      : '';
+    ? notifications.map(renderNotificationItem).join('')
+    : '<li><span class="dropdown-item-text text-body-secondary">No hay avisos pendientes.</span></li>';
+  const approvalItems = approvals.length
+    ? approvals.map(renderApprovalItem).join('')
+    : '<li><span class="dropdown-item-text text-body-secondary">No hay aprobaciones pendientes.</span></li>';
 
   return `
     <header class="admin-header shell-header">
@@ -49,10 +136,9 @@ function renderHeader(variant, data) {
           <button class="hamburger-menu shell-menu-toggle" type="button" data-sidebar-toggle aria-label="Abrir menú lateral">
             <i class="bi bi-list" aria-hidden="true"></i>
           </button>
-          <a class="navbar-brand shell-brand" href="./index.html" aria-label="Ir a Inicio de ${escapeHtml(company.shortName)}">
-            <img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoLight)}" alt="Logo de ${escapeHtml(company.shortName)}">
-            <img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoDark)}" alt="" aria-hidden="true">
-            ${brandName}
+          <a class="navbar-brand shell-brand" href="./index.html" aria-label="${escapeHtml(company.name)}: ir al Panel General">
+            <span class="shell-logo-frame shell-logo-frame--light"><img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoLight)}" alt="Logo de ${escapeHtml(company.shortName)}"></span>
+            <span class="shell-logo-frame shell-logo-frame--dark"><img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoDark)}" alt="" aria-hidden="true"></span>
           </a>
           <div class="shell-search" x-data="globalSearch" @click.outside="close()">
             <label class="visually-hidden" for="global-search">Búsqueda global</label>
@@ -77,14 +163,27 @@ function renderHeader(variant, data) {
             </select>
           </div>
           <div class="navbar-nav shell-header-actions flex-row">
+            <span class="shell-demo-badge" title="Todos los registros de esta aplicación son ficticios">
+              <i class="bi bi-info-circle" aria-hidden="true"></i><span class="shell-demo-badge-long">Datos de demostración</span><span class="shell-demo-badge-short">Demo</span>
+            </span>
+            <div class="dropdown">
+              <button class="btn shell-icon-button position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Aprobaciones: ${approvals.length} pendientes" title="Aprobaciones pendientes">
+                <i class="bi bi-check2-square" aria-hidden="true"></i>
+                ${approvals.length ? `<span class="shell-notification-count">${approvals.length}</span>` : ''}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shell-approval-menu">
+                <li><h6 class="dropdown-header">Aprobaciones pendientes</h6></li>
+                ${approvalItems}
+              </ul>
+            </div>
             <div x-data="themeSwitch">
               <button class="btn shell-icon-button" type="button" @click="toggle()" :aria-label="currentTheme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'" title="Cambiar tema">
-                <i class="bi bi-moon-fill" x-show="currentTheme === 'light'" aria-hidden="true"></i>
-                <i class="bi bi-sun-fill" x-show="currentTheme === 'dark'" x-cloak aria-hidden="true"></i>
+                <i class="bi bi-moon" x-show="currentTheme === 'light'" aria-hidden="true"></i>
+                <i class="bi bi-sun" x-show="currentTheme === 'dark'" x-cloak aria-hidden="true"></i>
               </button>
             </div>
             <div class="dropdown">
-              <button class="btn shell-icon-button position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones: ${notifications.length} pendientes">
+              <button class="btn shell-icon-button position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones: ${notifications.length} pendientes" title="Notificaciones">
                 <i class="bi bi-bell" aria-hidden="true"></i>
                 ${notifications.length ? `<span class="shell-notification-count">${notifications.length}</span>` : ''}
               </button>
@@ -94,11 +193,13 @@ function renderHeader(variant, data) {
               </ul>
             </div>
             <div class="dropdown">
-              <button class="btn shell-user-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menú de usuario de demostración">
-                <i class="bi bi-person" aria-hidden="true"></i><span class="shell-user-label">Usuario demo</span><i class="bi bi-chevron-down shell-user-chevron" aria-hidden="true"></i>
+              <button class="btn shell-user-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menú de usuario: ${escapeHtml(user.name)}, ${escapeHtml(user.role)}">
+                <span class="shell-user-avatar" aria-hidden="true">${escapeHtml(user.initials)}</span>
+                <span class="shell-user-label"><strong>${escapeHtml(user.name)}</strong><small>${escapeHtml(user.role)}</small></span>
+                <i class="bi bi-chevron-down shell-user-chevron" aria-hidden="true"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-end">
-                <li><span class="dropdown-header">Usuario demo · Administrador</span></li>
+                <li><span class="dropdown-header">${escapeHtml(user.name)} · ${escapeHtml(user.role)}</span></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="profile"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</button></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="settings"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configuración</button></li>
                 <li><hr class="dropdown-divider"></li>
@@ -127,8 +228,8 @@ function renderSidebar(variant) {
   return `<aside class="admin-sidebar" id="admin-sidebar" aria-label="Navegación principal"><div class="sidebar-content"><nav class="sidebar-nav" aria-label="Módulos">${sections}</nav></div></aside>`;
 }
 
-function renderFooter() {
-  return `<footer class="admin-footer shell-footer"><div class="container-fluid"><span>Plataforma de gestión de proyectos</span><span>Datos de demostración</span></div></footer>`;
+function renderFooter(variant) {
+  return `<footer class="admin-footer shell-footer"><div class="container-fluid"><span>${escapeHtml(variant.company.name)} · Plataforma de Gestión y Control de Proyectos</span><span>Datos ficticios con fines de demostración</span></div></footer>`;
 }
 
 export function appShellPlugin(mode) {
@@ -170,7 +271,7 @@ export function appShellPlugin(mode) {
         if (!html.includes('<!-- APP_HEADER -->')) return html;
 
         const themeKey = `mockup-erp:${variant.id}:theme`;
-        const brandStyle = `<style>:root{--brand-primary:${variant.theme.primary};--brand-accent:${variant.theme.accent};--brand-surface:${variant.theme.surface}}</style>`;
+        const brandStyle = `<style>${brandTokens(variant.theme)}${logoTokens(variant.company)}</style>`;
         const earlyTheme = `<script>try{document.documentElement.dataset.bsTheme=localStorage.getItem(${JSON.stringify(themeKey)})||'light'}catch{document.documentElement.dataset.bsTheme='light'}</script>`;
 
         return html
@@ -181,7 +282,7 @@ export function appShellPlugin(mode) {
           )
           .replace('<!-- APP_HEADER -->', renderHeader(variant, data))
           .replace('<!-- APP_SIDEBAR -->', renderSidebar(variant))
-          .replace('<!-- APP_FOOTER -->', renderFooter())
+          .replace('<!-- APP_FOOTER -->', renderFooter(variant))
           .replace(
             /<meta name="theme-color" content="[^"]*">/,
             `<meta name="theme-color" content="${variant.theme.primary}">`

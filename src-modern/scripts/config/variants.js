@@ -48,16 +48,32 @@ const jyDemoModules = [
   'documents',
 ];
 
+// The supplied logo files carry wide empty margins. The header shows each file
+// unaltered but clipped to its drawn area: [x, y, width, height, imageWidth,
+// imageHeight] in source pixels, measured from the files in public-assets.
+const LOGO_BOXES = {
+  surtecLight: [84, 104, 390, 351, 559, 559],
+  surtecDark: [83, 103, 392, 353, 559, 559],
+  jyLight: [389, 38, 1390, 616, 2172, 724],
+  jyDark: [400, 35, 1411, 632, 2172, 724],
+};
+
+// Fictitious signed-in user shown in the header (punto 3).
+const DEMO_USER = { name: 'Jean Estrada', role: 'Administrador', initials: 'JE' };
+
 export const VARIANTS = {
   'surtec-peti': {
     id: 'surtec-peti',
     dataSet: 'surtec',
+    user: DEMO_USER,
     company: {
       name: 'SurTec Ingeniería y Tecnología S.A.C.',
       shortName: 'SurTec',
       logoLight: 'assets/brands/surtec/logo-transparente.png',
       logoDark: 'assets/brands/surtec/logo-blanco-fondo-negro.png',
       logoCompact: 'assets/brands/surtec/logo-circular.png',
+      logoLightBox: LOGO_BOXES.surtecLight,
+      logoDarkBox: LOGO_BOXES.surtecDark,
     },
     theme: {
       primary: '#1A365D',
@@ -70,12 +86,15 @@ export const VARIANTS = {
   'jy-pmi': {
     id: 'jy-pmi',
     dataSet: 'jy',
+    user: DEMO_USER,
     company: {
       name: 'J&Y Ingenieros Consultores S.A.C.',
       shortName: 'J&Y',
       logoLight: 'assets/brands/jy/logo-claro-compacto.png',
       logoDark: 'assets/brands/jy/logo-oscuro-compacto.png',
       logoCompact: 'assets/brands/jy/isotipo-claro.png',
+      logoLightBox: LOGO_BOXES.jyLight,
+      logoDarkBox: LOGO_BOXES.jyDark,
     },
     // Neutral UI colors until a formal J&Y digital palette is supplied.
     theme: { primary: '#334155', accent: '#2563EB', neutral: '#475569', surface: '#F8FAFC' },
@@ -84,12 +103,15 @@ export const VARIANTS = {
   'jy-demo': {
     id: 'jy-demo',
     dataSet: 'jy',
+    user: DEMO_USER,
     company: {
       name: 'J&Y Ingenieros Consultores S.A.C.',
       shortName: 'J&Y',
       logoLight: 'assets/brands/jy/logo-claro-compacto.png',
       logoDark: 'assets/brands/jy/logo-oscuro-compacto.png',
       logoCompact: 'assets/brands/jy/isotipo-claro.png',
+      logoLightBox: LOGO_BOXES.jyLight,
+      logoDarkBox: LOGO_BOXES.jyDark,
     },
     theme: { primary: '#334155', accent: '#2563EB', neutral: '#475569', surface: '#F8FAFC' },
     enabledModules: jyDemoModules,

@@ -6,7 +6,7 @@
     padding: 1.1rem;
   }
   h2 {
-    font-size: 1rem;
+    font-size: var(--fs-base);
   }
 }
 
@@ -25,7 +25,7 @@ body[data-page='project-detail'] .project-workspace .row {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 }
 .workspace-quick-actions > span {
   color: var(--bs-secondary-color);
@@ -56,11 +56,11 @@ body[data-page='project-detail'] .project-workspace .row {
   display: block;
   margin-top: 0.45rem;
   color: var(--bs-secondary-color);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 .workspace-caption {
   color: var(--bs-secondary-color);
-  font-size: 0.76rem;
+  font-size: var(--fs-xs);
   margin: 0.3rem 0 0;
 }
 .workspace-chart-values {
@@ -72,7 +72,7 @@ body[data-page='project-detail'] .project-workspace .row {
 .workspace-chart-values span {
   display: flex;
   flex-direction: column;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 .workspace-chart-values small {
   color: var(--bs-secondary-color);
@@ -86,7 +86,7 @@ body[data-page='project-detail'] .project-workspace .row {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.77rem;
+  font-size: var(--fs-xs);
 }
 .workspace-source-list strong {
   white-space: nowrap;
@@ -120,17 +120,17 @@ body[data-page='project-detail'] .project-workspace .row {
 }
 .workspace-project-row strong {
   color: var(--brand-accent);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 .workspace-project-row > span:first-child span {
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 .workspace-project-row small,
 .workspace-compact-list small,
 .workspace-record-list small {
   color: var(--bs-secondary-color);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 .workspace-project-metrics {
   display: grid;
@@ -140,7 +140,7 @@ body[data-page='project-detail'] .project-workspace .row {
 }
 .workspace-compact-list a {
   align-items: flex-start;
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 .workspace-compact-list a > span:first-child {
   min-width: 0;
@@ -151,7 +151,7 @@ body[data-page='project-detail'] .project-workspace .row {
 }
 .workspace-compact-list time {
   color: var(--bs-secondary-color);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 .workspace-filters {
@@ -167,7 +167,7 @@ body[data-page='project-detail'] .project-workspace .row {
   flex: 0 1 185px;
 }
 .workspace-filters .form-label {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .workspace-filters .btn {
@@ -177,13 +177,13 @@ body[data-page='project-detail'] .project-workspace .row {
   display: grid;
   min-width: 190px;
   text-decoration: none;
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 .workspace-table-project span {
   color: var(--bs-body-color);
 }
 .workspace-project-table {
-  font-size: 0.77rem;
+  font-size: var(--fs-xs);
 }
 .workspace-project-table td {
   white-space: nowrap;
@@ -200,7 +200,7 @@ body[data-page='project-detail'] .project-workspace .row {
   color: var(--bs-secondary-color);
 }
 .workspace-empty i {
-  font-size: 1.6rem;
+  font-size: var(--fs-2xl);
 }
 .workspace-empty p {
   margin: 0.5rem 0 1rem;
@@ -225,7 +225,7 @@ body[data-page='project-detail'] .project-workspace .row {
   color: var(--bs-secondary-color);
   padding: 0.65rem 0.9rem;
   white-space: nowrap;
-  font-size: 0.83rem;
+  font-size: var(--fs-sm);
   font-weight: 600;
 }
 .workspace-tabs button:hover,
@@ -240,7 +240,7 @@ body[data-page='project-detail'] .project-workspace .row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.4rem;
-  font-size: 0.81rem;
+  font-size: var(--fs-sm);
   margin: 1rem 0;
 }
 .workspace-budget-track .progress {
@@ -261,7 +261,7 @@ body[data-page='project-detail'] .project-workspace .row {
   gap: 0.75rem;
   border-top: 1px solid var(--bs-border-color);
   padding: 0.57rem 0;
-  font-size: 0.79rem;
+  font-size: var(--fs-sm);
 }
 .workspace-summary-grid span {
   color: var(--bs-secondary-color);
@@ -270,7 +270,7 @@ body[data-page='project-detail'] .project-workspace .row {
   text-align: right;
 }
 .workspace-subheading {
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
   margin: 1.4rem 0 0.6rem;
 }
 .workspace-indicators {
@@ -283,14 +283,14 @@ body[data-page='project-detail'] .project-workspace .row {
   gap: 0.15rem;
 }
 .workspace-indicators strong {
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
 }
 .workspace-indicators span {
   color: var(--bs-secondary-color);
-  font-size: 0.73rem;
+  font-size: var(--fs-xs);
 }
 .workspace-record-list a {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 .workspace-record-list a > span {
   display: grid;
@@ -332,7 +332,7 @@ body[data-page='project-detail'] .project-workspace .row {
   }
   .workspace-project-card-top strong {
     color: var(--brand-accent);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
   .workspace-project-card-name {
     font-weight: 600;
@@ -340,19 +340,19 @@ body[data-page='project-detail'] .project-workspace .row {
   .workspace-project-card > small,
   .workspace-project-card-metrics small {
     color: var(--bs-secondary-color);
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
   }
   .workspace-project-card-metrics span {
     display: grid;
   }
   .workspace-project-card-metrics strong {
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
   }
   .workspace-project-card-end {
     border-top: 1px solid var(--bs-border-color);
     padding-top: 0.45rem;
     color: var(--brand-accent);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
   }
 }
 
@@ -375,7 +375,7 @@ body[data-page='project-detail'] .project-workspace .row {
     min-height: 100px;
   }
   .workspace-kpi .shell-kpi-value {
-    font-size: 1.15rem;
+    font-size: var(--fs-lg);
   }
   .workspace-project-metrics small {
     text-align: right;

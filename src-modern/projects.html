@@ -25,14 +25,10 @@
             </nav>
             <div class="shell-page-heading">
               <div>
-                <p class="shell-eyebrow">PORTAFOLIO</p>
-                <h1>Proyectos</h1>
-                <p class="shell-page-subtitle">Busca un proyecto y abre su ficha integral.</p>
+<h1>Proyectos</h1>
+                <p class="shell-page-subtitle">Gestión integral de proyectos</p>
               </div>
-              <span class="shell-demo-label"
-                ><i class="bi bi-info-circle" aria-hidden="true"></i> Datos de demostración</span
-              >
-            </div>
+</div>
             <section class="card" aria-labelledby="projects-list-title">
               <div class="card-body">
                 <div class="shell-section-header">
@@ -43,92 +39,144 @@
                     x-text="`${filteredProjects.length} de ${projects.length} proyectos`"
                   ></span>
                 </div>
-                <div class="workspace-filters mb-3">
-                  <div>
-                    <label class="form-label" for="projects-search">Buscar proyecto</label>
+                <div class="data-toolbar">
+                  <div class="data-toolbar-search">
+                    <label class="visually-hidden" for="projects-search">Buscar proyecto</label>
+                    <i class="bi bi-search" aria-hidden="true"></i>
                     <input
                       id="projects-search"
                       type="search"
                       class="form-control"
-                      placeholder="Código, nombre o cliente"
+                      placeholder="Buscar por código, nombre o cliente"
                       x-model="search"
                       @input="updateUrl()"
                     />
                   </div>
-                  <div>
-                    <label class="form-label" for="projects-status">Estado</label>
+                  <div class="data-toolbar-field">
+                    <label class="visually-hidden" for="projects-status">Estado</label>
                     <select
                       id="projects-status"
                       class="form-select"
                       x-model="status"
                       @change="updateUrl()"
                     >
-                      <option value="">Todos</option>
-                      <option value="Activo">Activo</option>
-                      <option value="En riesgo">En riesgo</option>
+                      <option value="">Todos los estados</option>
+                      <template x-for="item in statuses" :key="item"
+                        ><option :value="item" x-text="item" :selected="item === status"></option
+                      ></template>
                     </select>
                   </div>
                   <button
-                    class="btn btn-outline-secondary"
+                    class="btn btn-outline-secondary data-toolbar-more"
                     type="button"
-                    @click="clearFilters()"
-                    x-show="search || status"
+                    @click="moreFilters = !moreFilters"
+                    :aria-expanded="String(moreFilters)"
+                    aria-controls="projects-more-filters"
                   >
-                    Limpiar filtros
+                    <i class="bi bi-sliders" aria-hidden="true"></i> Más filtros
                   </button>
                 </div>
-                <div class="table-responsive workspace-project-table">
+                <div class="data-toolbar-extra" id="projects-more-filters" x-show="moreFilters" x-cloak>
+                  <div>
+                    <label class="form-label" for="projects-client">Cliente</label>
+                    <select id="projects-client" class="form-select" x-model="client" @change="updateUrl()">
+                      <option value="">Todos los clientes</option>
+                      <template x-for="item in clients" :key="item.id"
+                        ><option :value="item.id" x-text="item.name" :selected="item.id === client"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="projects-manager">Responsable</label>
+                    <select id="projects-manager" class="form-select" x-model="manager" @change="updateUrl()">
+                      <option value="">Todos los responsables</option>
+                      <template x-for="item in managers" :key="item.id"
+                        ><option :value="item.id" x-text="item.name" :selected="item.id === manager"></option
+                      ></template>
+                    </select>
+                  </div>
+                </div>
+                <div class="filter-chips" x-show="activeChips().length" x-cloak aria-label="Filtros aplicados">
+                  <template x-for="chip in activeChips()" :key="chip.key"
+                    ><button type="button" class="filter-chip" @click="clearChip(chip.key)" :aria-label="`Quitar filtro ${chip.label}: ${chip.value}`"
+                      ><span x-text="`${chip.label}: ${chip.value}`"></span><i class="bi bi-x" aria-hidden="true"></i></button
+                  ></template>
+                  <button type="button" class="filter-chip-clear" @click="clearFilters()">Limpiar filtros</button>
+                </div>
+                <div class="table-responsive workspace-project-table data-table">
                   <table class="table table-hover align-middle mb-0">
                     <thead>
                       <tr>
-                        <th scope="col">Proyecto</th>
-                        <th scope="col">Cliente</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Avance</th>
-                        <th scope="col">Presupuesto</th>
-                        <th scope="col">Ejecutado</th>
-                        <th scope="col"><span class="visually-hidden">Acción</span></th>
+                        <template
+                          x-for="column in [['id','Código'],['name','Proyecto'],['client','Cliente'],['manager','Responsable'],['progress','Avance'],['budget','Presupuesto'],['cost','Costo'],['status','Estado']]"
+                          :key="column[0]"
+                          ><th
+                            scope="col"
+                            :aria-sort="ariaSort(column[0])"
+                            :class="{ 'text-end': ['progress','budget','cost'].includes(column[0]), 'data-col-wide': column[0] === 'manager' }"
+                          >
+                            <button type="button" class="data-sort" @click="sortBy(column[0])"
+                              ><span x-text="column[1]"></span><i class="bi" :class="sortIcon(column[0])" aria-hidden="true"></i></button
+                          ></th
+                        ></template>
+                        <th scope="col" class="data-actions-col"><span class="visually-hidden">Acciones</span></th>
                       </tr>
                     </thead>
                     <tbody>
-                      <template x-for="project in filteredProjects" :key="project.id"
+                      <template x-for="project in visibleProjects" :key="project.id"
                         ><tr>
                           <td>
-                            <a class="workspace-table-project" :href="detailHref(project.id)"
-                              ><strong x-text="project.id"></strong
-                              ><span x-text="project.name"></span
-                            ></a>
+                            <a class="data-code" :href="detailHref(project.id)" x-text="project.id"></a>
                           </td>
+                          <td class="data-primary" x-text="project.name"></td>
                           <td x-text="projectClient(project)"></td>
+                          <td class="data-col-wide" x-text="projectManager(project)"></td>
+                          <td class="text-end">
+                            <span class="data-progress"
+                              ><span class="data-progress-bar"><span :style="`width:${project.progressPercent}%`"></span></span
+                              ><span x-text="`${project.progressPercent} %`"></span
+                            ></span>
+                          </td>
+                          <td class="text-end data-money" x-text="formatMoney(project.budgetAmount)"></td>
+                          <td class="text-end data-money" x-text="formatMoney(financials(project.id).executedCost)"></td>
                           <td>
                             <span
                               class="badge"
-                              :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                              :class="$statusClass(project.status)"
                               x-text="project.status"
                             ></span>
                           </td>
-                          <td x-text="`${project.progressPercent} %`"></td>
-                          <td x-text="formatMoney(project.budgetAmount)"></td>
-                          <td x-text="formatMoney(financials(project.id).executedCost)"></td>
-                          <td>
-                            <a
-                              :href="detailHref(project.id)"
-                              :aria-label="`Abrir ficha de ${project.id}`"
-                              ><i class="bi bi-arrow-right" aria-hidden="true"></i
-                            ></a>
+                          <td class="data-actions-col">
+                            <div class="dropdown">
+                              <button
+                                class="btn data-row-menu"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                data-bs-popper-config='{"strategy":"fixed"}'
+                                aria-expanded="false"
+                                :aria-label="`Acciones de ${project.id}`"
+                              >
+                                <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" :href="detailHref(project.id)"><i class="bi bi-eye" aria-hidden="true"></i> Ver ficha</a></li>
+                                <li><a class="dropdown-item" :href="costsHref(project.id)"><i class="bi bi-graph-up" aria-hidden="true"></i> Ver costos</a></li>
+                                <li><a class="dropdown-item" :href="documentsHref(project.id)"><i class="bi bi-folder2-open" aria-hidden="true"></i> Ver documentos</a></li>
+                              </ul>
+                            </div>
                           </td></tr
                       ></template>
                     </tbody>
                   </table>
                 </div>
                 <div class="workspace-project-cards">
-                  <template x-for="project in filteredProjects" :key="project.id"
+                  <template x-for="project in visibleProjects" :key="project.id"
                     ><a class="workspace-project-card" :href="detailHref(project.id)">
                       <span class="workspace-project-card-top"
                         ><strong x-text="project.id"></strong
                         ><span
                           class="badge"
-                          :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                          :class="$statusClass(project.status)"
                           x-text="project.status"
                         ></span
                       ></span>
@@ -151,6 +199,21 @@
                       ></span> </a
                   ></template>
                 </div>
+                <nav class="data-pagination" x-show="filteredProjects.length" aria-label="Paginación de proyectos">
+                  <span class="data-pagination-range" x-text="rangeLabel(filteredProjects)"></span>
+                  <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" :class="page === 1 && 'disabled'">
+                      <button class="page-link" type="button" @click="goToPage(page - 1, filteredProjects)" aria-label="Página anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                    </li>
+                    <template x-for="number in pageNumbers(filteredProjects)" :key="number"
+                      ><li class="page-item" :class="number === page && 'active'"
+                        ><button class="page-link" type="button" @click="goToPage(number, filteredProjects)" :aria-current="number === page ? 'page' : null" x-text="number"></button></li
+                    ></template>
+                    <li class="page-item" :class="page === pageCount(filteredProjects) && 'disabled'">
+                      <button class="page-link" type="button" @click="goToPage(page + 1, filteredProjects)" aria-label="Página siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    </li>
+                  </ul>
+                </nav>
                 <div class="workspace-empty" x-show="filteredProjects.length === 0" role="status">
                   <i class="bi bi-search" aria-hidden="true"></i>
                   <p>No se encontraron proyectos con esos filtros.</p>

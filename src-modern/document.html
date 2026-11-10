@@ -43,15 +43,10 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-                    <p class="shell-eyebrow">FICHA DOCUMENTAL · DEMOSTRACIÓN</p>
-                    <h1 x-text="document.id"></h1>
+<h1 x-text="document.id"></h1>
                     <p class="shell-page-subtitle" x-text="document.fileName"></p>
                   </div>
                   <a class="btn btn-outline-primary" :href="backHref" x-text="`← ${backLabel}`"></a>
-                </div>
-                <div class="alert alert-info" role="note">
-                  Esta ficha representa metadatos y versionado visual. No existe un PDF descargable
-                  ni un archivo procesado.
                 </div>
                 <div class="d9-actions mb-3">
                   <button type="button" class="btn btn-primary" @click="openPreview()">
@@ -85,7 +80,7 @@
                             ><a :href="originHref" x-text="document.operationId"></a>
                           </div>
                           <div>
-                            <small>Responsable ficticio</small
+                            <small>Responsable</small
                             ><strong x-text="workerName(document.responsibleId)"></strong>
                           </div>
                           <div>

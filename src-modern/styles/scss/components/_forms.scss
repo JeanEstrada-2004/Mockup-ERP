@@ -41,7 +41,7 @@
   text-align: center;
 
   .form-title {
-    font-size: 1.75rem;
+    font-size: var(--fs-2xl);
     font-weight: 600;
     color: var(--bs-heading-color);
     margin-bottom: 0.5rem;
@@ -49,7 +49,7 @@
 
   .form-subtitle {
     color: var(--bs-secondary);
-    font-size: 1rem;
+    font-size: var(--fs-base);
   }
 }
 
@@ -147,12 +147,12 @@
   display: flex;
   align-items: center;
   margin-top: 0.25rem;
-  font-size: 0.875rem;
+  font-size: var(--fs-md);
   line-height: 1.25;
 
   .feedback-icon {
     margin-right: 0.375rem;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
 
   &.valid-feedback-realtime {
@@ -179,7 +179,7 @@
       display: flex;
       align-items: center;
       color: var(--bs-secondary);
-      font-size: 0.875rem;
+      font-size: var(--fs-md);
       position: relative;
 
       &:not(:last-child) {
@@ -239,7 +239,7 @@
 
           &::before {
             content: '✓';
-            font-size: 0.75rem;
+            font-size: var(--fs-xs);
           }
         }
       }
@@ -298,7 +298,7 @@
 
   .upload-hint {
     color: var(--bs-secondary);
-    font-size: 0.875rem;
+    font-size: var(--fs-md);
   }
 
   .file-input {
@@ -334,7 +334,7 @@
         }
 
         .file-size {
-          font-size: 0.8125rem;
+          font-size: var(--fs-sm);
           color: var(--bs-secondary);
         }
       }
@@ -478,7 +478,7 @@
   }
 
   .strength-text {
-    font-size: 0.8125rem;
+    font-size: var(--fs-sm);
     color: var(--bs-secondary);
   }
 }
@@ -563,7 +563,7 @@
     }
 
     .step-title {
-      font-size: 0.875rem;
+      font-size: var(--fs-md);
       color: var(--bs-secondary);
       font-weight: 500;
     }

@@ -71,7 +71,7 @@ async function openVariant(variant, expectedName, expectedProjects) {
   await page.waitForFunction(() => window.AdminApp?.isInitialized);
   assert.equal(
     await page.locator('.shell-brand').getAttribute('aria-label'),
-    `Ir a Inicio de ${expectedName}`
+    `${expectedName}: ir al Panel General`
   );
   assert.equal(await page.locator('#global-project-select option').count(), expectedProjects);
   assert.ok(
@@ -160,12 +160,15 @@ async function verifyProjectFlow(variant, projectId) {
   }
   if (variant === 'surtec-peti') {
     await page.selectOption('#projects-status', 'En riesgo');
-    assert.equal(await page.locator('.workspace-project-table tbody tr').count(), 1);
+    assert.equal(
+      await page.locator('.workspace-project-table tbody tr').count(),
+      data.projects.filter((item) => item.status === 'En riesgo').length
+    );
   }
   await page.selectOption('#projects-status', 'Activo');
   await page.locator('#projects-search').fill(projectId);
   assert.equal(await page.locator('.workspace-project-table tbody tr').count(), 1);
-  await page.locator('.workspace-table-project').click();
+  await page.locator('.workspace-project-table .data-code').first().click();
   await page.waitForURL(/project\.html\?id=/);
   assert.equal(await page.locator('.workspace-detail-heading h1').innerText(), project.name);
   assert.equal(await page.locator('#global-project-select').inputValue(), projectId);
@@ -243,13 +246,13 @@ async function verifyProjectFlow(variant, projectId) {
 }
 
 try {
-  await openVariant('surtec-peti', 'SurTec', 3);
+  await openVariant('surtec-peti', 'SurTec Ingeniería y Tecnología S.A.C.', 15);
   assert.equal(await page.locator('.sidebar-nav [data-module="crm"]').count(), 1);
   assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 1);
-  assert.equal(await page.locator('.shell-notification-menu .shell-notification').count(), 4);
-  await page.locator('[aria-label="Notificaciones: 4 pendientes"]').click();
+  assert.equal(await page.locator('.shell-notification-menu .shell-notification').count(), 6);
+  await page.locator('[aria-label="Notificaciones: 6 pendientes"]').click();
   assert.ok(await page.locator('.shell-notification-menu').isVisible());
-  await page.locator('[aria-label="Notificaciones: 4 pendientes"]').click();
+  await page.locator('[aria-label="Notificaciones: 6 pendientes"]').click();
   await page.locator('[data-sidebar-toggle]').click();
   assert.equal(
     await page.locator('[data-sidebar-toggle]').getAttribute('aria-label'),
@@ -331,17 +334,17 @@ try {
   await verifyProjectFlow('jy-demo', 'PR-JY-001');
 
   await page.setViewportSize({ width: 1440, height: 900 });
-  await openVariant('jy-pmi', 'J&Y', 2);
+  await openVariant('jy-pmi', 'J&Y Ingenieros Consultores S.A.C.', 2);
   assert.equal(await page.locator('.sidebar-nav [data-module="crm"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 1);
   assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'light');
 
-  await openVariant('jy-demo', 'J&Y', 2);
+  await openVariant('jy-demo', 'J&Y Ingenieros Consultores S.A.C.', 2);
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="security"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="expenses"]').count(), 1);
-  await page.locator('[aria-label="Menú de usuario de demostración"]').click();
+  await page.locator('[aria-label="Menú de usuario: Jean Estrada, Administrador"]').click();
   assert.ok(await page.locator('[data-shell-action="profile"]').isVisible());
   await page.locator('[data-shell-action="profile"]').click();
   assert.ok(await page.locator('.toast').first().isVisible());

@@ -52,7 +52,7 @@
                       <span x-text="projectClient(project)"></span>
                       <span
                         class="badge ms-2"
-                        :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                        :class="$statusClass(project.status)"
                         x-text="project.status"
                       ></span>
                     </p>
@@ -282,7 +282,7 @@
                               </div>
                               <div>
                                 <strong x-text="documents.length"></strong
-                                ><span>Documentos simulados</span>
+                                ><span>Documentos</span>
                               </div>
                             </div>
                           </div>

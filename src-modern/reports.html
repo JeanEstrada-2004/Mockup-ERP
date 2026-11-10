@@ -39,15 +39,14 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-                    <p class="shell-eyebrow">SEGUIMIENTO OPERATIVO</p>
-                    <h1 x-text="hasBI ? 'Reportes y BI' : 'Reportes'"></h1>
+<h1 x-text="hasBI ? 'Reportes y BI' : 'Reportes'"></h1>
                     <p class="shell-page-subtitle">
-                      Indicadores y registros derivados de los datos ficticios compartidos.
+                      Indicadores calculados desde las operaciones de cada proyecto.
                     </p>
                   </div>
                 </div>
                 <div class="alert alert-info" role="note">
-                  Las cifras son de demostración. Los indicadores de presupuesto y costo son
+                  Los indicadores de presupuesto y costo son
                   acumulados; el filtro de período limita movimientos y la vista mensual, sin
                   cambiar esos totales.
                 </div>
@@ -107,9 +106,13 @@
                         x-model="statusFilter"
                         @change="updateFilters()"
                       >
-                        <option value="">Todos</option>
+                        <option value="ejecucion">En ejecución (activos y en riesgo)</option>
+                        <option value="todos">Todos los estados</option>
+                        <option value="Planificado">Planificado</option>
                         <option value="Activo">Activo</option>
                         <option value="En riesgo">En riesgo</option>
+                        <option value="Suspendido">Suspendido</option>
+                        <option value="Cerrado">Cerrado</option>
                       </select>
                     </div>
                     <div>

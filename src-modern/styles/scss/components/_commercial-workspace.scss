@@ -15,7 +15,7 @@
   }
   .commercial-lines-table {
     min-width: 620px;
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
   }
   .commercial-lines-table th {
     color: var(--bs-secondary-color);
@@ -39,7 +39,7 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
   display: inline-block;
   margin-left: 0.5rem;
   color: var(--bs-secondary-color);
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 .commercial-inline-links {
   display: flex;
@@ -66,11 +66,11 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
 }
 .commercial-facts span {
   color: var(--bs-secondary-color);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 .commercial-facts strong,
 .commercial-facts a {
-  font-size: 0.84rem;
+  font-size: var(--fs-sm);
   overflow-wrap: anywhere;
 }
 .commercial-totals {
@@ -83,7 +83,7 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
   gap: 0.65rem;
   padding: 0.48rem 0;
   border-bottom: 1px solid var(--bs-border-color);
-  font-size: 0.79rem;
+  font-size: var(--fs-sm);
 }
 .commercial-totals span {
   color: var(--bs-secondary-color);
@@ -94,7 +94,7 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
 .commercial-totals .commercial-grand-total {
   border-bottom: 0;
   padding-top: 0.8rem;
-  font-size: 0.98rem;
+  font-size: var(--fs-base);
 }
 .commercial-grand-total span {
   color: var(--bs-emphasis-color);
@@ -102,7 +102,7 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
 }
 .commercial-grand-total strong {
   color: var(--bs-emphasis-color);
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
 }
 .commercial-history {
   display: grid;
@@ -136,10 +136,10 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
 }
 .commercial-history small {
   color: var(--bs-secondary-color);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 .commercial-budget-alert {
-  font-size: 0.83rem;
+  font-size: var(--fs-sm);
 }
 .commercial-steps {
   list-style: none;
@@ -170,11 +170,11 @@ body[data-page='purchase-detail'] .commercial-workspace .row {
   padding-bottom: 0;
 }
 .commercial-steps strong {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 .commercial-steps small {
   color: var(--bs-secondary-color);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 @media (max-width: 575.98px) {

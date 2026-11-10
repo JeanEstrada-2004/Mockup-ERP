@@ -7,7 +7,7 @@
     display: flex;
     align-items: flex-start;
     gap: 0.6rem;
-    font-size: 0.84rem;
+    font-size: var(--fs-sm);
   }
   .expense-filters {
     display: grid;
@@ -36,7 +36,7 @@
     border-radius: 0.5rem;
     color: var(--bs-secondary-color);
     background: var(--bs-body-bg);
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
   }
   .expense-steps li span {
     display: grid;
@@ -96,7 +96,7 @@
     margin-bottom: 1rem;
   }
   .expense-stage h2 {
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
     margin-bottom: 0.65rem;
   }
   .expense-example-grid {
@@ -124,7 +124,7 @@
   }
   .expense-example i {
     color: var(--brand-accent);
-    font-size: 1.2rem;
+    font-size: var(--fs-xl);
   }
   .expense-example small,
   .expense-added-list small {
@@ -166,7 +166,7 @@
   }
   .expense-compare h3,
   .expense-undocumented h3 {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     margin-bottom: 0.8rem;
   }
   .expense-compare-grid {
@@ -178,7 +178,7 @@
     display: block;
     margin-bottom: 0.5rem;
     color: var(--bs-secondary-color);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
   }
   .expense-paper {
@@ -188,7 +188,7 @@
     border: 1px dashed var(--bs-secondary-color);
     border-radius: 0.25rem;
     background: var(--bs-tertiary-bg);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
   }
   .expense-paper > small {
     color: var(--bs-secondary-color);
@@ -217,7 +217,7 @@
   }
   .expense-edit-grid .form-label {
     margin-bottom: 0.2rem;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
   .expense-undocumented {
     margin-top: 1rem;
@@ -235,7 +235,7 @@
     gap: 0.45rem;
     max-width: 480px;
     margin: 1.2rem 0 0 auto;
-    font-size: 0.85rem;
+    font-size: var(--fs-md);
   }
   .expense-total-card > div {
     padding-bottom: 0.4rem;
@@ -244,7 +244,7 @@
   .expense-total-card > .expense-total {
     padding-top: 0.5rem;
     border: 0;
-    font-size: 1.04rem;
+    font-size: var(--fs-base);
   }
   .expense-observation {
     max-width: 600px;
@@ -269,7 +269,7 @@
     margin-left: 0.3rem;
     padding: 0 0 0.9rem 1.1rem;
     border-left: 2px solid var(--brand-accent);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
   }
   .expense-history li::before {
     content: '';
@@ -330,7 +330,7 @@
       gap: 0.2rem;
       padding: 0.4rem 0.1rem;
       text-align: center;
-      font-size: 0.63rem;
+      font-size: var(--fs-xs);
     }
     .expense-steps li span {
       width: 1.35rem;

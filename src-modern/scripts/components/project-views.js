@@ -11,6 +11,7 @@ import {
   getDataForVariant,
 } from '../data/mock-data.js';
 import { formatMoney, writeProjectId } from './shell.js';
+import { tableControls } from '../utils/data-table.js';
 
 const data = getDataForVariant(activeVariant);
 const costNames = {
@@ -104,9 +105,15 @@ function chartColors() {
   };
 }
 
+// The dashboard compares a readable subset: the first six projects in execution.
+// The full portfolio stays in Proyectos. (Entrega 2 redesigns this panel.)
+const DASHBOARD_PROJECT_LIMIT = 6;
+
 export function dashboardView() {
   return {
-    projects: data.projects,
+    projects: data.projects
+      .filter((project) => project.status === 'Activo' || project.status === 'En riesgo')
+      .slice(0, DASHBOARD_PROJECT_LIMIT),
     portfolio: getPortfolioFinancials(data),
     alerts: dashboardAlerts(),
     activity: recentActivity(),
@@ -217,15 +224,68 @@ export function dashboardView() {
   };
 }
 
+export const PROJECT_STATUSES = ['Planificado', 'Activo', 'En riesgo', 'Suspendido', 'Cerrado'];
+
+function projectManager(project) {
+  return data.workers.find((item) => item.id === project.managerId)?.name || '\u2014';
+}
+
 export function projectsList() {
+  const clients = data.clients.filter((client) =>
+    data.projects.some((project) => project.clientId === client.id)
+  );
+  const managers = data.workers.filter((worker) =>
+    data.projects.some((project) => project.managerId === worker.id)
+  );
   return {
+    ...tableControls({
+      // No initial sort: rows keep the portfolio order (active work first).
+      sortKey: '',
+      accessors: {
+        id: (project) => project.id,
+        name: (project) => project.name,
+        client: projectClient,
+        manager: projectManager,
+        progress: (project) => project.progressPercent,
+        budget: (project) => project.budgetAmount,
+        cost: (project) => getProjectFinancials(data, project.id).executedCost,
+        status: (project) => PROJECT_STATUSES.indexOf(project.status),
+      },
+      chipDefs: [
+        { key: 'search', label: 'B\u00fasqueda' },
+        { key: 'status', label: 'Estado' },
+        {
+          key: 'client',
+          label: 'Cliente',
+          format: (id) => clients.find((item) => item.id === id)?.name || id,
+        },
+        {
+          key: 'manager',
+          label: 'Responsable',
+          format: (id) => managers.find((item) => item.id === id)?.name || id,
+        },
+      ],
+    }),
     projects: data.projects,
+    statuses: PROJECT_STATUSES,
+    clients,
+    managers,
     search: '',
     status: '',
+    client: '',
+    manager: '',
+    moreFilters: false,
     formatMoney,
     projectClient,
+    projectManager,
     financials(id) {
       return getProjectFinancials(data, id);
+    },
+    costsHref(id) {
+      return moduleHref('costs', id);
+    },
+    documentsHref(id) {
+      return `./documents.html?project=${encodeURIComponent(id)}`;
     },
     get filteredProjects() {
       const term = this.search
@@ -235,23 +295,41 @@ export function projectsList() {
         .toLowerCase();
       return this.projects.filter((project) => {
         const matchesStatus = !this.status || project.status === this.status;
+        const matchesClient = !this.client || project.clientId === this.client;
+        const matchesManager = !this.manager || project.managerId === this.manager;
         const haystack = `${project.id} ${project.name} ${projectClient(project)}`
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
           .toLowerCase();
-        return matchesStatus && (!term || haystack.includes(term));
+        return (
+          matchesStatus && matchesClient && matchesManager && (!term || haystack.includes(term))
+        );
       });
+    },
+    get visibleProjects() {
+      return this.paginate(this.applySort(this.filteredProjects));
     },
     init() {
       const params = new URLSearchParams(location.search);
       this.search = params.get('search') || '';
       const status = params.get('status');
-      this.status = ['Activo', 'En riesgo'].includes(status) ? status : '';
+      this.status = PROJECT_STATUSES.includes(status) ? status : '';
+      const client = params.get('client');
+      this.client = clients.some((item) => item.id === client) ? client : '';
+      const manager = params.get('manager');
+      this.manager = managers.some((item) => item.id === manager) ? manager : '';
+      this.moreFilters = Boolean(this.client || this.manager);
+    },
+    onFiltersChange() {
+      this.updateUrl();
     },
     updateUrl() {
+      this.page = 1;
       const params = new URLSearchParams();
       if (this.search.trim()) params.set('search', this.search.trim());
       if (this.status) params.set('status', this.status);
+      if (this.client) params.set('client', this.client);
+      if (this.manager) params.set('manager', this.manager);
       history.replaceState(null, '', `./projects.html${params.size ? `?${params}` : ''}`);
     },
     detailHref(id) {
@@ -260,6 +338,8 @@ export function projectsList() {
     clearFilters() {
       this.search = '';
       this.status = '';
+      this.client = '';
+      this.manager = '';
       this.updateUrl();
     },
   };
@@ -271,7 +351,7 @@ export function projectDetail() {
   const project = getProject(data, id);
   const from = params.get('from') === 'home' ? 'home' : 'projects';
   const search = (params.get('search') || '').slice(0, 120);
-  const status = ['Activo', 'En riesgo'].includes(params.get('status')) ? params.get('status') : '';
+  const status = PROJECT_STATUSES.includes(params.get('status')) ? params.get('status') : '';
   const listParams = new URLSearchParams();
   if (search) listParams.set('search', search);
   if (status) listParams.set('status', status);

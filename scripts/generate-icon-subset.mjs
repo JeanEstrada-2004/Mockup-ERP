@@ -62,8 +62,17 @@ async function* walk(dir) {
   }
 }
 
+// The shared header/sidebar markup is generated at build time by this plugin,
+// so its icons live outside src-modern but still ship on every page.
+const EXTRA_SOURCES = [path.join(ROOT, 'scripts/app-shell-template.mjs')];
+
+async function* sources() {
+  yield* walk(SRC);
+  yield* EXTRA_SOURCES;
+}
+
 const icons = new Set();
-for await (const file of walk(SRC)) {
+for await (const file of sources()) {
   const text = await readFile(file, 'utf8');
   for (const match of text.matchAll(ICON_RE)) {
     if (!NOT_ICONS.has(`bi-${match[1]}`)) icons.add(match[1]);

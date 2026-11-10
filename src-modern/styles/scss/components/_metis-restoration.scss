@@ -30,20 +30,20 @@ body.admin-layout,
 
 .shell-nav-group > small {
   padding: 0.8rem 0.85rem 0.4rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.065em;
 }
 
 .admin-sidebar .sidebar-nav .nav-link {
   min-height: 44px;
   margin-bottom: 0.18rem;
-  font-size: 0.94rem;
+  font-size: var(--fs-md);
   font-weight: 500;
   border-radius: 0.625rem;
 }
 
 .admin-sidebar .sidebar-nav .nav-link i {
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   color: var(--bs-secondary-color);
 }
 
@@ -62,24 +62,24 @@ body.admin-layout,
 }
 
 .shell-brand .shell-brand-name {
-  font-size: 1.16rem;
+  font-size: var(--fs-lg);
 }
 
 .shell-search .form-control {
   height: 42px;
   padding-left: 2.45rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
   border-radius: 0.65rem;
 }
 
 .shell-project label {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   margin-bottom: 0.2rem;
 }
 
 .shell-project select {
   height: 38px;
-  font-size: 0.84rem;
+  font-size: var(--fs-sm);
   border-radius: 0.55rem;
 }
 
@@ -90,12 +90,12 @@ body.admin-layout,
 }
 
 .shell-user-label {
-  font-size: 0.875rem;
+  font-size: var(--fs-md);
 }
 
 .shell-search-result {
   padding: 0.85rem 0.95rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
 }
 
 .shell-page {
@@ -117,23 +117,23 @@ body.admin-layout,
 
 .shell-page-subtitle {
   margin-top: 0.45rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .shell-eyebrow {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.075em;
   margin-bottom: 0.5rem;
 }
 
 .shell-breadcrumb {
   margin-bottom: 1.35rem;
-  font-size: 0.88rem;
+  font-size: var(--fs-md);
 }
 
 .shell-demo-label {
   padding: 0.45rem 0.7rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   border-radius: 0.55rem;
 }
 
@@ -166,18 +166,18 @@ body.admin-layout,
 .shell-section-header h2,
 .shell-context-heading,
 .project-workspace h2 {
-  font-size: 1.12rem;
+  font-size: var(--fs-lg);
   font-weight: 700;
   letter-spacing: -0.015em;
 }
 
 .shell-section-header a {
-  font-size: 0.88rem;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
 .shell-kpi-label {
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
   font-weight: 600;
   margin-bottom: 0.65rem;
 }
@@ -194,23 +194,23 @@ body.admin-layout,
 
 .shell-page .btn-sm {
   padding: 0.52rem 0.8rem;
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
 }
 
 .shell-page :is(.form-control, .form-select) {
   min-height: 42px;
-  font-size: 0.93rem;
+  font-size: var(--fs-md);
 }
 
 .shell-page .form-label {
-  font-size: 0.87rem;
+  font-size: var(--fs-md);
   font-weight: 600;
   margin-bottom: 0.4rem;
 }
 
 .shell-page
   :is(.table, .commercial-lines-table, .d9-table, .costs-table, .workspace-project-table) {
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
 }
 
 .shell-page .table {
@@ -224,7 +224,7 @@ body.admin-layout,
 }
 
 .shell-page .table :is(th, td) {
-  font-size: 0.88rem;
+  font-size: var(--fs-md);
   line-height: 1.5;
   padding-block: 0.85rem;
 }
@@ -236,23 +236,23 @@ body.admin-layout,
 }
 
 .shell-page :is(.badge, .workspace-caption, .shell-project-code) {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .shell-page .workspace-caption {
-  font-size: 0.88rem;
+  font-size: var(--fs-md);
   line-height: 1.5;
 }
 
 .shell-page small {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   line-height: 1.45;
 }
 
 .shell-page :is(.d9-facts, .costs-operation-facts, .commercial-facts) small,
 .shell-page .commercial-facts span,
 .shell-page .commercial-history small {
-  font-size: 0.84rem;
+  font-size: var(--fs-sm);
 }
 
 .workspace-heading-actions {
@@ -262,7 +262,7 @@ body.admin-layout,
 .workspace-quick-actions {
   gap: 0.65rem;
   margin-bottom: 1.25rem !important;
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
 }
 
 .workspace-quick-actions a {
@@ -297,7 +297,7 @@ body.admin-layout,
   border-radius: 0.65rem;
   background: var(--surface-sunken);
   color: var(--brand-primary, var(--bs-primary));
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
 }
 
 .workspace-kpi .shell-kpi-value {
@@ -306,7 +306,7 @@ body.admin-layout,
 
 .workspace-kpi small {
   margin-top: 0.65rem;
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .workspace-chart-values {
@@ -322,13 +322,13 @@ body.admin-layout,
   width: fit-content;
   color: var(--brand-primary, var(--bs-primary));
   cursor: pointer;
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
 .workspace-chart-values span,
 .workspace-source-list > div {
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
 }
 
 .workspace-source-list {
@@ -343,37 +343,37 @@ body.admin-layout,
 }
 
 .workspace-project-row > span:first-child span {
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .workspace-compact-list a {
-  font-size: 0.88rem;
+  font-size: var(--fs-md);
 }
 
 .workspace-project-row strong,
 .workspace-compact-list time {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .workspace-filters .form-label,
 .commercial-facts span {
-  font-size: 0.85rem;
+  font-size: var(--fs-md);
 }
 
 .commercial-facts strong,
 .commercial-facts a,
 .commercial-totals > div {
-  font-size: 0.94rem;
+  font-size: var(--fs-md);
 }
 
 .commercial-totals .commercial-grand-total,
 .commercial-grand-total strong {
-  font-size: 1.2rem;
+  font-size: var(--fs-xl);
 }
 
 .expense-steps li,
 .delivery-nine-workspace .d9-tabs button {
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
 }
 
 .expense-steps li {
@@ -399,7 +399,7 @@ body.admin-layout,
 
 .costs-kpis small,
 .delivery-nine-workspace .d9-kpis small {
-  font-size: 0.86rem;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
@@ -409,7 +409,7 @@ body.admin-layout,
 }
 
 .costs-kpis span {
-  font-size: 0.84rem;
+  font-size: var(--fs-sm);
 }
 
 .costs-source-row {
@@ -437,25 +437,20 @@ body.admin-layout,
   --erp-panel-shadow: 0 2px 14px rgba(0, 0, 0, 0.12);
 }
 
-html[data-bs-theme='dark'] {
-  --brand-primary: #bfdbfe;
-  --brand-accent: #60a5fa;
-}
-
 [data-bs-theme='dark'] .shell-page a:not(.btn):not(.workspace-project-row),
 [data-bs-theme='dark'] .shell-page .workspace-chart-details summary,
 [data-bs-theme='dark'] .shell-page .workspace-kpi-icon {
-  color: #93c5fd;
+  color: var(--brand-accent);
 }
 
 [data-bs-theme='dark'] .shell-page a:not(.btn):hover {
-  color: #bfdbfe;
+  color: var(--brand-accent-hover);
 }
 
 [data-bs-theme='dark'] .shell-notification-count,
 [data-bs-theme='dark'] .expense-steps li.active span,
 [data-bs-theme='dark'] .expense-steps li.done span {
-  background: #2563eb;
+  background: var(--brand-solid);
   color: #fff;
 }
 
@@ -473,12 +468,12 @@ html[data-bs-theme='dark'] {
 
 [data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active,
 [data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active:hover {
-  background: var(--surface-hover);
-  color: #bfdbfe;
+  background: var(--brand-accent-subtle);
+  color: var(--brand-primary);
 }
 
 [data-bs-theme='dark'] .admin-sidebar .sidebar-nav .nav-link.active i {
-  color: #bfdbfe;
+  color: var(--brand-primary);
 }
 
 [data-bs-theme='dark'] .shell-search .form-control,
@@ -517,7 +512,7 @@ html[data-bs-theme='dark'] {
   }
 
   .shell-page-heading h1 {
-    font-size: 1.6rem;
+    font-size: var(--fs-2xl);
   }
 
   .shell-page .card-body {

@@ -16,11 +16,11 @@
     margin-bottom: 0;
   }
   .d9-table th {
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     white-space: nowrap;
   }
   .d9-table td {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     vertical-align: middle;
   }
   .d9-table small {
@@ -59,7 +59,7 @@
     color: var(--bs-secondary-color);
   }
   .d9-empty .bi {
-    font-size: 1.8rem;
+    font-size: var(--fs-2xl);
   }
   .d9-empty p {
     margin: 0;
@@ -146,7 +146,7 @@
     color: var(--bs-secondary-color);
   }
   .d9-kpis strong {
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
     overflow-wrap: anywhere;
   }
   .d9-link-list {
@@ -201,7 +201,7 @@
     grid-template-columns: 1fr;
   }
   .delivery-nine-workspace .d9-kpis strong {
-    font-size: 1.1rem;
+    font-size: var(--fs-lg);
   }
   .delivery-nine-workspace .d9-filters .btn {
     min-height: 44px;

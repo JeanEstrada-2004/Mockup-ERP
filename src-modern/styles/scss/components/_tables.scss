@@ -9,7 +9,7 @@
   th {
     border-top: none;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--fs-md);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--bs-secondary);
@@ -26,7 +26,7 @@
       
       i {
         margin-left: 0.5rem;
-        font-size: 0.75rem;
+        font-size: var(--fs-xs);
         opacity: 0.7;
       }
     }
@@ -56,7 +56,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--bs-border-radius);
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
   }
 }
 
@@ -129,7 +129,7 @@
 
 // Badge Enhancements
 .badge {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   padding: 0.35em 0.65em;
   font-weight: 500;
   letter-spacing: 0.025em;
@@ -138,7 +138,7 @@
 // Action Buttons
 .btn-group-sm .btn {
   padding: 0.25rem 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--fs-sm);
   border-radius: var(--bs-border-radius-sm);
   
   &:hover {
@@ -210,7 +210,7 @@
   }
   
   .empty-title {
-    font-size: 1.25rem;
+    font-size: var(--fs-xl);
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--bs-heading-color);
@@ -225,7 +225,7 @@
 @media (max-width: 768px) {
   .table-responsive {
     .table {
-      font-size: 0.875rem;
+      font-size: var(--fs-md);
       
       th, td {
         padding: 0.5rem 0.25rem;
@@ -234,7 +234,7 @@
     
     .btn-group-sm .btn {
       padding: 0.125rem 0.25rem;
-      font-size: 0.75rem;
+      font-size: var(--fs-xs);
     }
   }
   
@@ -242,11 +242,11 @@
     .stats-icon {
       width: 40px;
       height: 40px;
-      font-size: 1rem;
+      font-size: var(--fs-base);
     }
     
     h3 {
-      font-size: 1.5rem;
+      font-size: var(--fs-2xl);
     }
   }
   
@@ -327,7 +327,7 @@
 .table-cell-date {
   min-width: 120px;
   font-family: var(--bs-font-monospace);
-  font-size: 0.875rem;
+  font-size: var(--fs-md);
 }
 
 // Advanced Filtering
@@ -348,7 +348,7 @@
   .filter-label {
     font-weight: 600;
     margin-bottom: 0.5rem;
-    font-size: 0.875rem;
+    font-size: var(--fs-md);
   }
 }
 

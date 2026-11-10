@@ -510,14 +510,15 @@ export function initShellActions(app) {
   document.querySelectorAll('[data-shell-action]').forEach((button) => {
     button.addEventListener('click', () => {
       const action = button.dataset.shellAction;
+      const user = activeVariant.user;
       if (action === 'profile')
-        app.notificationManager.info('Usuario de demostración · Administrador');
+        app.notificationManager.info(`${user.name} · ${user.role} · ${activeVariant.company.name}`);
       if (action === 'settings') {
         if (isModuleEnabled('administration')) window.location.href = moduleHref('administration');
-        else app.notificationManager.info('Administración no forma parte de esta presentación.');
+        else app.notificationManager.info('La configuración la gestiona el administrador del sistema.');
       }
       if (action === 'logout') {
-        app.notificationManager.info('Esta demostración no utiliza una sesión real.');
+        app.notificationManager.info('Cierre de sesión simulado: en la demostración la sesión continúa.');
       }
     });
   });

@@ -38,6 +38,8 @@ import { integrationsWorkspace } from './components/integration-views.js';
 import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
 
+import { statusClass } from './utils/status.js';
+
 // Import Alpine.js for reactive components
 import Alpine from 'alpinejs';
 
@@ -471,6 +473,9 @@ class AdminApp {
 
   // Initialize Alpine.js
   initAlpine() {
+    // Shared helpers available in every template: `$statusClass(status)`.
+    Alpine.magic('statusClass', () => statusClass);
+
     // Register Alpine data components
     Alpine.data('globalSearch', globalSearch);
     Alpine.data('projectContext', projectContext);

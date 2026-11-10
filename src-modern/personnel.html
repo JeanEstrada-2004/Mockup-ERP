@@ -27,10 +27,9 @@
             </nav>
             <div class="shell-page-heading">
               <div>
-                <p class="shell-eyebrow">PERSONAS Y PROYECTOS</p>
-                <h1>Personal y Tareo</h1>
+<h1>Personal y Tareo</h1>
                 <p class="shell-page-subtitle">
-                  Asignaciones, asistencia y horas de trabajo de demostración.
+                  Asignaciones, asistencia y horas de trabajo por proyecto.
                 </p>
               </div>
               <button
@@ -40,11 +39,6 @@
               >
                 <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar tareo manual
               </button>
-            </div>
-            <div class="alert alert-info personnel-demo-note" role="note">
-              <i class="bi bi-info-circle" aria-hidden="true"></i> Los datos de trabajadores, DNI y
-              jornadas son ficticios. Las horas visibles son una muestra y no recalculan los costos
-              laborales compartidos.
             </div>
             <div class="personnel-kpis">
               <div class="card">
@@ -172,7 +166,7 @@
             >
               <div class="card-body">
                 <div class="shell-section-header">
-                  <h2 id="personnel-people-title">Trabajadores ficticios</h2>
+                  <h2 id="personnel-people-title">Trabajadores</h2>
                   <span
                     class="workspace-caption"
                     x-text="`${filteredWorkers.length} personas`"
@@ -182,7 +176,7 @@
                   <table class="table table-hover align-middle mb-0">
                     <thead>
                       <tr>
-                        <th scope="col">DNI ficticio</th>
+                        <th scope="col">DNI</th>
                         <th scope="col">Trabajador</th>
                         <th scope="col">Cargo</th>
                         <th scope="col">Área</th>
@@ -216,7 +210,7 @@
                         ><strong x-text="worker.name"></strong
                         ><span class="badge text-bg-success" x-text="worker.status"></span></span
                       ><small x-text="`${worker.role} · ${worker.area}`"></small
-                      ><small x-text="`DNI ficticio ${worker.dni}`"></small><b>Ver ficha →</b></a
+                      ><small x-text="`DNI ${worker.dni}`"></small><b>Ver ficha →</b></a
                     ></template
                   >
                 </div>
@@ -502,7 +496,7 @@
               aria-labelledby="personnel-biometrics-title"
             >
               <div class="card-body">
-                <h2 id="personnel-biometrics-title">Biometría simulada</h2>
+                <h2 id="personnel-biometrics-title">Sincronización biométrica</h2>
                 <div class="alert alert-warning" role="note">
                   Escenario visual de marcaciones. No hay dispositivo conectado, sincronización,
                   identificación biométrica ni captura real.
@@ -545,7 +539,7 @@
               aria-labelledby="personnel-incidents-title"
             >
               <div class="card-body">
-                <h2 id="personnel-incidents-title">Incidencias de asistencia · simulación</h2>
+                <h2 id="personnel-incidents-title">Incidencias de asistencia</h2>
                 <p class="workspace-caption">
                   Las acciones guardan una decisión local con motivo. La marcación de ejemplo
                   original permanece visible.
@@ -779,7 +773,7 @@
                       class="btn btn-primary personnel-primary-action"
                       @click="resolveIncident()"
                     >
-                      Guardar decisión simulada
+                      Guardar decisión
                     </button>
                   </div>
                 </div>

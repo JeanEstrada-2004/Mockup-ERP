@@ -24,15 +24,11 @@
           >
             <div class="shell-page-heading">
               <div>
-                <p class="shell-eyebrow">PORTAFOLIO</p>
-                <h1>Panel General</h1>
+<h1>Panel General</h1>
                 <p class="shell-page-subtitle">Estado de los proyectos y operaciones recientes</p>
               </div>
               <div class="workspace-heading-actions">
-                <span class="shell-demo-label"
-                  ><i class="bi bi-info-circle" aria-hidden="true"></i> Datos de demostración</span
-                >
-                <a class="btn btn-primary btn-sm" href="./projects.html">Ver proyectos</a>
+<a class="btn btn-primary btn-sm" href="./projects.html">Ver proyectos</a>
               </div>
             </div>
 
@@ -179,7 +175,7 @@
                       ></a>
                     </div>
                     <div class="workspace-project-list">
-                      <template x-for="project in projects" :key="project.id"
+                      <template x-for="project in projects.slice(0, 5)" :key="project.id"
                         ><a class="workspace-project-row" :href="projectHref(project.id)">
                           <span
                             ><strong x-text="project.id"></strong><span x-text="project.name"></span
@@ -188,7 +184,7 @@
                           <span class="workspace-project-metrics"
                             ><span
                               class="badge"
-                              :class="project.status === 'En riesgo' ? 'text-bg-warning' : 'text-bg-primary'"
+                              :class="$statusClass(project.status)"
                               x-text="project.status"
                             ></span>
                             <small

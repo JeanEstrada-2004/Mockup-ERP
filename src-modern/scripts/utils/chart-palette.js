@@ -78,8 +78,18 @@ function isDark() {
  * @returns {string[]}
  */
 export function categorical(count) {
-  const seq = isDark() ? CATEGORICAL_DARK : CATEGORICAL_LIGHT;
-  return count ? seq.slice(0, count) : [...seq];
+  const seq = [...(isDark() ? CATEGORICAL_DARK : CATEGORICAL_LIGHT)];
+  // Series 1 carries the presentation's brand accent (SurTec #0066CC, J&Y
+  // #2563EB). Both stay in the blue slot the sequence was validated with.
+  const brand = brandAccent();
+  if (brand) seq[0] = brand;
+  return count ? seq.slice(0, count) : seq;
+}
+
+function brandAccent() {
+  const value = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim();
+  // The build may minify #0066cc to #06c; ApexCharts accepts both forms.
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value) ? value : null;
 }
 
 /** The accent — series-of-one, and any single-measure chart. */

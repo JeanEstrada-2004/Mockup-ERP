@@ -10,6 +10,90 @@ const operation = (id, projectId, type, amount, costSource, details = {}) => ({
   ...details,
 });
 
+// Portfolio projects that complete the dashboard totals of the specification:
+// 12 active projects (Activo + En riesgo) with S/ 1 245 000 budget and
+// S/ 768 400 executed cost, plus one planned, one suspended and one closed.
+// PR-2027-001/002/003 keep their detailed records below; these projects carry
+// one operation per cost source so every sol still traces to a document.
+const portfolio = [
+  // id, name, client, manager, start, end, budget, executed, progress, status
+  ['PR-2027-004', 'Cableado Estructurado Sede Arequipa', 'CLI-001', 'PER-004', '2027-01-18', '2027-05-31', 72000, 51300, 71, 'Activo'],
+  ['PR-2027-005', 'Videovigilancia Planta Moquegua', 'CLI-002', 'PER-005', '2027-02-03', '2027-07-15', 118000, 79400, 64, 'Activo'],
+  ['PR-2027-006', 'Data Center Modular', 'CLI-001', 'PER-004', '2027-01-25', '2027-08-29', 156000, 112600, 58, 'En riesgo'],
+  ['PR-2027-007', 'Red Inalámbrica Hospitalaria', 'CLI-003', 'PER-002', '2027-02-14', '2027-06-30', 64000, 38900, 57, 'Activo'],
+  ['PR-2027-008', 'Control de Accesos Corporativo', 'CLI-002', 'PER-001', '2027-02-20', '2027-06-15', 58000, 49950, 74, 'En riesgo'],
+  ['PR-2027-009', 'Telecomunicaciones Campamento Minero', 'CLI-001', 'PER-005', '2027-03-01', '2027-09-30', 134000, 82100, 55, 'Activo'],
+  ['PR-2027-010', 'Sistema de Detección de Incendios', 'CLI-003', 'PER-003', '2027-03-08', '2027-08-15', 87000, 41300, 46, 'Activo'],
+  ['PR-2027-011', 'Migración de Servidores', 'CLI-004', 'PER-002', '2027-03-15', '2027-07-31', 66000, 31200, 44, 'Activo'],
+  ['PR-2027-012', 'Automatización de Subestación', 'CLI-005', 'PER-005', '2027-03-22', '2027-09-15', 64000, 38500, 52, 'Activo'],
+  ['PR-2027-013', 'Ampliación de Red de Fibra Óptica', 'CLI-004', 'PER-004', '2027-06-01', '2027-11-30', 92000, 0, 0, 'Planificado'],
+  ['PR-2027-014', 'Sistema de Gestión Energética', 'CLI-005', 'PER-001', '2027-02-10', '2027-07-31', 48000, 9800, 20, 'Suspendido'],
+  ['PR-2026-021', 'Renovación de Centro de Cómputo', 'CLI-003', 'PER-003', '2026-06-01', '2026-12-18', 120000, 116400, 100, 'Cerrado'],
+];
+const portfolioSuppliers = ['PROV-001', 'PROV-002', 'PROV-003'];
+
+function shiftIso(iso, days) {
+  const date = new Date(`${iso}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function portfolioOperations([id, , , managerId, start, , , executed, , status], index) {
+  if (!executed) return [];
+  const suffix = id.slice(-3);
+  const purchases = Math.round(executed * 0.45);
+  const personnel = Math.round(executed * 0.3);
+  const expenses = Math.round(executed * 0.12);
+  const other = executed - purchases - personnel - expenses;
+  const closed = status === 'Cerrado';
+  return [
+    operation(`OC-${suffix}1`, id, 'purchase', purchases, 'purchases', {
+      supplierId: portfolioSuppliers[index % 3],
+      status: closed ? 'Cerrada' : 'Atendida',
+      date: shiftIso(start, 20),
+    }),
+    operation(`TAR-${suffix}1`, id, 'timesheet', personnel, 'personnel', {
+      workerId: managerId,
+      status: 'Aprobado',
+      date: shiftIso(start, 45),
+    }),
+    operation(`R-${suffix}1`, id, 'expense', expenses, 'expenses', {
+      workerId: managerId,
+      status: 'Aprobada',
+      date: shiftIso(start, 30),
+    }),
+    operation(`AJ-${suffix}1`, id, 'other', other, 'other', {
+      status: 'Registrado',
+      date: shiftIso(start, 50),
+    }),
+  ];
+}
+
+const portfolioProjects = portfolio.map(
+  ([id, name, clientId, managerId, startDate, endDate, budgetAmount, , progressPercent, status], index) => ({
+    id,
+    name,
+    clientId,
+    managerId,
+    budgetId: `PRE-${String(index + 4).padStart(3, '0')}`,
+    startDate,
+    endDate,
+    budgetAmount,
+    progressPercent,
+    status,
+  })
+);
+
+const portfolioBudgets = portfolioProjects.map((project) => ({
+  id: project.budgetId,
+  projectId: project.id,
+  clientId: project.clientId,
+  version: 1,
+  amount: project.budgetAmount,
+  status: project.status === 'Planificado' ? 'En revisión' : 'Aprobado',
+  documentId: `DOC-${project.budgetId}`,
+}));
+
 export const surtecData = {
   id: 'surtec',
   fictitious: true,
@@ -17,6 +101,8 @@ export const surtecData = {
     { id: 'CLI-001', name: 'Minera del Sur S.A.', ruc: '20512345678', sector: 'Minería' },
     { id: 'CLI-002', name: 'Industrias Andinas S.A.C.', sector: 'Industria' },
     { id: 'CLI-003', name: 'Clínica Regional del Sur', sector: 'Salud' },
+    { id: 'CLI-004', name: 'Corporación Logística Austral S.A.C.', sector: 'Logística' },
+    { id: 'CLI-005', name: 'Agroindustrial Valle Sur S.A.C.', sector: 'Agroindustria' },
   ],
   suppliers: [
     { id: 'PROV-001', name: 'TechSupply Perú S.A.C.' },
@@ -46,6 +132,22 @@ export const surtecData = {
       dni: '00000003',
       role: 'Técnico de campo',
       area: 'Operaciones',
+      status: 'Activo',
+    },
+    {
+      id: 'PER-004',
+      name: 'María Salazar',
+      dni: '00000004',
+      role: 'Jefa de proyecto',
+      area: 'Proyectos',
+      status: 'Activo',
+    },
+    {
+      id: 'PER-005',
+      name: 'José Vargas',
+      dni: '00000005',
+      role: 'Jefe de proyecto',
+      area: 'Proyectos',
       status: 'Activo',
     },
   ],
@@ -86,6 +188,7 @@ export const surtecData = {
       progressPercent: 38,
       status: 'Activo',
     },
+    ...portfolioProjects,
   ],
   opportunities: [
     {
@@ -129,6 +232,7 @@ export const surtecData = {
       status: 'Aprobado',
       documentId: 'DOC-PRE-003',
     },
+    ...portfolioBudgets,
   ],
   materials: [
     {
@@ -292,5 +396,7 @@ export const surtecData = {
       status: 'Registrado',
       date: '2027-05-31',
     }),
+
+    ...portfolio.flatMap(portfolioOperations),
   ],
 };

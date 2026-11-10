@@ -36,7 +36,7 @@
   }
   .reports-view-label {
     color: var(--bs-primary);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
   }
   .reports-chart-values {
@@ -95,10 +95,10 @@
   }
   .reports-manager-table th {
     white-space: nowrap;
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
   .reports-manager-table td {
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
   }
 }
 @media (max-width: 1199.98px) {

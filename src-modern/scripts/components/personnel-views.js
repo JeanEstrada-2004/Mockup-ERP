@@ -1,3 +1,4 @@
+import { statusClass } from '../utils/status.js';
 import { Modal } from 'bootstrap';
 import { activeVariant } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
@@ -45,13 +46,6 @@ const hoursLabel = (value) =>
   value == null
     ? '—'
     : `${new Intl.NumberFormat('es-PE', { maximumFractionDigits: 2 }).format(value)} h`;
-
-function statusClass(status) {
-  if (status === 'Completa' || status === 'Validado (ejemplo)' || status === 'Revisada')
-    return 'text-bg-success';
-  if (status === 'Incompleta' || status === 'Pendiente') return 'text-bg-warning';
-  return 'text-bg-secondary';
-}
 
 function toast(message) {
   window.AdminApp?.notificationManager?.info(message);

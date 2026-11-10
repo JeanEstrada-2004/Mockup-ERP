@@ -152,6 +152,15 @@ async function testDocuments() {
 async function testReports() {
   const surtec = getDataForVariant('surtec-peti');
   const totals = getPortfolioFinancials(surtec);
+  // Reports and BI open scoped to projects in execution, like the Panel General.
+  const inExecution = new Set(
+    surtec.projects
+      .filter((item) => ['Activo', 'En riesgo'].includes(item.status))
+      .map((item) => item.id)
+  );
+  const scopedPurchases = surtec.operations.filter(
+    (item) => item.type === 'purchase' && inExecution.has(item.projectId)
+  );
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(url('surtec-peti', 'reports.html'));
   await ready();
@@ -164,7 +173,7 @@ async function testReports() {
       .locator('xpath=ancestor::section')
       .locator('table tbody tr')
       .count(),
-    surtec.projects.length
+    inExecution.size
   );
   await page.locator('.reports-catalog-card').filter({ hasText: 'Compras' }).click();
   assert.match(await page.locator('#reports-result-title').innerText(), /Compras/);
@@ -174,7 +183,7 @@ async function testReports() {
       .locator('xpath=ancestor::section')
       .locator('table tbody tr')
       .count(),
-    surtec.operations.filter((item) => item.type === 'purchase').length
+    scopedPurchases.length
   );
   await page.locator('#reports-period').selectOption('2027-03');
   assert.equal(
@@ -183,21 +192,20 @@ async function testReports() {
       .locator('xpath=ancestor::section')
       .locator('table tbody tr')
       .count(),
-    surtec.operations.filter((item) => item.type === 'purchase' && item.date.startsWith('2027-03'))
-      .length
+    scopedPurchases.filter((item) => item.date.startsWith('2027-03')).length
   );
   await page.getByRole('button', { name: 'BI gerencial' }).click();
   await page.locator('#reports-budget-chart .apexcharts-series').first().waitFor();
   const kpis = await page.locator('.d9-kpis').innerText();
   assert.ok(kpis.includes(String(totals.activeProjectCount)));
-  assert.ok(kpis.includes('S/ 426 000'));
-  assert.ok(kpis.includes('S/ 243 150'));
+  assert.ok(kpis.includes('S/ 1 245 000'));
+  assert.ok(kpis.includes('S/ 768 400'));
   assert.match(
     await page.locator('#reports-monthly-title').locator('xpath=ancestor::section[1]').innerText(),
     /2027-03/
   );
   await page.locator('.reports-source-list button').filter({ hasText: 'Compras' }).click();
-  assert.equal(await page.locator('.reports-source-detail a').count(), surtec.projects.length);
+  assert.equal(await page.locator('.reports-source-detail a').count(), inExecution.size);
   await page.locator('.reports-source-detail a').first().click();
   await page.waitForURL(/costs\.html\?project=.*&source=purchases/);
   await page.goBack();
@@ -305,10 +313,8 @@ async function testIntegrations() {
   await ready();
   assert.equal(await page.locator('.sidebar-nav [data-module="integrations"].active').count(), 1);
   assert.equal(await page.locator('.integration-list button').count(), 5);
-  assert.match(
-    await page.locator('.integrations-workspace .alert-warning').innerText(),
-    /No hay dispositivos/
-  );
+  // Entrega 1: the demo nature is stated once, in the header badge.
+  assert.match(await page.locator('.shell-demo-badge').innerText(), /Datos de demostración/);
   assert.match(
     await page
       .locator('#integration-detail-title')
