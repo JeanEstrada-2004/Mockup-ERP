@@ -16,7 +16,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 | Entrega | Estado | Commit | Notas para la siguiente |
 |---|---|---|---|
 | 1. Base técnica: datos, estados, tabla, header | **Terminada** (10/11/2026) | `Entrega 1: base del sistema de diseño` | Ver "Notas de la Entrega 1" |
-| 2. Sistema visual "Red de Integración" + kit D3 | Pendiente | — | — |
+| 2. Sistema visual "Red de Integración" + kit D3 | **Terminada** (10/11/2026) | `Entrega 2: sistema visual Red de Integración y kit D3` | Ver "Notas de la Entrega 2" |
 | 3. Panel General, Proyectos y Ficha Integral | Pendiente | — | — |
 | 4. Aprobaciones, Rendiciones, Presupuestos, Compras | Pendiente | — | — |
 | 5. Personal, Almacén y Costos | Pendiente | — | — |
@@ -56,6 +56,38 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
   `delivery-nine-interaction-test.mjs`, `personnel-interaction-test.mjs`,
   `validate-mock-data.mjs` (detalle en el commit de la Entrega 1).
 - `npm run icons` también escanea `scripts/app-shell-template.mjs`.
+
+### Notas de la Entrega 2 (para las siguientes)
+
+- **Usar lo que ya existe.** Componentes y clases en `DESIGN.md` › Clases; ejemplo vivo
+  con datos reales en `design-system.html` ("Sistema visual", fuera del menú). No crear
+  otra franja de KPI, otro bloque protagonista ni otro estilo de pestañas.
+- **Gráficos:** solo el kit (`src-modern/scripts/charts/`), API `render(el, data, options)`
+  → `{ update, destroy }`. Colores por token y por fuente con `COST_SOURCE_TOKENS`
+  (`project-views.js`). Llamar `update()` al cambiar de proyecto: el kit ya redibuja con el
+  tema y el tamaño (no escuchar `theme-change` en las vistas).
+- **Cifras animadas:** `x-count`, `x-count.money`, `x-count.pct`. Las pruebas que lean un
+  KPI recién cargado deben esperar ~900 ms o usar el `aria-label` del elemento.
+- **Panel (Entrega 3):** ya tiene la franja de 4 KPI con conteo y sus dos gráficos en D3
+  (barras + dona); falta la composición completa de la referencia (6 KPI, bloque
+  protagonista, flujo, ejecución frente al avance, área mensual). `DASHBOARD_PROJECT_LIMIT`
+  sigue en `project-views.js`. El cálculo del costo mensual por fecha de operación está en
+  `design-system-view.js` (`monthlyCost()`): moverlo a `mock-data.js` al usarlo en el Panel.
+- **ApexCharts:** ninguna vista del ERP lo usa. Quedan `utils/apex.js`, `chart-palette.js`,
+  el chunk `vendor-charts`, la dependencia y las páginas de muestra de Metis → Entrega 7.
+- **Riel:** muestra PETI / PMI / Demo por pedido del usuario (antes estaba prohibido).
+  El contenido de las vistas sigue sin nombrar cursos. "Aprobaciones" no está en el riel
+  hasta que exista `approvals.html` (Entrega 4): añadirla a `modules.js` con contador
+  (`.shell-nav-count`).
+- **Pendiente visual por módulo:** los KPI de Costos, Reportes, Almacén y Personal siguen
+  como tarjetas (`.workspace-kpi`, `.costs-kpis`, `.d9-kpis`) con el estilo nuevo; pasarlos
+  a `.kpi-strip` en su entrega. Costos muestra decimales con punto ("49.1 %") → Entrega 5.
+- **Pruebas cambiadas (intencional):** `shell-interaction-test.mjs` y `final-audit.mjs`
+  (PETI/PMI permitido en el riel, prohibido en `#main-content`; 23 páginas; gráficos
+  `.chart-svg`), `cost-interaction-test.mjs`, `delivery-nine-interaction-test.mjs` y
+  `smoke-test.mjs` (esperan el SVG del kit en vez de ApexCharts).
+- **Capturas:** `npm run build:variants` y luego `node scripts/capture-views.mjs <etiqueta>`
+  (PowerShell, `PAGES_BASE='/Mockup-ERP/'`); variables en la cabecera del script.
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

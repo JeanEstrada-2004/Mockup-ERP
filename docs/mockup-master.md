@@ -363,3 +363,37 @@ Plan completo y estado en `docs/plan-mejoras.md`; especificación original en
   Reportes y BI abren con el mismo alcance que el Panel.
 - **Avisos:** se retiraron las alertas "no es real" de cada página y las etiquetas
   "ficticio/simulado" de títulos y columnas; la reglas funcionales se conservaron.
+
+## Mejoras — Entrega 2: sistema visual "Red de Integración" y kit D3 (10/11/2026)
+
+Referencia aprobada: `docs/referencia/red-de-integracion.html`. Reglas, tokens, clases y
+API del kit en `DESIGN.md`.
+
+- **Shell:** riel de navegación a toda la altura (azul profundo en SurTec, pizarra en J&Y)
+  con el logo oficial sin alterar sobre una placa del color de fondo de su archivo y la
+  etiqueta de presentación (**PETI** · TO-BE 2027–2030, **PMI** · ERP contractual,
+  **Demo** · Propuesta para J&Y), a pedido del usuario para distinguir las tres
+  presentaciones. Riel contraído con isotipo; en móvil el header muestra isotipo y código.
+  Header limpio de 70 px. Pantalla completa (sin `max-width: 1700px`); se eliminó
+  `_metis-restoration.scss` y se vaciaron los temas claro/oscuro de Metis.
+- **Tokens:** superficies, tinta, series `--s1..--s4`, estados `--good/--warn/--bad`,
+  `--rail*`, `--hero-*`, `--solid`, escala `--fs-*` (cuerpo 15 px, página 30, KPI 32).
+  Corregido: la paleta por variante se inyecta con `html:root` (J&Y mostraba los colores de
+  SurTec desde la Entrega 1) y la fuente Inter se declara como `'Inter Variable'` (antes
+  caía a Segoe UI). Plus Jakarta Sans autoalojada para títulos y cifras.
+- **Componentes:** franja de KPI, bloque protagonista con textura de red, paneles,
+  botones, píldoras, tablas, un solo estilo de pestañas, menús, modales, toasts,
+  confirmaciones, alertas y formularios. Movimiento: `x-count` (cifras que cuentan),
+  gráficos que se dibujan, botones con escala al presionar, entrada breve del contenido;
+  todo con `prefers-reduced-motion`.
+- **Kit D3** (`src-modern/scripts/charts/`): `flow`, `execution-bars`, `area`, `sparkline`,
+  `split-bar`, `donut`, `bars`, más `theme`, `tooltip` y `base`. Paleta validada con la
+  skill `dataviz` en claro y oscuro para ambas marcas (azul oscuro de SurTec re-escalonado
+  a `#3d85e6`). Migrados Panel, Costos y Reportes › BI: ninguna vista del ERP usa ya
+  ApexCharts.
+- **Panel:** solo cambió la forma de los 4 KPI (franja con conteo) y sus gráficos pasaron
+  a D3; el contenido se rediseña en la Entrega 3.
+- **Sistema visual** (`design-system.html`, fuera del menú): todos los componentes y los
+  7 patrones con datos reales de la variante. Es la referencia de las Entregas 3–7.
+- **Capturas:** `scripts/capture-views.mjs` → `screenshots/entregas/entrega-2-antes/` y
+  `entrega-2-despues/`.

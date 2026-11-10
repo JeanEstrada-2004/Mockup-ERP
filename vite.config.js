@@ -49,6 +49,7 @@ export default defineConfig(({ mode }) => ({
         security: resolve(__dirname, 'src-modern/security.html'),
         settings: resolve(__dirname, 'src-modern/settings.html'),
         'module-preview': resolve(__dirname, 'src-modern/module-preview.html'),
+        'design-system': resolve(__dirname, 'src-modern/design-system.html'),
       },
 
       output: {
@@ -62,6 +63,10 @@ export default defineConfig(({ mode }) => ({
           }
           if (id.includes('node_modules/apexcharts/')) {
             return 'vendor-charts';
+          }
+          // D3 modules used by the chart kit (src-modern/scripts/charts/).
+          if (/node_modules\/(d3-|internmap)/.test(id)) {
+            return 'vendor-d3';
           }
           if (id.includes('node_modules/alpinejs/') || id.includes('node_modules/sweetalert2/')) {
             return 'vendor-ui';

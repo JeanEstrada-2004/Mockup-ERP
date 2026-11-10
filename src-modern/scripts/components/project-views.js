@@ -22,6 +22,15 @@ const costNames = {
   other: 'Otros',
 };
 const costOrder = Object.keys(costNames);
+// Fixed series slot per cost source (DESIGN.md › Datos): the same source keeps
+// its colour in every chart and variant, even when another source is absent.
+export const COST_SOURCE_TOKENS = {
+  purchases: '--s1',
+  personnel: '--s2',
+  expenses: '--s3',
+  materials: '--s4',
+  other: '--s-other',
+};
 const operationNames = {
   purchase: 'Compra',
   expense: 'Rendición',
@@ -94,17 +103,6 @@ function recentActivity() {
     }));
 }
 
-function chartColors() {
-  const root = document.documentElement;
-  const styles = getComputedStyle(root);
-  return {
-    brand: styles.getPropertyValue('--brand-accent').trim() || '#2563eb',
-    muted: styles.getPropertyValue('--bs-secondary-color').trim() || '#64748b',
-    grid: styles.getPropertyValue('--bs-border-color').trim() || '#e2e8f0',
-    dark: root.dataset.bsTheme === 'dark',
-  };
-}
-
 // The dashboard compares a readable subset: the first six projects in execution.
 // The full portfolio stays in Proyectos. (Entrega 2 redesigns this panel.)
 const DASHBOARD_PROJECT_LIMIT = 6;
@@ -138,6 +136,20 @@ export function dashboardView() {
     get availableBudget() {
       return this.portfolio.budgetAmount - this.portfolio.executedCost;
     },
+    get riskCount() {
+      return data.projects.filter((project) => project.status === 'En riesgo').length;
+    },
+    get clientCount() {
+      const inExecution = data.projects.filter(
+        (project) => project.status === 'Activo' || project.status === 'En riesgo'
+      );
+      return new Set(inExecution.map((project) => project.clientId)).size;
+    },
+    get executedPercentLabel() {
+      const { budgetAmount, executedCost } = this.portfolio;
+      const percent = budgetAmount ? (executedCost / budgetAmount) * 100 : 0;
+      return `${percent.toFixed(1).replace('.', ',')} %`;
+    },
     get sources() {
       return sourceRows(this.selectedProjectId);
     },
@@ -155,71 +167,60 @@ export function dashboardView() {
       const budgetElement = document.querySelector('#dashboard-budget-chart');
       const sourceElement = document.querySelector('#dashboard-source-chart');
       if (!budgetElement || !sourceElement) return;
-      const { default: ApexCharts } = await import('apexcharts');
-      const colors = chartColors();
-      this.budgetChart?.destroy();
-      this.sourceChart?.destroy();
-      budgetElement.replaceChildren();
-      sourceElement.replaceChildren();
-      this.budgetChart = new ApexCharts(budgetElement, {
-        chart: {
-          type: 'bar',
-          height: 252,
-          toolbar: { show: false },
-          animations: { enabled: false },
-          background: 'transparent',
-          foreColor: colors.muted,
-        },
+      const [{ render: renderBars }, { render: renderDonut }] = await Promise.all([
+        import('../charts/bars.js'),
+        import('../charts/donut.js'),
+      ]);
+      const budgetData = {
+        categories: this.projects.map((item) => item.id),
         series: [
-          { name: 'Presupuesto', data: this.projects.map((item) => item.budgetAmount) },
           {
-            name: 'Costo ejecutado',
-            data: this.projects.map((item) => getProjectFinancials(data, item.id).executedCost),
+            label: 'Presupuesto',
+            color: '--s1',
+            values: this.projects.map((item) => item.budgetAmount),
+          },
+          {
+            label: 'Costo ejecutado',
+            color: '--s2',
+            values: this.projects.map((item) => getProjectFinancials(data, item.id).executedCost),
           },
         ],
-        colors: [colors.brand, '#f59e0b'],
-        plotOptions: { bar: { borderRadius: 3, columnWidth: '48%' } },
-        dataLabels: { enabled: false },
-        xaxis: { categories: this.projects.map((item) => item.id) },
-        yaxis: { labels: { formatter: (value) => `S/ ${Math.round(value / 1000)} mil` } },
-        grid: { borderColor: colors.grid },
-        legend: { position: 'top', horizontalAlign: 'right' },
-        tooltip: { theme: colors.dark ? 'dark' : 'light', y: { formatter: formatMoney } },
-      });
-      await this.budgetChart.render();
-      const sources = this.sources;
-      this.sourceChart = new ApexCharts(sourceElement, {
-        chart: {
-          type: 'donut',
+      };
+      const sourceData = this.sources.map((item) => ({
+        label: item.label,
+        value: item.amount,
+        color: COST_SOURCE_TOKENS[item.id],
+      }));
+      const center = {
+        centerLabel: 'Ejecutado',
+        centerValue: formatMoney(this.currentFinancials.executedCost),
+      };
+      // Charts redraw themselves on theme and size changes; a new project
+      // only swaps their data.
+      if (this.budgetChart?.update) this.budgetChart.update(budgetData);
+      else {
+        budgetElement.replaceChildren();
+        this.budgetChart = renderBars(budgetElement, budgetData, {
           height: 252,
-          animations: { enabled: false },
-          background: 'transparent',
-          foreColor: colors.muted,
-        },
-        series: sources.map((item) => item.amount),
-        labels: sources.map((item) => item.label),
-        colors: [colors.brand, '#0ea5e9', '#f59e0b', '#22c55e', '#8b5cf6'],
-        dataLabels: { enabled: false },
-        legend: { show: false },
-        stroke: { colors: [colors.dark ? '#212529' : '#fff'] },
-        tooltip: { theme: colors.dark ? 'dark' : 'light', y: { formatter: formatMoney } },
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '68%',
-              labels: {
-                show: true,
-                total: {
-                  show: true,
-                  label: 'Ejecutado',
-                  formatter: () => formatMoney(this.currentFinancials.executedCost),
-                },
-              },
-            },
-          },
-        },
-      });
-      await this.sourceChart.render();
+          label: 'Presupuesto y costo ejecutado por proyecto, en soles',
+          table: false,
+        });
+      }
+      if (this.sourceChart?.update) this.sourceChart.update(sourceData, center);
+      else {
+        sourceElement.replaceChildren();
+        this.sourceChart = renderDonut(sourceElement, sourceData, {
+          ...center,
+          size: 220,
+          legend: false,
+          table: false,
+          label: 'Distribución del costo ejecutado por fuente',
+        });
+      }
+    },
+    destroy() {
+      this.budgetChart?.destroy?.();
+      this.sourceChart?.destroy?.();
     },
   };
 }

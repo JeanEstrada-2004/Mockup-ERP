@@ -37,8 +37,10 @@ import { crmWorkspace } from './components/crm-views.js';
 import { integrationsWorkspace } from './components/integration-views.js';
 import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
+import { designSystemView } from './components/design-system-view.js';
 
 import { statusClass } from './utils/status.js';
+import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
 
 // Import Alpine.js for reactive components
 import Alpine from 'alpinejs';
@@ -51,6 +53,7 @@ import Alpine from 'alpinejs';
 // font covers the full 100–900 range in a single file, so the weights the
 // template uses (300/400/500/600/700) all come from one request.
 import '@fontsource-variable/inter';
+import '@fontsource-variable/plus-jakarta-sans';
 
 import '../styles/scss/main.scss';
 
@@ -109,6 +112,9 @@ class AdminApp {
 
       // Shared shell actions and current-module indicator
       initShellActions(this);
+
+      // Network texture on hero panels (decorative canvas, resized with its box).
+      this.stopHeroNetworks = mountHeroNetworks();
 
       this.isInitialized = true;
 
@@ -475,6 +481,8 @@ class AdminApp {
   initAlpine() {
     // Shared helpers available in every template: `$statusClass(status)`.
     Alpine.magic('statusClass', () => statusClass);
+    // Figures count up to their value (`x-count`, `x-count.money`, `x-count.pct`).
+    registerCountDirective(Alpine);
 
     // Register Alpine data components
     Alpine.data('globalSearch', globalSearch);
@@ -495,6 +503,7 @@ class AdminApp {
     Alpine.data('warehouseWorkspace', warehouseWorkspace);
     Alpine.data('materialDetail', materialDetail);
     Alpine.data('costWorkspace', costWorkspace);
+    Alpine.data('designSystemView', designSystemView);
     Alpine.data('documentsWorkspace', documentsWorkspace);
     Alpine.data('documentDetail', documentDetail);
     Alpine.data('reportsWorkspace', reportsWorkspace);
@@ -649,6 +658,7 @@ class AdminApp {
 
   // Cleanup method
   destroy() {
+    this.stopHeroNetworks?.();
     this.components.forEach((component) => {
       if (component.destroy) {
         component.destroy();

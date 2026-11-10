@@ -43,18 +43,3 @@
     transform: rotate(180deg);
   }
 }
-
-// Desktop: pin hamburger at sidebar's right edge
-@media (min-width: 992px) {
-  .admin-header .hamburger-menu {
-    position: absolute;
-    left: calc(var(--sidebar-width) - 40px - 0.5rem);
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  // Override :active transform so vertical centering isn't lost
-  .admin-header .hamburger-menu:active {
-    transform: translateY(-50%) scale(0.95);
-  }
-}

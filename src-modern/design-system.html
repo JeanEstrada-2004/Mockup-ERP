@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Componentes y gráficos compartidos de la plataforma" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Sistema visual</title>
+  </head>
+  <body data-page="design-system" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page design-system-page"
+            x-data="designSystemView"
+            @project-change.window="selectProject($event.detail.projectId)"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Sistema visual</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Sistema visual</h1>
+                <p class="shell-page-subtitle">
+                  Componentes y gráficos compartidos, con los datos de esta presentación
+                </p>
+              </div>
+              <div class="workspace-heading-actions">
+                <a class="btn btn-outline-secondary" href="./projects.html">Ver proyectos</a>
+                <a class="btn btn-primary" href="./costs.html">Abrir costos</a>
+              </div>
+            </div>
+
+            <!-- Franja de KPI -->
+            <section class="kpi-strip kpi-strip--4" aria-label="Franja de indicadores">
+              <a class="kpi" href="./projects.html">
+                <span class="kpi-label"
+                  ><i class="kpi-dot" aria-hidden="true"></i>Proyectos en ejecución</span
+                >
+                <span class="kpi-value" x-count="portfolio.activeProjectCount"></span>
+                <span class="kpi-foot"><span id="ds-split" class="w-100"></span></span>
+              </a>
+              <a class="kpi" href="./projects.html">
+                <span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Presupuesto activo</span
+                >
+                <span class="kpi-value" x-count.money="portfolio.budgetAmount"></span>
+                <span
+                  class="kpi-foot"
+                  x-text="`${portfolio.activeProjectCount} proyectos en ejecución`"
+                ></span>
+              </a>
+              <a class="kpi" href="./costs.html">
+                <span class="kpi-label"
+                  ><i class="kpi-dot" aria-hidden="true"></i>Costo acumulado</span
+                >
+                <span class="kpi-value" x-count.money="portfolio.executedCost"></span>
+                <span class="kpi-foot"
+                  ><span id="ds-spark"></span
+                  ><span x-count.pct="executedPercent"></span> ejecutado</span
+                >
+              </a>
+              <a class="kpi" href="#ds-hero-title">
+                <span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Aprobaciones</span
+                >
+                <span class="kpi-value"
+                  ><span x-count="approvals.length"></span> <small>pendientes</small></span
+                >
+                <span class="kpi-foot"
+                  ><span class="pill pill-warn" x-text="`${approvals.length} por revisar`"></span
+                ></span>
+              </a>
+            </section>
+
+            <!-- Bloque protagonista + trazabilidad -->
+            <div class="panel-grid panel-grid--hero">
+              <section class="hero-panel" aria-labelledby="ds-hero-title">
+                <canvas class="hero-net" aria-hidden="true"></canvas>
+                <div class="hero-top">
+                  <span class="hero-figure" x-count="approvals.length"></span>
+                  <h2 id="ds-hero-title">aprobaciones esperan tu revisión</h2>
+                </div>
+                <p>Revisar a tiempo evita que el costo llegue tarde al proyecto.</p>
+                <ul class="hero-list">
+                  <template x-for="item in oldestApprovals" :key="item.id">
+                    <li>
+                      <a :href="item.href">
+                        <span class="hero-tag" x-text="item.kind"></span>
+                        <span
+                          ><b x-text="item.id"></b> · <span x-text="item.projectName"></span
+                        ></span>
+                        <em x-text="formatMoney(item.amount)"></em>
+                      </a>
+                    </li>
+                  </template>
+                </ul>
+                <button class="btn" type="button" @click.stop="openApprovals()">
+                  Abrir bandeja
+                </button>
+              </section>
+
+              <section class="panel" aria-labelledby="ds-flow-title">
+                <div class="panel-head">
+                  <div>
+                    <h2
+                      id="ds-flow-title"
+                      x-text="`Trazabilidad del costo · ${focusProjectId}`"
+                    ></h2>
+                    <p>De qué fuentes viene cada sol ejecutado y cuánto presupuesto queda</p>
+                  </div>
+                  <a :href="`./costs.html?project=${encodeURIComponent(focusProjectId)}`"
+                    >Ver costos →</a
+                  >
+                </div>
+                <div id="ds-flow"></div>
+              </section>
+            </div>
+
+            <!-- Ejecución, serie temporal y dona -->
+            <div class="panel-grid panel-grid--wide">
+              <section class="panel" aria-labelledby="ds-exec-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="ds-exec-title">Ejecución frente al avance</h2>
+                    <p>
+                      Barra: costo ejecutado sobre el presupuesto. Marca: lo que debería llevarse
+                      gastado según el avance físico.
+                    </p>
+                  </div>
+                  <a href="./projects.html">Todos los proyectos →</a>
+                </div>
+                <ul class="legend">
+                  <li><i class="legend-swatch legend-swatch--s1"></i>Dentro de lo esperado</li>
+                  <li>
+                    <i class="legend-swatch legend-swatch--bad"></i>Gasta más rápido que su avance
+                  </li>
+                  <li><i class="legend-swatch legend-swatch--mark"></i>Avance físico</li>
+                </ul>
+                <div id="ds-execution"></div>
+              </section>
+
+              <div class="panel-stack">
+                <section class="panel" aria-labelledby="ds-area-title">
+                  <div class="panel-head">
+                    <div>
+                      <h2 id="ds-area-title">Costo mensual del portafolio</h2>
+                      <p>Costo ejecutado por mes según la fecha de cada operación</p>
+                    </div>
+                  </div>
+                  <div id="ds-area"></div>
+                </section>
+                <section class="panel" aria-labelledby="ds-donut-title">
+                  <div class="panel-head">
+                    <div>
+                      <h2 id="ds-donut-title">Costo por fuente</h2>
+                      <p
+                        x-text="focusProject ? `${focusProject.id} · ${focusProject.name}` : ''"
+                      ></p>
+                    </div>
+                  </div>
+                  <div id="ds-donut"></div>
+                </section>
+              </div>
+            </div>
+
+            <!-- Barras finas -->
+            <section class="panel mb-4" aria-labelledby="ds-bars-title">
+              <div class="panel-head">
+                <div>
+                  <h2 id="ds-bars-title">Presupuesto y costo por proyecto</h2>
+                  <p>Barras finas con extremos redondeados; un solo eje en soles</p>
+                </div>
+              </div>
+              <div id="ds-bars"></div>
+            </section>
+
+            <!-- Componentes -->
+            <div class="panel-grid panel-grid--halves">
+              <section class="panel" aria-labelledby="ds-actions-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="ds-actions-title">Acciones y estados</h2>
+                    <p>Una acción principal por pantalla; estados con texto, nunca solo color</p>
+                  </div>
+                </div>
+                <div class="ds-row">
+                  <button class="btn btn-primary" type="button">Guardar</button>
+                  <button class="btn btn-outline-secondary" type="button">Cancelar</button>
+                  <button class="btn btn-outline-primary" type="button">Ver historial</button>
+                  <button class="btn btn-outline-danger" type="button">Eliminar</button>
+                </div>
+                <div class="ds-row">
+                  <span class="badge status-badge status-badge--info">Activo</span>
+                  <span class="badge status-badge status-badge--success">Aprobada</span>
+                  <span class="badge status-badge status-badge--warning">En revisión</span>
+                  <span class="badge status-badge status-badge--danger">En riesgo</span>
+                  <span class="badge status-badge">Borrador</span>
+                </div>
+                <div class="ds-row">
+                  <span>Costo comprometido</span>
+                  <button
+                    class="help-tip"
+                    type="button"
+                    data-tip="Órdenes y obligaciones ya aprobadas que todavía pueden no haberse ejecutado."
+                  >
+                    ?
+                  </button>
+                </div>
+                <nav class="d9-tabs" aria-label="Pestañas de ejemplo">
+                  <button
+                    type="button"
+                    :class="tab === 'resumen' ? 'active' : ''"
+                    @click="tab = 'resumen'"
+                  >
+                    Resumen
+                  </button>
+                  <button
+                    type="button"
+                    :class="tab === 'costos' ? 'active' : ''"
+                    @click="tab = 'costos'"
+                  >
+                    Costos
+                  </button>
+                  <button
+                    type="button"
+                    :class="tab === 'documentos' ? 'active' : ''"
+                    @click="tab = 'documentos'"
+                  >
+                    Documentos
+                  </button>
+                </nav>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label" for="ds-field-name">Nombre del proyecto</label>
+                    <input
+                      id="ds-field-name"
+                      class="form-control"
+                      type="text"
+                      placeholder="Ej.: Red corporativa"
+                    />
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label" for="ds-field-status">Estado</label>
+                    <select id="ds-field-status" class="form-select">
+                      <option>Activo</option>
+                      <option>En riesgo</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel" aria-labelledby="ds-table-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="ds-table-title">Tabla</h2>
+                    <p>Cifras tabulares, filas que responden al pasar el mouse</p>
+                  </div>
+                  <a href="./projects.html">Ver todos →</a>
+                </div>
+                <div class="data-table table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th scope="col">Código</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col" class="text-end">Costo</th>
+                        <th scope="col">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="row in sampleRows" :key="row.id">
+                        <tr>
+                          <td>
+                            <a
+                              class="data-code"
+                              :href="`./project.html?id=${encodeURIComponent(row.id)}`"
+                              x-text="row.id"
+                            ></a>
+                          </td>
+                          <td x-text="row.name"></td>
+                          <td class="text-end data-money" x-text="formatMoney(row.cost)"></td>
+                          <td>
+                            <span
+                              class="badge"
+                              :class="$statusClass(row.status)"
+                              x-text="row.status"
+                            ></span>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

@@ -20,7 +20,6 @@
             class="container-fluid shell-page project-workspace"
             x-data="dashboardView"
             @project-change.window="selectProject($event.detail.projectId)"
-            @theme-change.window="renderCharts()"
           >
             <div class="shell-page-heading">
               <div>
@@ -32,60 +31,39 @@
               </div>
             </div>
 
-            <section aria-label="Indicadores del portafolio" class="row g-3 mb-3">
-              <div class="col-6 col-xl-3">
-                <div class="card h-100">
-                  <div class="card-body workspace-kpi">
-                    <div class="workspace-kpi-head">
-                      <p class="shell-kpi-label">Proyectos en ejecución</p>
-                      <span class="workspace-kpi-icon"
-                        ><i class="bi bi-folder2-open" aria-hidden="true"></i
-                      ></span>
-                    </div>
-                    <p class="shell-kpi-value" x-text="portfolio.activeProjectCount"></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-xl-3">
-                <div class="card h-100">
-                  <div class="card-body workspace-kpi">
-                    <div class="workspace-kpi-head">
-                      <p class="shell-kpi-label">Presupuesto</p>
-                      <span class="workspace-kpi-icon"
-                        ><i class="bi bi-wallet2" aria-hidden="true"></i
-                      ></span>
-                    </div>
-                    <p class="shell-kpi-value" x-text="formatMoney(portfolio.budgetAmount)"></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-xl-3">
-                <div class="card h-100">
-                  <div class="card-body workspace-kpi">
-                    <div class="workspace-kpi-head">
-                      <p class="shell-kpi-label">Costo ejecutado</p>
-                      <span class="workspace-kpi-icon"
-                        ><i class="bi bi-graph-up-arrow" aria-hidden="true"></i
-                      ></span>
-                    </div>
-                    <p class="shell-kpi-value" x-text="formatMoney(portfolio.executedCost)"></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-xl-3">
-                <div class="card h-100">
-                  <div class="card-body workspace-kpi">
-                    <div class="workspace-kpi-head">
-                      <p class="shell-kpi-label">Saldo por ejecutar</p>
-                      <span class="workspace-kpi-icon"
-                        ><i class="bi bi-pie-chart" aria-hidden="true"></i
-                      ></span>
-                    </div>
-                    <p class="shell-kpi-value" x-text="formatMoney(availableBudget)"></p>
-                    <small>Presupuesto menos costo ejecutado</small>
-                  </div>
-                </div>
-              </div>
+            <section class="kpi-strip kpi-strip--4" aria-label="Indicadores del portafolio">
+              <a class="kpi" href="./projects.html">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Proyectos en ejecución</span>
+                <span class="kpi-value" x-count="portfolio.activeProjectCount"></span>
+                <span class="kpi-foot">
+                  <span
+                    class="splitbar"
+                    role="img"
+                    :aria-label="`${portfolio.activeProjectCount - riskCount} activos, ${riskCount} en riesgo`"
+                  >
+                    <span class="kpi-seg kpi-seg--ok" :style="`flex: ${portfolio.activeProjectCount - riskCount}`"></span>
+                    <span class="kpi-seg kpi-seg--risk" :style="`flex: ${riskCount}`"></span>
+                  </span>
+                  <span class="text-nowrap" x-text="`${riskCount} en riesgo`"></span>
+                </span>
+              </a>
+              <a class="kpi" href="./projects.html">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Presupuesto activo</span>
+                <span class="kpi-value" x-count.money="portfolio.budgetAmount"></span>
+                <span class="kpi-foot" x-text="`${portfolio.activeProjectCount} proyectos · ${clientCount} clientes`"></span>
+              </a>
+              <a class="kpi" href="./costs.html">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Costo ejecutado</span>
+                <span class="kpi-value" x-count.money="portfolio.executedCost"></span>
+                <span class="kpi-foot">
+                  <span class="pill pill-info" x-text="`${executedPercentLabel} ejecutado`"></span>
+                </span>
+              </a>
+              <a class="kpi" href="./costs.html">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Saldo por ejecutar</span>
+                <span class="kpi-value" x-count.money="availableBudget"></span>
+                <span class="kpi-foot">Presupuesto menos costo ejecutado</span>
+              </a>
             </section>
 
             <nav class="workspace-quick-actions mb-3" aria-label="Acciones rápidas">

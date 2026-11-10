@@ -48,40 +48,69 @@ const mix = (hex, target, amount) => {
 const rgbList = (hex) => hexToRgb(hex).join(', ');
 
 function brandTokens(theme) {
-  const { primary, accent } = theme;
+  const { primary, accent, rail, railDark } = theme;
+  // Rail (navigation) palette: active item is the rail tinted toward the
+  // accent; text and group labels are white mixed back into the rail so they
+  // keep their hue and clear 4.5:1 on it.
+  const railTokens = (base) => ({
+    rail: base,
+    'rail-active': mix(mix(base, accent, 0.35), '#ffffff', 0.06),
+    'rail-ink': mix('#ffffff', base, 0.22),
+    'rail-muted': mix('#ffffff', base, 0.48),
+    'rail-indicator': mix(accent, '#ffffff', 0.3),
+  });
   const light = {
-    // Text and identity (titles, eyebrow, active nav label).
+    ...railTokens(rail),
+    brand: primary,
+    solid: primary,
+    accent,
+    'accent-soft': mix(accent, '#ffffff', 0.9),
+    'hero-a': primary,
+    'hero-b': accent,
+    // Series 1 carries the presentation accent; s2–s4 are fixed (DESIGN.md).
+    s1: accent,
+    // Legacy names used across the module partials.
     'brand-primary': primary,
-    // Interaction signal: links, active indicator, focus, chart series 1.
     'brand-accent': accent,
     'brand-accent-rgb': rgbList(accent),
     'brand-accent-hover': mix(accent, '#000000', 0.2),
     'brand-accent-subtle': mix(accent, '#ffffff', 0.9),
     'brand-accent-border': mix(accent, '#ffffff', 0.7),
-    // Solid fill for the primary button.
     'brand-solid': primary,
     'brand-solid-rgb': rgbList(primary),
     'brand-solid-hover': mix(primary, '#000000', 0.18),
     'brand-solid-active': mix(primary, '#000000', 0.28),
     'brand-surface': theme.surface,
   };
+  const darkAccent = mix(accent, '#ffffff', 0.3);
+  const darkSolid = mix(accent, '#000000', 0.05);
   const dark = {
-    'brand-primary': mix(accent, '#ffffff', 0.72),
-    'brand-accent': mix(accent, '#ffffff', 0.38),
-    'brand-accent-rgb': rgbList(mix(accent, '#ffffff', 0.38)),
-    'brand-accent-hover': mix(accent, '#ffffff', 0.58),
-    'brand-accent-subtle': mix(accent, '#111827', 0.78),
-    'brand-accent-border': mix(accent, '#111827', 0.45),
-    'brand-solid': accent,
-    'brand-solid-rgb': rgbList(accent),
-    'brand-solid-hover': mix(accent, '#ffffff', 0.12),
-    'brand-solid-active': mix(accent, '#ffffff', 0.2),
+    ...railTokens(railDark),
+    brand: mix(accent, '#ffffff', 0.66),
+    solid: darkSolid,
+    accent: darkAccent,
+    'accent-soft': mix(accent, '#0a1424', 0.76),
+    'hero-a': mix(primary, '#000000', 0.25),
+    'hero-b': darkSolid,
+    s1: theme.series1Dark || mix(accent, '#ffffff', 0.23),
+    'brand-primary': mix(accent, '#ffffff', 0.66),
+    'brand-accent': darkAccent,
+    'brand-accent-rgb': rgbList(darkAccent),
+    'brand-accent-hover': mix(accent, '#ffffff', 0.5),
+    'brand-accent-subtle': mix(accent, '#0a1424', 0.76),
+    'brand-accent-border': mix(accent, '#0a1424', 0.45),
+    'brand-solid': darkSolid,
+    'brand-solid-rgb': rgbList(darkSolid),
+    'brand-solid-hover': mix(accent, '#ffffff', 0.1),
+    'brand-solid-active': mix(accent, '#ffffff', 0.18),
   };
   const declarations = (tokens) =>
     Object.entries(tokens)
       .map(([name, value]) => `--${name}:${value}`)
       .join(';');
-  return `:root{${declarations(light)}}html[data-bs-theme="dark"]{${declarations(dark)}}`;
+  // `html:root` and `html[data-bs-theme]` outrank the SurTec fallbacks that
+  // the stylesheet declares on `:root`, whatever order the two are loaded in.
+  return `html:root{${declarations(light)}}html[data-bs-theme="dark"]{${declarations(dark)}}`;
 }
 
 // The supplied logo files keep wide empty margins. The image itself is shown
@@ -91,7 +120,10 @@ function logoTokens(company) {
     `.shell-brand .shell-logo-frame--${theme}{width:calc(var(--logo-h) * ${(width / height).toFixed(4)})}` +
     `.shell-brand .shell-logo-frame .shell-logo--${theme}{width:calc(var(--logo-h) * ${(imageWidth / height).toFixed(4)});height:auto;max-width:none;` +
     `left:calc(var(--logo-h) * -${(x / height).toFixed(4)});top:calc(var(--logo-h) * -${(y / height).toFixed(4)})}`;
-  return rule('light', company.logoLightBox) + rule('dark', company.logoDarkBox);
+  const plates =
+    `html:root{--logo-plate:${company.logoPlate.light}}` +
+    `html[data-bs-theme="dark"]{--logo-plate:${company.logoPlate.dark}}`;
+  return rule('light', company.logoLightBox) + rule('dark', company.logoDarkBox) + plates;
 }
 
 const NOTIFICATION_ICONS = {
@@ -136,9 +168,9 @@ function renderHeader(variant, data) {
           <button class="hamburger-menu shell-menu-toggle" type="button" data-sidebar-toggle aria-label="Abrir menú lateral">
             <i class="bi bi-list" aria-hidden="true"></i>
           </button>
-          <a class="navbar-brand shell-brand" href="./index.html" aria-label="${escapeHtml(company.name)}: ir al Panel General">
-            <span class="shell-logo-frame shell-logo-frame--light"><img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoLight)}" alt="Logo de ${escapeHtml(company.shortName)}"></span>
-            <span class="shell-logo-frame shell-logo-frame--dark"><img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoDark)}" alt="" aria-hidden="true"></span>
+          <a class="shell-header-mark" href="./index.html" aria-label="${escapeHtml(company.name)} · ${escapeHtml(variant.presentation.code)}: ir al Panel General">
+            <img src="./${escapeHtml(company.logoCompact)}" alt="" width="34" height="34">
+            <span><strong>${escapeHtml(company.shortName)}</strong><small>${escapeHtml(variant.presentation.code)}</small></span>
           </a>
           <div class="shell-search" x-data="globalSearch" @click.outside="close()">
             <label class="visually-hidden" for="global-search">Búsqueda global</label>
@@ -225,7 +257,24 @@ function renderSidebar(variant) {
     return `<div class="shell-nav-group"><small>${group.label}</small><ul class="nav flex-column">${links}</ul></div>`;
   }).join('');
 
-  return `<aside class="admin-sidebar" id="admin-sidebar" aria-label="Navegación principal"><div class="sidebar-content"><nav class="sidebar-nav" aria-label="Módulos">${sections}</nav></div></aside>`;
+  const company = variant.company;
+  const presentation = variant.presentation;
+  const brand = `
+    <div class="shell-rail-brand">
+      <a class="shell-brand" href="./index.html" aria-label="${escapeHtml(company.name)}: ir al Panel General">
+        <span class="shell-logo-plate">
+          <span class="shell-logo-frame shell-logo-frame--light"><img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoLight)}" alt="Logo de ${escapeHtml(company.shortName)}"></span>
+          <span class="shell-logo-frame shell-logo-frame--dark"><img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoDark)}" alt="" aria-hidden="true"></span>
+        </span>
+        <img class="shell-logo-compact" src="./${escapeHtml(company.logoCompact)}" alt="" aria-hidden="true">
+      </a>
+      <p class="shell-presentation" title="${escapeHtml(company.name)} · ${escapeHtml(presentation.code)} · ${escapeHtml(presentation.label)}">
+        <span class="shell-presentation-code">${escapeHtml(presentation.code)}</span>
+        <span class="shell-presentation-label">${escapeHtml(presentation.label)}</span>
+      </p>
+    </div>`;
+
+  return `<aside class="admin-sidebar shell-rail" id="admin-sidebar" aria-label="Navegación principal"><div class="sidebar-content">${brand}<nav class="sidebar-nav" aria-label="Módulos">${sections}</nav></div></aside>`;
 }
 
 function renderFooter(variant) {
@@ -276,6 +325,8 @@ export function appShellPlugin(mode) {
 
         return html
           .replace('<html lang="en"', '<html lang="es"')
+          .replace('<html', `<html data-variant="${variant.id}"`)
+          .replace(/<title>([^<]*)<\/title>/, (_match, title) => `<title>${title} · ${escapeHtml(variant.company.shortName)} ${escapeHtml(variant.presentation.code)}</title>`)
           .replace(
             '</head>',
             `<link rel="manifest" href="./manifest.json">${brandStyle}${earlyTheme}</head>`

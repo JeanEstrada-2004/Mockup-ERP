@@ -132,7 +132,8 @@ async function checkVariant(variant) {
   const data = getDataForVariant(variant);
   const variantDir = path.join(dist, variant);
   const htmlPages = (await readdir(variantDir)).filter((file) => file.endsWith('.html'));
-  assert.equal(htmlPages.length, 22);
+  // 22 views + design-system.html (Sistema visual, Entrega 2 de mejoras).
+  assert.equal(htmlPages.length, 23);
   const manifest = JSON.parse(await readFile(path.join(variantDir, 'manifest.json'), 'utf8'));
   assert.match(manifest.name, new RegExp(config.company.shortName.replace('&', '&')));
   assert.equal(manifest.start_url, './index.html');
@@ -174,7 +175,11 @@ async function checkVariant(variant) {
       `${pagesBase}${variant}/manifest.json`
     );
     const body = await page.locator('body').innerText();
-    assert.ok(!/\bMetis\b|\bPETI\b|\bPMI\b/i.test(body), `Texto de plantilla/curso: ${html}`);
+    // Entrega 2: the rail names the presentation (PETI / PMI / Demo) on purpose;
+    // course names stay out of the page content and template text stays out entirely.
+    assert.ok(!/\bMetis\b/i.test(body), `Texto de plantilla: ${html}`);
+    const content = await page.locator('#main-content').innerText();
+    assert.ok(!/\bPETI\b|\bPMI\b/.test(content), `Texto de curso en el contenido: ${html}`);
     assert.ok(!body.includes(ownBrand === 'surtec' ? 'J&Y' : 'SurTec'), `Marca ajena: ${html}`);
     await checkVisibleLinks(variant);
     await checkBasicAccessibility();
@@ -223,7 +228,7 @@ async function checkVariant(variant) {
     assert.ok(overflow <= 1, `Desbordamiento móvil ${overflow}px: ${variant}/${html}`);
   }
   console.log(
-    `${variant}: 22 vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
+    `${variant}: 23 vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
   );
 }
 

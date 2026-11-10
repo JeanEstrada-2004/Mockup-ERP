@@ -177,46 +177,35 @@ export function costWorkspace() {
     async renderChart() {
       const element = document.getElementById('cost-budget-chart');
       if (!element || !this.financials) return;
-      const { default: ApexCharts } = await import('apexcharts');
-      this.budgetChart?.destroy();
-      element.replaceChildren();
-      const dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-      const styles = getComputedStyle(document.documentElement);
-      this.budgetChart = new ApexCharts(element, {
-        chart: {
-          type: 'bar',
-          height: 260,
-          toolbar: { show: false },
-          animations: { enabled: false },
-          background: 'transparent',
-          foreColor: styles.getPropertyValue('--bs-secondary-color').trim(),
-        },
+      const { render } = await import('../charts/bars.js');
+      // Same series slots as the Panel: budget --s1, executed --s2;
+      // committed uses --s3 like the flow chart.
+      const chartData = {
+        categories: ['Presupuesto', 'Comprometido total', 'Ejecutado'],
         series: [
           {
-            name: 'Soles',
-            data: [
+            label: 'Soles',
+            color: '--s1',
+            values: [
               this.financials.budgetAmount,
               this.financials.committedCost,
               this.financials.executedCost,
             ],
           },
         ],
-        colors: [
-          styles.getPropertyValue('--brand-accent').trim() || '#2563eb',
-          '#f59e0b',
-          '#0ea5e9',
-        ],
-        plotOptions: { bar: { horizontal: true, distributed: true, borderRadius: 4 } },
-        xaxis: {
-          categories: ['Presupuesto', 'Comprometido total', 'Ejecutado'],
-          labels: { formatter: (value) => `S/ ${Math.round(value / 1000)} mil` },
-        },
-        dataLabels: { enabled: false },
-        legend: { show: false },
-        grid: { borderColor: styles.getPropertyValue('--bs-border-color').trim() },
-        tooltip: { theme: dark ? 'dark' : 'light', y: { formatter: formatMoney } },
+        colors: ['--s1', '--s3', '--s2'],
+      };
+      if (this.budgetChart?.update) {
+        this.budgetChart.update(chartData);
+        return;
+      }
+      element.replaceChildren();
+      this.budgetChart = render(element, chartData, {
+        orientation: 'horizontal',
+        labelWidth: 140,
+        label: 'Presupuesto, costo comprometido total y costo ejecutado del proyecto, en soles',
+        table: false,
       });
-      await this.budgetChart.render();
     },
   };
 }

@@ -7,7 +7,7 @@ import {
   getProjectFinancials,
 } from '../data/mock-data.js';
 import { COST_SOURCES } from '../data/cost-data.js';
-import { formatDate } from './project-views.js';
+import { COST_SOURCE_TOKENS, formatDate } from './project-views.js';
 import { formatMoney, writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
@@ -263,62 +263,58 @@ export function reportsWorkspace() {
       const budgetElement = document.getElementById('reports-budget-chart');
       const sourceElement = document.getElementById('reports-source-chart');
       if (!budgetElement || !sourceElement) return;
-      const { default: ApexCharts } = await import('apexcharts');
-      const styles = getComputedStyle(document.documentElement);
-      const dark = document.documentElement.dataset.bsTheme === 'dark';
-      const text = styles.getPropertyValue('--bs-secondary-color').trim();
-      const grid = styles.getPropertyValue('--bs-border-color').trim();
-      this.budgetChart?.destroy();
-      this.sourceChart?.destroy();
-      budgetElement.replaceChildren();
-      sourceElement.replaceChildren();
-      this.budgetChart = new ApexCharts(budgetElement, {
-        chart: {
-          type: 'bar',
-          height: 260,
-          toolbar: { show: false },
-          animations: { enabled: false },
-          background: 'transparent',
-          foreColor: text,
-        },
+      const [{ render: renderBars }, { render: renderDonut }] = await Promise.all([
+        import('../charts/bars.js'),
+        import('../charts/donut.js'),
+      ]);
+      const budgetData = {
+        categories: this.scopedProjects.map((item) => item.id),
         series: [
-          { name: 'Presupuesto', data: this.scopedProjects.map((item) => item.budgetAmount) },
           {
-            name: 'Ejecutado',
-            data: this.scopedProjects.map(
+            label: 'Presupuesto',
+            color: '--s1',
+            values: this.scopedProjects.map((item) => item.budgetAmount),
+          },
+          {
+            label: 'Ejecutado',
+            color: '--s2',
+            values: this.scopedProjects.map(
               (item) => getProjectFinancials(data, item.id).executedCost
             ),
           },
         ],
-        colors: ['#2563eb', '#f59e0b'],
-        plotOptions: { bar: { borderRadius: 3, columnWidth: '48%' } },
-        xaxis: { categories: this.scopedProjects.map((item) => item.id) },
-        yaxis: { labels: { formatter: (value) => `S/ ${Math.round(value / 1000)} mil` } },
-        dataLabels: { enabled: false },
-        grid: { borderColor: grid },
-        legend: { position: 'top' },
-        tooltip: { theme: dark ? 'dark' : 'light', y: { formatter: formatMoney } },
-      });
-      await this.budgetChart.render();
-      const sources = this.sourceRows.filter((item) => item.amount > 0);
-      if (!sources.length) return;
-      this.sourceChart = new ApexCharts(sourceElement, {
-        chart: {
-          type: 'donut',
+      };
+      const sourceData = this.sourceRows
+        .filter((item) => item.amount > 0)
+        .map((item) => ({
+          label: item.label,
+          value: item.amount,
+          color: COST_SOURCE_TOKENS[item.id] || '--s-other',
+        }));
+      if (this.budgetChart?.update) this.budgetChart.update(budgetData);
+      else {
+        budgetElement.replaceChildren();
+        this.budgetChart = renderBars(budgetElement, budgetData, {
           height: 260,
-          animations: { enabled: false },
-          background: 'transparent',
-          foreColor: text,
-        },
-        series: sources.map((item) => item.amount),
-        labels: sources.map((item) => item.label),
-        colors: ['#2563eb', '#0ea5e9', '#f59e0b', '#22c55e', '#8b5cf6'],
-        dataLabels: { enabled: false },
-        legend: { show: false },
-        stroke: { colors: [dark ? '#212529' : '#fff'] },
-        tooltip: { theme: dark ? 'dark' : 'light', y: { formatter: formatMoney } },
-      });
-      await this.sourceChart.render();
+          label: 'Presupuesto y costo ejecutado por proyecto, en soles',
+          table: false,
+        });
+      }
+      if (this.sourceChart?.update) this.sourceChart.update(sourceData);
+      else {
+        sourceElement.replaceChildren();
+        this.sourceChart = renderDonut(sourceElement, sourceData, {
+          size: 220,
+          legend: false,
+          table: false,
+          centerLabel: 'Ejecutado',
+          label: 'Distribución del costo ejecutado por fuente',
+        });
+      }
+    },
+    destroy() {
+      this.budgetChart?.destroy?.();
+      this.sourceChart?.destroy?.();
     },
   };
 }

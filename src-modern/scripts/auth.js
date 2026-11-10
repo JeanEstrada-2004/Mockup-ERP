@@ -16,6 +16,7 @@
 import { ThemeManager } from './utils/theme-manager.js';
 import Alpine from 'alpinejs';
 import '@fontsource-variable/inter';
+import '@fontsource-variable/plus-jakarta-sans';
 import '../styles/scss/main.scss';
 
 // Registers the Alpine scopes on the `alpine:init` event, which fires inside

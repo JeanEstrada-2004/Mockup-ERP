@@ -47,6 +47,11 @@ The smoke test needs Playwright, which is deliberately not a dependency:
 | `src-modern/scripts/utils/chart-palette.js` | Single source for every chart colour — validated, theme-aware |
 | `src-modern/scripts/utils/password-strength.js` | Shared password scorer (auth pages + forms showcase) |
 | `scripts/auth-interaction-test.mjs` | Drives the auth flows in a browser; the smoke test can't see stuck widgets |
+| `src-modern/scripts/charts/` | D3 chart kit: `render(el, data, options)` → `{ update, destroy }` (API in `DESIGN.md`) |
+| `src-modern/scripts/utils/motion.js` | `x-count` Alpine directive (count-up figures) and the hero network texture |
+| `src-modern/styles/scss/components/_design-system.scss` | "Red de Integración" layer: shell, panels, KPI strip, hero, tables, tabs — imported last |
+| `src-modern/design-system.html` | "Sistema visual": every shared component and chart with real data (not in the menu) |
+| `scripts/capture-views.mjs` | Before/after screenshots of the built variants (`VIEWS`, `VARIANTS`, `THEMES`, `WIDTHS`, `COLLAPSED`, `FULL`) |
 
 ## Architecture Quick Reference
 

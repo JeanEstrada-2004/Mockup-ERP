@@ -92,7 +92,7 @@ async function checkVariant(variant, projectId) {
     );
   }
   assert.ok(kpis.includes(`${financials.executionPercent} %`));
-  await page.locator('#cost-budget-chart .apexcharts-series').first().waitFor();
+  await page.locator('#cost-budget-chart .chart-svg rect').first().waitFor();
   assert.equal(await page.locator('.costs-source-row').count(), 5);
   assert.equal(
     await page.locator('.costs-source-total').innerText(),
@@ -244,7 +244,7 @@ try {
   await page.getByRole('button', { name: 'Activar modo oscuro' }).click();
   await page.waitForTimeout(300);
   assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'dark');
-  await page.locator('#cost-budget-chart .apexcharts-series').first().waitFor();
+  await page.locator('#cost-budget-chart .chart-svg rect').first().waitFor();
   await checkVariant('jy-pmi', 'PR-JY-001');
   await checkVariant('jy-demo', 'PR-JY-001');
   assert.deepEqual(errors, []);

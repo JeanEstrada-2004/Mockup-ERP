@@ -49,8 +49,15 @@ $orange: #ea580c;
 // --------------------------------------------------------------------------
 // Typography
 // --------------------------------------------------------------------------
+// Fontsource registers the variable fonts under these family names.
+$font-family-display:
+  'Plus Jakarta Sans Variable',
+  'Inter Variable',
+  'Segoe UI',
+  system-ui,
+  sans-serif;
 $font-family-sans-serif:
-  'Inter',
+  'Inter Variable',
   -apple-system,
   BlinkMacSystemFont,
   'Segoe UI',
@@ -61,7 +68,7 @@ $font-family-sans-serif:
 $font-family-monospace:
   'Fira Code', 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-$font-size-base: 1rem;
+$font-size-base: 0.9375rem; // 15px body (DESIGN.md)
 $line-height-base: 1.5;
 
 // Page titles and card headings form an obvious hierarchy at normal zoom.
@@ -72,8 +79,9 @@ $h4-font-size: 1.125rem;
 $h5-font-size: 1rem;
 $h6-font-size: 0.875rem;
 
-$headings-font-weight: 600;
-$headings-line-height: 1.3;
+$headings-font-family: $font-family-display;
+$headings-font-weight: 700;
+$headings-line-height: 1.25;
 
 // --------------------------------------------------------------------------
 // Spacing
@@ -110,7 +118,7 @@ $spacers: (
 // Border radius
 // --------------------------------------------------------------------------
 // Soft corners match the original Metis cards and controls.
-$border-radius: 0.625rem;
+$border-radius: 0.625rem; // 10px controls
 $border-radius-sm: 0.5rem;
 $border-radius-lg: 0.75rem;
 $border-radius-xl: 0.875rem;
@@ -136,8 +144,8 @@ $box-shadow-xl:
 // --------------------------------------------------------------------------
 // Layout
 // --------------------------------------------------------------------------
-$sidebar-width: 240px;
-$sidebar-mini-width: 64px;
+$sidebar-width: 232px;
+$sidebar-mini-width: 76px;
 $header-height: 68px;
 $footer-height: 56px;
 
@@ -170,8 +178,8 @@ $navbar-brand-font-size: 1rem;
 
 $card-border-width: 1px;
 $card-border-color: $border-color;
-$card-border-radius: $border-radius;
-$card-box-shadow: $box-shadow-sm;
+$card-border-radius: 0.875rem; // 14px panels
+$card-box-shadow: none;
 $card-cap-bg: transparent;
 
 $btn-border-radius: $border-radius-sm;
@@ -179,7 +187,7 @@ $btn-border-radius-sm: 0.3125rem;
 $btn-border-radius-lg: $border-radius;
 $btn-padding-y: 0.5625rem;
 $btn-padding-x: 1rem;
-$btn-font-weight: 500;
+$btn-font-weight: 600;
 $btn-focus-width: 2px;
 
 $input-border-radius: $border-radius-sm;
@@ -218,20 +226,66 @@ $dark-border-color: $gray-800;
 $dark-primary: $primary;
 
 // --------------------------------------------------------------------------
-// Runtime custom properties
+// Runtime custom properties — "Red de Integración" (DESIGN.md)
 // --------------------------------------------------------------------------
+// Variant colours (--rail*, --brand, --solid, --accent, --hero-*, --s1 and the
+// legacy --brand-*) are injected per build by scripts/app-shell-template.mjs.
+// The values below are SurTec fallbacks plus the tokens shared by all variants.
 :root {
-  // Type scale (DESIGN.md). Every ERP font size uses one of these steps; the
-  // smallest readable step is 12px so projected screens stay legible.
-  --fs-xs: 0.75rem; //   12px · captions, eyebrows, counters
-  --fs-sm: 0.8125rem; // 13px · secondary metadata, badges
-  --fs-md: 0.875rem; //  14px · tables, forms, buttons, body copy in panels
-  --fs-base: 1rem; //    16px · reading text, sidebar
-  --fs-lg: 1.125rem; //  18px · panel and section titles
-  --fs-xl: 1.25rem; //   20px · sub-page headings
-  --fs-2xl: 1.75rem; //  28px · page titles, headline figures
+  // Fonts
+  --font-display: #{$font-family-display};
+  --font-body: #{$font-family-sans-serif};
 
-  // Brand fallbacks; the build injects the variant palette over these.
+  // Type scale. Body 15px; the smallest step is 12.5px (projected screens).
+  --fs-xs: 0.78125rem; //  12.5px · metadata, pills, counters
+  --fs-sm: 0.84375rem; //  13.5px · secondary text, captions
+  --fs-md: 0.9375rem; //   15px  · body, tables, forms, buttons
+  --fs-dense: 0.875rem; // 14px  · dense tables
+  --fs-base: 0.9375rem; // 15px  · reading text
+  --fs-lg: 1.125rem; //    18px  · panel titles
+  --fs-xl: 1.25rem; //     20px  · sub-headings
+  --fs-2xl: 1.75rem; //    28px  · section figures
+  --fs-page: 1.875rem; //  30px  · page title / greeting
+  --fs-kpi: 2rem; //       32px  · KPI figures
+  --fs-hero: 3.25rem; //   52px  · the one hero figure
+
+  // Surfaces and ink
+  --canvas: #f2f5f9;
+  --panel: #ffffff;
+  --panel-2: #f7f9fc;
+  --line: #e1e7ef;
+  --line-strong: #cfd8e3;
+  --track: #e8edf4;
+  --ink: #0f1e33;
+  --ink-2: #4a5568;
+  --ink-3: #6b778a;
+
+  // Data series (validated, fixed order) and reserved status colours
+  --s1: #0066cc;
+  --s2: #0e9c8c;
+  --s3: #bf7a04;
+  --s4: #7b5cf5;
+  --s-other: #8c97a8;
+  --good: #17803d;
+  --good-soft: #e5f4ea;
+  --warn: #a8550a;
+  --warn-soft: #fdf1dc;
+  --bad: #c2261d;
+  --bad-soft: #fde8e7;
+
+  // Brand fallbacks (SurTec); the build injects the variant palette over these.
+  --rail: #10264a;
+  --rail-active: #1d4a86;
+  --rail-ink: #c3d1e6;
+  --rail-muted: #8396b4;
+  --rail-indicator: #4d9bf0;
+  --brand: #1a365d;
+  --solid: #1a365d;
+  --accent: #0066cc;
+  --accent-soft: #e6f0fa;
+  --hero-a: #1a365d;
+  --hero-b: #0066cc;
+  --logo-plate: #ffffff;
   --brand-primary: #1a365d;
   --brand-accent: #0066cc;
   --brand-accent-rgb: 0, 102, 204;
@@ -243,15 +297,28 @@ $dark-primary: $primary;
   --brand-solid-hover: #152c4c;
   --brand-solid-active: #132743;
 
+  // Shape and depth
+  --r-panel: 14px;
+  --r-control: 10px;
+  --shadow-frame:
+    0 1px 2px rgba(15, 30, 51, 0.05),
+    0 6px 18px rgba(15, 30, 51, 0.06);
+  --shadow-float:
+    0 12px 32px rgba(15, 30, 51, 0.14),
+    0 2px 6px rgba(15, 30, 51, 0.06);
+
   // Motion (emil-design-eng): short, ease-out, transform/opacity only.
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --motion-fast: 140ms;
   --motion-base: 180ms;
+  --motion-draw: 700ms;
 
+  // Layout
   --sidebar-width: #{$sidebar-width};
   --sidebar-mini-width: #{$sidebar-mini-width};
-  --header-height: #{$header-height};
+  --header-height: 70px;
   --footer-height: #{$footer-height};
+  --gutter: 28px;
 
   --transition-base: #{$transition-base};
   --transition-fast: #{$transition-fast};
@@ -263,44 +330,52 @@ $dark-primary: $primary;
 
   --box-shadow: #{$box-shadow};
   --box-shadow-sm: #{$box-shadow-sm};
-  --box-shadow-lg: #{$box-shadow-lg};
+  --box-shadow-lg: var(--shadow-float);
 
-  // Surface roles. The app background is one step down from panels so that a
-  // flat, borderless panel still reads as a distinct surface.
-  --surface-app: #f6f8fc;
-  --surface-panel: #ffffff;
-  --surface-sunken: #f1f5fb;
-  --surface-hover: #eff5ff;
-
-  // Ink roles.
-  --ink-primary: #{$gray-900};
-  --ink-secondary: #{$gray-600};
-  --ink-muted: #{$gray-500};
-
-  // Text-emphasis tokens. Bootstrap 5.3 auto-computes these, but its defaults
-  // land too light against white for our 600-step base colors. Pinned to the
-  // 700-step equivalents, all of which clear 4.5:1 for normal text.
-  --bs-primary-text-emphasis: #1d4ed8; // Blue 700
-  --bs-success-text-emphasis: #15803d; // Green 700
-  --bs-danger-text-emphasis: #b91c1c; // Red 700
-  --bs-warning-text-emphasis: #b45309; // Amber 700
-  --bs-info-text-emphasis: #0e7490; // Cyan 700
+  // Legacy surface/ink roles, now aliases of the tokens above.
+  --surface-app: var(--canvas);
+  --surface-panel: var(--panel);
+  --surface-sunken: var(--panel-2);
+  --surface-hover: var(--panel-2);
+  --ink-primary: var(--ink);
+  --ink-secondary: var(--ink-2);
+  --ink-muted: var(--ink-3);
 }
 
 [data-bs-theme='dark'] {
-  --surface-app: #111827;
-  --surface-panel: #1c2636;
-  --surface-sunken: #172131;
-  --surface-hover: #25354b;
+  color-scheme: dark;
+  --canvas: #08111f;
+  --panel: #0e1a2b;
+  --panel-2: #122236;
+  --line: #1f3048;
+  --line-strong: #2b405e;
+  --track: #1a2a40;
+  --ink: #e8eef7;
+  --ink-2: #aab7c9;
+  --ink-3: #8090a6;
 
-  --ink-primary: #{$gray-100};
-  --ink-secondary: #{$gray-400};
-  --ink-muted: #{$gray-500};
+  --s1: #3d85e6;
+  --s2: #1fa08f;
+  --s3: #c2861c;
+  --s4: #8670ea;
+  --s-other: #6f7d92;
+  --good: #5cc98a;
+  --good-soft: #10301f;
+  --warn: #e2a64b;
+  --warn-soft: #33240d;
+  --bad: #f07a70;
+  --bad-soft: #3a1513;
 
-  // Lighter against a dark ground — 300-step equivalents.
-  --bs-primary-text-emphasis: #93c5fd; // Blue 300
-  --bs-success-text-emphasis: #86efac; // Green 300
-  --bs-danger-text-emphasis: #fca5a5; // Red 300
-  --bs-warning-text-emphasis: #fcd34d; // Amber 300
-  --bs-info-text-emphasis: #67e8f9; // Cyan 300
+  --shadow-frame:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-float:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 575.98px) {
+  :root {
+    --gutter: 16px;
+  }
 }

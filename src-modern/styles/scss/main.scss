@@ -105,8 +105,7 @@
 @import 'components/integration-workspace';
 @import 'components/security-workspace';
 @import 'components/administration-workspace';
-@import 'components/metis-restoration';
-@import 'components/design-system';
+@import 'components/design-system'; // Red de Integración — must stay last
 
 // 9. Include utilities and helpers
 @import 'abstracts/utilities';

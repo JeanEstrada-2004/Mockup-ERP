@@ -90,7 +90,15 @@ async function openVariant(variant, expectedName, expectedProjects) {
         )
       )
   );
-  assert.ok(!/\b(PETI|PMI|Metis)\b/i.test(await page.locator('body').innerText()));
+  // Entrega 2: the rail and the mobile header name the presentation on purpose
+  // (user request: PETI / PMI / Demo must be told apart). Course names stay
+  // out of the page content, and no template branding appears anywhere.
+  assert.ok(!/\bMetis\b/i.test(await page.locator('body').innerText()));
+  assert.ok(!/\b(PETI|PMI)\b/.test(await page.locator('#main-content').innerText()));
+  assert.equal(
+    await page.locator('.shell-presentation-code').innerText(),
+    { 'surtec-peti': 'PETI', 'jy-pmi': 'PMI', 'jy-demo': 'Demo' }[variant]
+  );
   assert.equal(errors.length, 0, errors.join('\n'));
 }
 
@@ -101,7 +109,12 @@ async function verifyProjectFlow(variant, projectId) {
   const financials = getProjectFinancials(data, projectId);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(pageUrl(variant));
-  await page.waitForFunction(() => document.querySelectorAll('.apexcharts-canvas').length === 2);
+  // Entrega 2: Panel charts are drawn with the D3 kit (bars + donut).
+  await page.waitForFunction(
+    () => document.querySelectorAll('#dashboard-budget-chart .chart-svg, #dashboard-source-chart .chart-svg').length === 2
+  );
+  // KPI figures count up (~650 ms); read them once they settle.
+  await page.waitForTimeout(900);
   assert.ok(
     (await page.locator('body').innerText()).includes(
       `S/ ${Math.round(portfolio.budgetAmount)

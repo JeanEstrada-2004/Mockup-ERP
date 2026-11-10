@@ -47,8 +47,11 @@ const MIME = {
 
 // Pages that are expected to render at least one chart.
 const CHART_PAGES = new Set([
-  // The ERP dashboard is being rebuilt in delivery 3; delivery 2 has a
-  // coherent project overview without charts.
+  // ERP pages drawn with the D3 kit (Entrega 2 de mejoras).
+  'index.html',
+  'costs.html',
+  'design-system.html',
+  // Legacy Metis showcase pages (ApexCharts), when they are built.
   'analytics.html',
   'users.html',
   'orders.html',
@@ -149,7 +152,7 @@ async function main() {
     // Charts and the lazily-imported highlighter settle a tick after load.
     await tab.waitForTimeout(1200);
 
-    const charts = await tab.locator('.apexcharts-canvas').count();
+    const charts = await tab.locator('.apexcharts-canvas, .chart-svg, .exec-row').count();
     const highlighted = await tab.locator('code.language-html .token').count();
     const alpineErrors = errors.filter((e) => /alpine/i.test(e)).length;
 

@@ -195,7 +195,7 @@ async function testReports() {
     scopedPurchases.filter((item) => item.date.startsWith('2027-03')).length
   );
   await page.getByRole('button', { name: 'BI gerencial' }).click();
-  await page.locator('#reports-budget-chart .apexcharts-series').first().waitFor();
+  await page.locator('#reports-budget-chart .chart-svg rect').first().waitFor();
   const kpis = await page.locator('.d9-kpis').innerText();
   assert.ok(kpis.includes(String(totals.activeProjectCount)));
   assert.ok(kpis.includes('S/ 1 245 000'));
