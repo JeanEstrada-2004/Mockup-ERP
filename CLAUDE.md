@@ -81,7 +81,7 @@ Alpine.data('componentName', () => ({
 
 - **UI**: Bootstrap 5.3.8, Bootstrap Icons 1.13.1 (subset, see below)
 - **Reactive**: Alpine.js 3.17
-- **Charts**: ApexCharts 7.1 (single chart library — Chart.js was removed in v3.4.0). Colours come from `utils/chart-palette.js`, never inline hexes
+- **Charts**: D3 (modular imports) through the in-house kit in `src-modern/scripts/charts/` (from Entrega 2). ApexCharts 7.1 remains only in charts not yet migrated and is removed in Entrega 7 — see `docs/plan-mejoras.md`
 - **Notifications**: SweetAlert2 11.26.25
 - **Highlighting**: Prism 1.30 (bundled, showcase pages only)
 - **Fonts**: Inter via `@fontsource-variable/inter` (self-hosted)
@@ -89,8 +89,8 @@ Alpine.data('componentName', () => ({
 
 ## Conventions
 
-- **One charting library.** Use ApexCharts. ApexCharts requires a `<div>` container — not `<canvas>`.
-- **Import ApexCharts from `utils/apex.js`, never from `'apexcharts'`.** That module registers only the chart types this template renders. Using a new chart type means adding its module there, or the chart silently fails to render.
+- **New charts use the D3 kit only** (`src-modern/scripts/charts/`). Do not add ApexCharts charts. Visual direction: `DESIGN.md` and `docs/referencia/red-de-integracion.html` (approved by the user).
+- **While legacy ApexCharts charts remain, import them from `utils/apex.js`, never from `'apexcharts'`.** That module registers only the chart types this template renders. Using a new chart type means adding its module there, or the chart silently fails to render.
 - **No third-party runtime requests.** No CDN `<script>`/`<link>`, no remote fonts or images. `npm run test:build` fails the build if a page requests anything off-origin.
 - **No inline `<script>` or `onclick`.** Use a delegated listener in the page's component keyed off a `data-*` attribute. This keeps the template CSP-compatible and the code lintable — six pages once shipped a silent SyntaxError precisely because the logic sat in inline scripts nobody linted.
 - **Nothing is a global.** Alpine, ApexCharts, Swal and Bootstrap are all ES module imports. ESLint declares no library globals, so a missing import fails `npm run lint`.
@@ -99,7 +99,7 @@ Alpine.data('componentName', () => ({
 - **No `innerHTML` with interpolation.** Use `createElement` + `textContent`. Toast `action` callbacks must be functions, not strings.
 - **Search inputs** use the shared factory: `Alpine.data('searchComponent', createSearchComponent({ getResults }))`. Don't paste fresh definitions per page.
 - **Component cleanup.** Anything that calls `setInterval` / `setTimeout` / `addEventListener` should track the IDs and clean up in `destroy()` (called via `pagehide`).
-- **Chart colours come from `utils/chart-palette.js`.** Never inline a hex in a chart config. The categorical sequences are validated for colour-blind separation and contrast in both themes; a hand-picked substitute silently breaks that. Status colours (`STATUS.*`) are reserved for actual states and are never "series 4".
+- **Chart colours come from the CSS tokens `--s1..--s4`, `--s-other` and the status tokens** (read by the D3 kit; legacy charts use `utils/chart-palette.js`). Never inline a hex in a chart. The categorical sequences are validated for colour-blind separation and contrast in both themes; a hand-picked substitute silently breaks that. Status colours (`STATUS.*`) are reserved for actual states and are never "series 4".
 - **Standalone pages use `scripts/auth.js`, not `main.js`.** Login, register, forgot/reset password, two-factor, lock screen and the three error pages render outside the admin shell, so they must not pull in the sidebar, notification or dashboard managers.
 - **Don't spread a mixin that exposes a getter.** `{...mixin()}` copies the getter's *value*, evaluated immediately. Use the `compose()` helper in `components/auth.js`, which merges property descriptors.
 - **Bootstrap Icons subset.** After adding any `bi-*` icon to markup, run `npm run icons`. The subset partial is generated; if you skip this the class exists, the markup looks right, and the glyph renders as nothing. The script exits non-zero on a typo'd icon name, so it is safe in CI.

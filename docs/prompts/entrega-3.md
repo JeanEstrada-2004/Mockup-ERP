@@ -1,73 +1,74 @@
-# Entrega 3 de 6 — Aprobaciones, Rendiciones, Presupuestos y Compras
+# Entrega 3 de 7 — Panel General, Proyectos y Ficha Integral
 
 Trabajas en el Mockup Maestro de este repositorio. Sigue el **protocolo común** de
 `docs/prompts/README.md`. Requisito: la Entrega 2 figura como **Terminada** en
 `docs/plan-mejoras.md`. Lee sus "Notas para la siguiente", `PRODUCT.md` y `DESIGN.md`.
 
 ## Objetivo
-Los flujos operativos con aprobación (Bloques 2 y 3): crear, enviar, revisar, observar,
-corregir y aprobar, más la experiencia móvil de Rendiciones. Reutiliza tabla, modales,
-confirmaciones y toasts de la Entrega 1. `/impeccable critique` antes de cada vista,
-`/impeccable adapt` para móvil, `/impeccable harden` para estados vacíos y errores.
+Las tres pantallas más importantes de la demostración (Bloque 1 de la especificación):
+un usuario entra al Panel, entiende qué pasa, abre un proyecto y lo recorre completo.
+Usa los componentes del sistema visual y el kit D3 de la Entrega 2 (y la tabla, estados y header de la Entrega 1); no crees variantes nuevas de tabla, KPI, gráfico o modal. La referencia visual exacta del Panel es `docs/referencia/red-de-integracion.html`.
+
+Antes de cada vista: `/impeccable critique <vista>`. Después: `/impeccable layout` y
+`/impeccable distill` si hay saturación.
 
 ## Tareas
 
-### A. Bandeja de Aprobaciones (vista nueva)
-- `src-modern/approvals.html` + componente + entrada en `vite.config.js` + caso en
-  `main.js` (ver "Adding a New Page" en `CLAUDE.md`). Visible en las variantes que
-  tengan al menos uno de presupuestos, compras o rendiciones.
-- Título "Aprobaciones Pendientes"; pestañas Presupuestos, Compras, Rendiciones con contador.
-- Tabla: Tipo · Código · Responsable · Proyecto · Monto · Fecha · Acción (Revisar, Aprobar
-  con confirmación "¿Deseas aprobar la rendición R-045?", Observar con motivo).
-- Conectar el botón de Aprobaciones del header a esta vista.
+### A. Panel General (`src-modern/index.html`, `components/project-views.js` › `dashboardView`)
+Reproducir la composición aprobada de `docs/referencia/red-de-integracion.html`,
+con datos reales de `mock-data.js` (nada fijo en el HTML) y en las 3 variantes:
+- **Saludo:** "Buenos días, Jean" (según la hora) + línea de contexto (fecha de corte,
+  proyectos en ejecución, clientes). Acciones a la derecha: "+ Nueva rendición" (secundaria)
+  y "+ Nuevo proyecto" (principal). El título de página sigue siendo "Panel General"
+  para breadcrumbs y `<title>`.
+- **Franja de 6 KPI** en un solo panel con divisiones finas (no 6 tarjetas sueltas):
+  Proyectos activos (barra activos/en riesgo) · Presupuesto activo (S/ 1 245 000) ·
+  Costo acumulado (S/ 768 400 + mini gráfico + % ejecutado) · Rendiciones pendientes ·
+  Órdenes por aprobar · Alertas; cada una con una píldora de contexto y enlace a su módulo.
+  Cifras con conteo animado.
+- **Bloque protagonista** con degradado de marca y textura de red: "N aprobaciones esperan
+  tu revisión" con las 3 más antiguas y "Abrir bandeja" (desplegable del header hasta que
+  exista `approvals.html` en la Entrega 4). Es el único bloque con degradado.
+- **Trazabilidad del costo** del proyecto del selector (flujo D3: fuentes → ejecutado →
+  presupuesto con ejecutado / comprometido / disponible), enlazado a Costos.
+- **Ejecución frente al avance** (barras D3 por proyecto en ejecución; rojo si gasta más
+  rápido que su avance) con enlace a Proyectos. Sustituye "Presupuesto vs. costo".
+- **Costo mensual del portafolio** (área D3) derivado de las fechas de las operaciones.
+- **Actividad reciente** (línea de tiempo) derivada de operaciones.
+- Quitar el límite temporal `DASHBOARD_PROJECT_LIMIT` y el gráfico de barras ApexCharts.
+- En J&Y Demo y PMI la composición es la misma con sus datos; lo que no aplique
+  (por ejemplo, materiales) no aparece.
 
-### B. Rendiciones (`expenses.html`, `expense.html`, `expense-views.js`)
-- Lista: Código · Responsable · Proyecto · Fecha · Monto · Estado · Acciones; filtros
-  proyecto, responsable, estado, periodo; "+ Nueva rendición".
-- Detalle: tabla Fecha · Tipo · Documento · Concepto · V.V. · IGV · Total · Evidencia;
-  totales rendido / documentado / no documentado; conceptos Valor de Venta, IGV,
-  No Gravado y No Documentado visibles.
-- "+ Agregar gasto" con Tomar foto / Subir imagen / Adjuntar PDF (simulados) →
-  bloque "Datos propuestos por OCR" (RUC, proveedor, fecha, tipo, número, V.V., IGV,
-  total) editable.
-- Revisión administrativa en dos columnas: comprobante simulado | datos registrados;
-  Aprobar gasto, Observar (modal motivo + comentario → estado Observada),
-  Solicitar corrección.
-- Trazabilidad: Creada → Enviada → Revisada → Observada → Corregida → Aprobada con
-  fecha, usuario y comentario.
-- **Mis Rendiciones (móvil):** pantalla con botón grande "+ Nueva rendición" →
-  seleccionar proyecto → Tomar foto / Seleccionar archivo → OCR simulado →
-  "Confirmar y enviar". Botones de al menos 48 px, una acción por pantalla.
-  Conservar el recorrido actual de 4 pasos y su `localStorage`.
+### B. Proyectos (`projects.html`, `components/project-views.js`)
+- Columnas: Código · Proyecto · Cliente · Responsable · Avance · Presupuesto · Costo ·
+  Estado · Acciones (`⋮`: Ver, Editar, Duplicar, Historial).
+- Filtros visibles: buscar, estado; en "Más filtros": cliente, responsable, periodo.
+  Chips de filtros aplicados. Estado en la URL (ya existe; conservarlo).
+- Acción principal "+ Nuevo proyecto" → modal en 3 secciones (principal, económica,
+  complementaria; campos del punto 14) → "Guardar proyecto"/"Cancelar" → toast
+  "Proyecto creado" y la fila aparece (persistencia en `localStorage` con
+  `variantStorageKey`, marcada como demostración y fuera de los totales).
+- En móvil, filas como tarjetas.
 
-### C. Presupuestos (`budgets.html`, `budget.html`, `commercial-views.js`)
-- Lista: Código · Cliente · Proyecto/Oportunidad · Versión · Fecha · Monto · Estado · `⋮`.
-- "+ Nuevo presupuesto": cabecera del punto 25 + partidas jerárquicas (1 Infraestructura /
-  1.1 Cableado / 1.2 Equipos; 2 Instalación / 2.1 Mano de obra / 2.2 Configuración) con
-  Unidad, Cantidad, Costo unit., Precio unit., Total.
-- Totales: subtotal, descuento, valor de venta, IGV, total, costo estimado, margen.
-- Acciones: Guardar borrador, Enviar a revisión, Aprobar, Nueva versión, Duplicar,
-  Generar PDF (modal "Documento generado correctamente"), Ver historial.
-- Versiones V1–V3 con fecha, responsable, estado y vigente; nunca sobrescritura.
-- Si PMI no tiene Presupuestos en alguna vista, respetar `enabledModules`.
-
-### D. Compras (`purchases.html`, `purchase.html`)
-- Lista: N.º OC · Proyecto · Proveedor · Fecha · Monto · Estado · `⋮`; filtros del punto 31.
-- "+ Nueva orden de compra": datos del punto 32 y detalle Producto/Servicio · Cantidad ·
-  Unidad · Precio · IGV · Total; partida presupuestaria, centro de costo, cotización adjunta.
-- Acciones: Guardar borrador, Enviar a aprobación, Aprobar, Emitir, Registrar recepción,
-  Generar documento, Ver historial.
-- Alerta no bloqueante: "Advertencia: esta compra supera el saldo disponible de la
-  partida seleccionada."
-- "Ver proyecto" en cada OC.
-
-Las acciones simuladas no alteran costos ejecutados del conjunto base (mantener la
-regla actual documentada en `mockup-master.md`).
+### C. Ficha Integral (`project.html`)
+- Breadcrumb Proyectos / PR-2027-001 / <pestaña>. Encabezado: código, nombre,
+  cliente, responsable, estado, avance, fecha final, "Volver a Proyectos".
+- 6 KPI: Presupuesto, Costo ejecutado, Disponible (S/ 72 550 en PR-2027-001), Avance,
+  Documentos, Alertas.
+- 9 pestañas: Resumen, Presupuesto, Compras, Rendiciones, Personal, Materiales,
+  Costos, Documentos, Indicadores. Pestaña activa en el hash (`#costos`), navegable
+  con teclado, y en móvil desplazable horizontalmente.
+- Resumen: descripción, cronograma por hitos, responsables, alertas, últimas actividades,
+  gráfico pequeño presupuesto vs. costo.
+- Cada pestaña muestra un resumen de su módulo con enlace "Abrir en <módulo>"; cada
+  registro enlaza a su ficha y cada ficha de módulo tiene "Ver proyecto" (punto 123).
+- Materiales solo con datos en PETI; en las otras variantes, estado vacío explicativo.
+- Selector de proyecto del header sincronizado con la ficha (ya existe; conservarlo).
 
 ## Fuera de alcance
-Almacén, Personal y Costos (Entrega 4).
+Crear presupuestos, OC o rendiciones reales (Entrega 4); rediseñar los módulos enlazados.
 
 ## Terminado cuando
-- Escenario 2 del punto 156 recorrible en móvil (390 px) y escritorio.
-- La bandeja muestra lo pendiente de las 3 áreas y el contador del header coincide.
-- Verificación y cierre del protocolo completos.
+- Escenario 1 del punto 156 recorrible: Panel → PR-2027-001 → Costos → Compras → OC-025 → documento.
+- Las cifras coinciden entre Panel, Ficha y Costos en las 3 variantes.
+- Escritorio y móvil revisados con capturas; verificación y cierre del protocolo completos.

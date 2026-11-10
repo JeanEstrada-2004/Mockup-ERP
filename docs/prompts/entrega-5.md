@@ -1,77 +1,64 @@
-# Entrega 5 de 6 — Documentos, Reportes, BI, CRM, Integraciones, Seguridad y Administración
+# Entrega 5 de 7 — Personal y Tareo, Almacén y Materiales, Costos por Proyecto
 
 Trabajas en el Mockup Maestro de este repositorio. Sigue el **protocolo común** de
 `docs/prompts/README.md`. Requisito: la Entrega 4 figura como **Terminada** en
 `docs/plan-mejoras.md`. Lee sus "Notas para la siguiente", `PRODUCT.md` y `DESIGN.md`.
 
 ## Objetivo
-Completar los módulos de control y sistema (Bloques 7 y 8). Son muchas vistas:
-prioriza en este orden Documentos → BI → CRM → Seguridad → Integraciones →
-Reportes → Administración, y si el tiempo no alcanza, deja las últimas anotadas en
-"Notas para la siguiente" en vez de entregarlas a medias.
-Estados simulados creíbles (MFA Activado, ZKTeco Conectado, Backup Correcto), sin
-avisos repetidos de "no es real" (decisión de la Entrega 1).
+Mostrar cómo personal y materiales se convierten en costo del proyecto, y hacer de
+Costos la vista donde todo costo tiene un origen identificable (Bloques 4 a 6).
+`/impeccable critique` antes de cada vista; `/impeccable distill` en Costos para que
+sea importante sin saturarse.
 
 ## Tareas
 
-### A. Gestión Documental (`documents.html`, `document.html`)
-- Panel lateral o filtros: Proyecto, Módulo, Tipo, Fecha, Responsable, Estado.
-- Árbol por proyecto: Contratos, Presupuestos, Compras, Rendiciones, Personal, Planos,
-  Informes, Entregables.
-- Tabla: Documento · Tipo · Proyecto · Módulo origen · Versión · Responsable · Fecha.
-- Ficha: campos del punto 78; Vista previa, Descargar (toast), Nueva versión, Historial
-  (V1–V3 con fecha, responsable, comentario). Trazabilidad OC-025.pdf → PR-2027-001 →
-  Compras → OC-025.
-- Indicador de documentos generados automáticamente (Cotización PDF, OC, Resumen de
-  rendición, Reporte de tareo, Reporte de costos).
+### A. Personal y Tareo (`personnel.html`, `worker.html`, `personnel-views.js`)
+- Título "Personal y Tareo"; pestañas Personal, Asignaciones, Tareo, Biometría,
+  Incidencias. Biometría e Incidencias **solo en PETI**.
+- Personal: DNI · Trabajador · Cargo · Área · Estado · Proyectos · `⋮`.
+- Ficha del trabajador: datos, cargo, área, proyectos, historial de tareo, asistencia,
+  incidencias, costo imputable. No convertirlo en RR. HH. completo.
+- Asignaciones: Trabajador · Proyecto · Rol · Desde · Hasta · % · botón "Asignar trabajador" (modal).
+- Tareo: Trabajador · Proyecto · Fecha · Entrada · Salida · Horas · Estado; filtros;
+  modal de registro manual (punto 52, conservar validaciones existentes).
+- Biometría: "Sincronización Biométrica", tarjeta ZKTeco Oficina Principal ·
+  Conectado · 08/11/2026 18:05 · 43 registros · 2 errores; tabla de registros
+  (Juan Pérez 08:01–17:03 8h 02m Correcto; Ana Díaz 08:10 — Incompleto).
+- Incidencias: falta entrada, falta salida, duplicada, no identificado;
+  Corregir / Justificar / Ignorar con responsable, fecha y motivo.
+- Franja compacta Biométrico → Asistencia → Tareo → Proyecto → Costo laboral.
+- Tareo en móvil como tarjetas.
 
-### B. BI (`analytics.html`, solo PETI)
-- Reconvertir la página Metis existente (agregar a `vite.config.js` y al menú como
-  "Reportes y BI" o enlace desde Reportes, sin sumar entradas de primer nivel).
-- Título "Inteligencia de Negocios", subtítulo "Indicadores para la toma de decisiones".
-- Filtros: Periodo, Proyecto, Cliente, Responsable, Estado.
-- KPI: Rentabilidad estimada, Presupuesto total, Costo total, Desviación promedio,
-  Proyectos en riesgo, Rendiciones pendientes.
-- Máximo 4 gráficos: margen por proyecto, presupuesto vs. costo, costos por fuente,
-  evolución mensual. Tabla gerencial (punto 87).
-- Drill-down Empresa → Proyecto → Fuente → Transacción. Reutilizar cálculos de
-  `report-views.js` y quitar de Reportes el BI duplicado.
+### B. Almacén y Materiales (`warehouse.html`, `material.html`) — solo PETI
+- Pestañas: Inventario, Movimientos, Entradas, Salidas, Kardex, Almacenes.
+- Inventario: Código · Material · Categoría · Unidad · Stock · Mínimo · Almacén · Estado;
+  badge "Stock bajo" y su notificación (Conector RJ45 80/100; Cable UTP 1 250/300 sin alerta).
+- Ficha de material: punto 60.
+- Modales: Entrada (desde OC: OC → Recepción → Entrada), Salida (imputa costo al
+  proyecto), Devolución, Transferencia.
+- Kardex: Fecha · Documento · Movimiento · Entrada · Salida · Saldo · Proyecto/Origen.
+- Conservar la regla de no duplicar costo entre OC de inventario y salidas.
 
-### C. Reportes (`reports.html`)
-- Catálogo de 8 reportes (punto 82) en tarjetas o tabla con Ver y Exportar (toast).
-- Reportes operativos para PETI y PMI; ocultos en J&Y Demo.
+### C. Costos por Proyecto (`costs.html`, `cost-views.js`)
+- Selector de proyecto arriba.
+- 5 KPI: Presupuesto S/ 185 000 · Comprometido S/ 128 700 · Ejecutado S/ 112 450 ·
+  Disponible S/ 72 550 · Ejecución 60,8 % (PR-2027-001). Tooltip en "Costo comprometido":
+  "Órdenes y obligaciones ya aprobadas que todavía pueden no haberse ejecutado."
+- Gráfico presupuesto / comprometido / ejecutado y, en grande, el flujo de trazabilidad
+  (`charts/flow.js`) del proyecto seleccionado: fuentes → ejecutado → presupuesto.
+- Tabla por fuente (Compras 47 230 · Personal 30 362 · Rendiciones 15 743 · Materiales
+  13 494 · Otros 5 621, con %) y drill-down fuente → operaciones (OC-025, OC-028…;
+  R-041, R-045…) → documento.
+- Tabla "Costos por partida": Partida · Presupuesto · Ejecutado · Variación · %;
+  desviaciones resaltadas.
+- Alertas: "Proyecto ha consumido X % del presupuesto con Y % de avance",
+  "Partida 2.1 supera el presupuesto en 8 %" (derivadas de datos, no texto fijo).
 
-### D. CRM (`crm.html`, solo PETI)
-- Título "Gestión Comercial". Kanban: Prospecto, Contactado, Propuesta, Negociación,
-  Ganado, Perdido; tarjeta con cliente, oportunidad, monto, probabilidad, responsable,
-  próxima acción. En móvil, columnas desplazables o lista por etapa.
-- Ficha de oportunidad (punto 21). Acciones: Generar presupuesto, Registrar actividad,
-  Marcar como ganado / perdido, y "Convertir en proyecto" si está ganada.
-- Recorrido OP-001 → PRE-001 → PR-2027-001 (ya existe; conservarlo).
-
-### E. Integraciones (`integrations.html`, solo PETI)
-- Tarjetas: Biometría ZKTeco (Conectado), Software contable (Sincronización pendiente),
-  Correo (Activo), Backup (Correcto), Almacenamiento (Activo).
-- Historial: Integración · Última ejecución · Registros · Resultado.
-- Error "2 registros biométricos no pudieron asociarse con trabajadores." con
-  "Revisar incidencias" → pestaña Incidencias de Personal.
-
-### F. Seguridad (`security.html`, PETI y PMI)
-- Título "Seguridad y Control de Acceso"; pestañas Usuarios, Roles, Permisos,
-  Sesiones, Auditoría, Backups.
-- Roles del punto 95; matriz de permisos (Sí / Parcial / No); MFA Activado
-  (aplicación autenticadora / correo); sesiones con dispositivo, IP ficticia,
-  ubicación, actividad; auditoría (08/11/2026 10:22 · jperez · Modificó · Rendiciones ·
-  R-045 · Correcto) derivada de operaciones; backups (último 08/11/2026 02:00,
-  Correcto, Automático, próximo 09/11/2026 02:00, "Ver historial").
-
-### G. Administración (`settings.html`, PETI y PMI)
-- Título "Administración del Sistema"; pestañas Empresa, Catálogos, Parámetros,
-  Notificaciones, Apariencia, Configuración general.
-- Empresa: razón social, RUC, dirección, teléfono, correo, logo, moneda, zona horaria.
-- Catálogos del punto 103. Nota única sobre datos de demostración.
+## Fuera de alcance
+Documentos, Reportes, BI y módulos de sistema (Entrega 6).
 
 ## Terminado cuando
-- Escenario 5 del punto 156 recorrible; trazabilidad documental demostrable.
-- Alcance correcto por variante (también por URL directa).
+- Escenarios 3 y 4 del punto 156 recorribles en PETI; PMI y J&Y Demo sin Almacén
+  ni Biometría (también por URL directa).
+- Cifras de Costos iguales a Panel y Ficha en las 3 variantes.
 - Verificación y cierre del protocolo completos.

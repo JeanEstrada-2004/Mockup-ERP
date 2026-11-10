@@ -1,4 +1,4 @@
-# Prompts de las entregas 1–6
+# Prompts de las entregas 1–7
 
 Uso: abrir una **conversación nueva** por entrega y pegar el contenido del archivo
 `entrega-N.md` correspondiente. Cada prompt remite a este protocolo común.
@@ -11,6 +11,8 @@ Uso: abrir una **conversación nueva** por entrega y pegar el contenido del arch
    - `docs/plan-mejoras.md` (plan, reglas de diseño, decisiones y tabla de estado);
    - `docs/mockup-master.md` (qué se construyó en las Entregas 1–10 originales y por qué);
    - `PRODUCT.md` y `DESIGN.md` (existen a partir de la Entrega 1);
+   - la referencia visual aprobada `docs/referencia/red-de-integracion.html` (abrirla en el
+     navegador): es la fuente de verdad del estilo "Red de Integración";
    - la especificación original: `docs/especificacion/01-brief-maestro.md` y
      `docs/especificacion/02-especificacion-funcional.md`. Cuando un prompt cita
      "punto N", se refiere a la numeración de `02-especificacion-funcional.md`.
@@ -22,10 +24,12 @@ Uso: abrir una **conversación nueva** por entrega y pegar el contenido del arch
 4. Tomar capturas **antes** (1440×900 y 390×844, modo claro) de las vistas de la entrega.
 
 ### 2. Durante el trabajo
-- **Adaptar, no reescribir.** Reutilizar componentes compartidos creados en la Entrega 1
+- **Adaptar, no reescribir.** Reutilizar componentes compartidos creados en las Entregas 1 y 2
   (tabla, filtros, chips, `⋮`, toasts, confirmaciones, tooltips, KPI, badges).
 - **Reglas de diseño** de `docs/plan-mejoras.md` y tokens de `DESIGN.md`. Nada de tamaños
-  de letra, colores de gráfico o hexes sueltos fuera de la escala y de `chart-palette.js`.
+  de letra, colores o hexes sueltos fuera de los tokens. **Gráficos nuevos solo con el kit D3**
+  (`src-modern/scripts/charts/`, desde la Entrega 2); ApexCharts queda solo en lo no migrado
+  y se elimina en la Entrega 7.
 - **Datos:** solo desde `src-modern/scripts/data/`. Ninguna cifra inventada en el HTML.
   Tras tocar datos, `npm run check:mock-data`.
 - **Variantes:** respetar `enabledModules` de `variants.js`. Lo exclusivo de PETI no debe

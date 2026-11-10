@@ -1,63 +1,73 @@
-# Entrega 4 de 6 — Personal y Tareo, Almacén y Materiales, Costos por Proyecto
+# Entrega 4 de 7 — Aprobaciones, Rendiciones, Presupuestos y Compras
 
 Trabajas en el Mockup Maestro de este repositorio. Sigue el **protocolo común** de
 `docs/prompts/README.md`. Requisito: la Entrega 3 figura como **Terminada** en
 `docs/plan-mejoras.md`. Lee sus "Notas para la siguiente", `PRODUCT.md` y `DESIGN.md`.
 
 ## Objetivo
-Mostrar cómo personal y materiales se convierten en costo del proyecto, y hacer de
-Costos la vista donde todo costo tiene un origen identificable (Bloques 4 a 6).
-`/impeccable critique` antes de cada vista; `/impeccable distill` en Costos para que
-sea importante sin saturarse.
+Los flujos operativos con aprobación (Bloques 2 y 3): crear, enviar, revisar, observar,
+corregir y aprobar, más la experiencia móvil de Rendiciones. Reutiliza tabla, modales,
+confirmaciones y toasts de las Entregas 1 y 2. `/impeccable critique` antes de cada vista,
+`/impeccable adapt` para móvil, `/impeccable harden` para estados vacíos y errores.
 
 ## Tareas
 
-### A. Personal y Tareo (`personnel.html`, `worker.html`, `personnel-views.js`)
-- Título "Personal y Tareo"; pestañas Personal, Asignaciones, Tareo, Biometría,
-  Incidencias. Biometría e Incidencias **solo en PETI**.
-- Personal: DNI · Trabajador · Cargo · Área · Estado · Proyectos · `⋮`.
-- Ficha del trabajador: datos, cargo, área, proyectos, historial de tareo, asistencia,
-  incidencias, costo imputable. No convertirlo en RR. HH. completo.
-- Asignaciones: Trabajador · Proyecto · Rol · Desde · Hasta · % · botón "Asignar trabajador" (modal).
-- Tareo: Trabajador · Proyecto · Fecha · Entrada · Salida · Horas · Estado; filtros;
-  modal de registro manual (punto 52, conservar validaciones existentes).
-- Biometría: "Sincronización Biométrica", tarjeta ZKTeco Oficina Principal ·
-  Conectado · 08/11/2026 18:05 · 43 registros · 2 errores; tabla de registros
-  (Juan Pérez 08:01–17:03 8h 02m Correcto; Ana Díaz 08:10 — Incompleto).
-- Incidencias: falta entrada, falta salida, duplicada, no identificado;
-  Corregir / Justificar / Ignorar con responsable, fecha y motivo.
-- Franja compacta Biométrico → Asistencia → Tareo → Proyecto → Costo laboral.
-- Tareo en móvil como tarjetas.
+### A. Bandeja de Aprobaciones (vista nueva)
+- `src-modern/approvals.html` + componente + entrada en `vite.config.js` + caso en
+  `main.js` (ver "Adding a New Page" en `CLAUDE.md`). Visible en las variantes que
+  tengan al menos uno de presupuestos, compras o rendiciones.
+- Título "Aprobaciones Pendientes"; pestañas Presupuestos, Compras, Rendiciones con contador.
+- Tabla: Tipo · Código · Responsable · Proyecto · Monto · Fecha · Acción (Revisar, Aprobar
+  con confirmación "¿Deseas aprobar la rendición R-045?", Observar con motivo).
+- Conectar el botón de Aprobaciones del header a esta vista.
 
-### B. Almacén y Materiales (`warehouse.html`, `material.html`) — solo PETI
-- Pestañas: Inventario, Movimientos, Entradas, Salidas, Kardex, Almacenes.
-- Inventario: Código · Material · Categoría · Unidad · Stock · Mínimo · Almacén · Estado;
-  badge "Stock bajo" y su notificación (Conector RJ45 80/100; Cable UTP 1 250/300 sin alerta).
-- Ficha de material: punto 60.
-- Modales: Entrada (desde OC: OC → Recepción → Entrada), Salida (imputa costo al
-  proyecto), Devolución, Transferencia.
-- Kardex: Fecha · Documento · Movimiento · Entrada · Salida · Saldo · Proyecto/Origen.
-- Conservar la regla de no duplicar costo entre OC de inventario y salidas.
+### B. Rendiciones (`expenses.html`, `expense.html`, `expense-views.js`)
+- Lista: Código · Responsable · Proyecto · Fecha · Monto · Estado · Acciones; filtros
+  proyecto, responsable, estado, periodo; "+ Nueva rendición".
+- Detalle: tabla Fecha · Tipo · Documento · Concepto · V.V. · IGV · Total · Evidencia;
+  totales rendido / documentado / no documentado; conceptos Valor de Venta, IGV,
+  No Gravado y No Documentado visibles.
+- "+ Agregar gasto" con Tomar foto / Subir imagen / Adjuntar PDF (simulados) →
+  bloque "Datos propuestos por OCR" (RUC, proveedor, fecha, tipo, número, V.V., IGV,
+  total) editable.
+- Revisión administrativa en dos columnas: comprobante simulado | datos registrados;
+  Aprobar gasto, Observar (modal motivo + comentario → estado Observada),
+  Solicitar corrección.
+- Trazabilidad: Creada → Enviada → Revisada → Observada → Corregida → Aprobada con
+  fecha, usuario y comentario.
+- **Mis Rendiciones (móvil):** pantalla con botón grande "+ Nueva rendición" →
+  seleccionar proyecto → Tomar foto / Seleccionar archivo → OCR simulado →
+  "Confirmar y enviar". Botones de al menos 48 px, una acción por pantalla.
+  Conservar el recorrido actual de 4 pasos y su `localStorage`.
 
-### C. Costos por Proyecto (`costs.html`, `cost-views.js`)
-- Selector de proyecto arriba.
-- 5 KPI: Presupuesto S/ 185 000 · Comprometido S/ 128 700 · Ejecutado S/ 112 450 ·
-  Disponible S/ 72 550 · Ejecución 60,8 % (PR-2027-001). Tooltip en "Costo comprometido":
-  "Órdenes y obligaciones ya aprobadas que todavía pueden no haberse ejecutado."
-- Gráfico presupuesto / comprometido / ejecutado.
-- Tabla por fuente (Compras 47 230 · Personal 30 362 · Rendiciones 15 743 · Materiales
-  13 494 · Otros 5 621, con %) y drill-down fuente → operaciones (OC-025, OC-028…;
-  R-041, R-045…) → documento.
-- Tabla "Costos por partida": Partida · Presupuesto · Ejecutado · Variación · %;
-  desviaciones resaltadas.
-- Alertas: "Proyecto ha consumido X % del presupuesto con Y % de avance",
-  "Partida 2.1 supera el presupuesto en 8 %" (derivadas de datos, no texto fijo).
+### C. Presupuestos (`budgets.html`, `budget.html`, `commercial-views.js`)
+- Lista: Código · Cliente · Proyecto/Oportunidad · Versión · Fecha · Monto · Estado · `⋮`.
+- "+ Nuevo presupuesto": cabecera del punto 25 + partidas jerárquicas (1 Infraestructura /
+  1.1 Cableado / 1.2 Equipos; 2 Instalación / 2.1 Mano de obra / 2.2 Configuración) con
+  Unidad, Cantidad, Costo unit., Precio unit., Total.
+- Totales: subtotal, descuento, valor de venta, IGV, total, costo estimado, margen.
+- Acciones: Guardar borrador, Enviar a revisión, Aprobar, Nueva versión, Duplicar,
+  Generar PDF (modal "Documento generado correctamente"), Ver historial.
+- Versiones V1–V3 con fecha, responsable, estado y vigente; nunca sobrescritura.
+- Si PMI no tiene Presupuestos en alguna vista, respetar `enabledModules`.
+
+### D. Compras (`purchases.html`, `purchase.html`)
+- Lista: N.º OC · Proyecto · Proveedor · Fecha · Monto · Estado · `⋮`; filtros del punto 31.
+- "+ Nueva orden de compra": datos del punto 32 y detalle Producto/Servicio · Cantidad ·
+  Unidad · Precio · IGV · Total; partida presupuestaria, centro de costo, cotización adjunta.
+- Acciones: Guardar borrador, Enviar a aprobación, Aprobar, Emitir, Registrar recepción,
+  Generar documento, Ver historial.
+- Alerta no bloqueante: "Advertencia: esta compra supera el saldo disponible de la
+  partida seleccionada."
+- "Ver proyecto" en cada OC.
+
+Las acciones simuladas no alteran costos ejecutados del conjunto base (mantener la
+regla actual documentada en `mockup-master.md`).
 
 ## Fuera de alcance
-Documentos, Reportes, BI y módulos de sistema (Entrega 5).
+Almacén, Personal y Costos (Entrega 5).
 
 ## Terminado cuando
-- Escenarios 3 y 4 del punto 156 recorribles en PETI; PMI y J&Y Demo sin Almacén
-  ni Biometría (también por URL directa).
-- Cifras de Costos iguales a Panel y Ficha en las 3 variantes.
+- Escenario 2 del punto 156 recorrible en móvil (390 px) y escritorio.
+- La bandeja muestra lo pendiente de las 3 áreas y el contador del header coincide.
 - Verificación y cierre del protocolo completos.

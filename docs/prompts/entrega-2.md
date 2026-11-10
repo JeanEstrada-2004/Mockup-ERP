@@ -1,64 +1,84 @@
-# Entrega 2 de 6 — Panel General, Proyectos y Ficha Integral
+# Entrega 2 de 7 — Sistema visual "Red de Integración" y kit de gráficos D3
 
 Trabajas en el Mockup Maestro de este repositorio. Sigue el **protocolo común** de
 `docs/prompts/README.md`. Requisito: la Entrega 1 figura como **Terminada** en
-`docs/plan-mejoras.md`. Lee sus "Notas para la siguiente", `PRODUCT.md` y `DESIGN.md`.
+`docs/plan-mejoras.md`. Lee sus "Notas de la Entrega 1", `PRODUCT.md` y `DESIGN.md`.
+
+**Referencia visual aprobada por el usuario:** `docs/referencia/red-de-integracion.html`.
+Ábrela en el navegador antes de empezar; es la fuente de verdad del estilo (colores,
+tipografía, riel de navegación, franja de KPI, bloque protagonista, gráficos, movimiento).
+`DESIGN.md` describe sus reglas. Si la referencia y el código actual chocan, gana la referencia.
 
 ## Objetivo
-Las tres pantallas más importantes de la demostración (Bloque 1 de la especificación):
-un usuario entra al Panel, entiende qué pasa, abre un proyecto y lo recorre completo.
-Usa los componentes compartidos de la Entrega 1; no crees variantes nuevas de tabla, KPI o modal.
-
-Antes de cada vista: `/impeccable critique <vista>`. Después: `/impeccable layout` y
-`/impeccable distill` si hay saturación.
+Que **toda la aplicación** cambie de aspecto, en las 3 variantes y en claro/oscuro, antes
+de rediseñar pantallas concretas. Al terminar, cualquier vista existente ya debe verse con
+el nuevo estilo aunque su contenido no cambie, y debe existir un kit de gráficos D3 listo
+para las entregas siguientes. **No rediseñar todavía el contenido del Panel** (Entrega 3),
+salvo lo mínimo para que no se rompa.
 
 ## Tareas
 
-### A. Panel General (`src-modern/index.html`, `components/dashboard.js`)
-- Título "Panel General", subtítulo "Visión consolidada de proyectos y operación".
-- 6 KPI clicables: Proyectos activos (12) · Presupuesto activo (S/ 1 245 000) ·
-  Costos acumulados (S/ 768 400) · Rendiciones pendientes · Órdenes pendientes · Alertas.
-  Todas las cifras derivadas de `mock-data.js`, con una línea breve de contexto.
-- Acciones rápidas con modal: + Nuevo proyecto, + Nueva rendición, + Nueva orden de
-  compra, + Nuevo presupuesto. El de proyecto reutiliza el modal de la sección B;
-  los demás abren un modal corto que lleva a la vista de creación del módulo.
-- "Presupuesto vs. costo por proyecto" (ApexCharts, S/ miles) — al menos PR-2027-001/002/003.
-- Donut de costos por fuente (Compras, Rendiciones, Personal, Materiales, Otros).
-- Tabla "Proyectos relevantes": máx. 5 filas, filtro por estado, búsqueda, "Ver proyecto".
-- Timeline de actividad reciente ("Hace 10 min — Rendición R-045 enviada", etc.)
-  derivada de operaciones. Bloque de alertas.
-- Máximo 2 gráficos; resumen primero, detalle después.
+### A. Dependencias
+- `npm install d3` (o solo los módulos necesarios: d3-selection, d3-scale, d3-shape,
+  d3-transition, d3-array, d3-interpolate, d3-ease). Importar por módulos, nunca como global.
+- Tipografía autoalojada: `@fontsource-variable/plus-jakarta-sans` (títulos y cifras) junto a
+  `@fontsource-variable/inter` (cuerpo), ya instalada. Nada desde CDN (lo exige `npm test`).
 
-### B. Proyectos (`projects.html`, `components/project-views.js`)
-- Columnas: Código · Proyecto · Cliente · Responsable · Avance · Presupuesto · Costo ·
-  Estado · Acciones (`⋮`: Ver, Editar, Duplicar, Historial).
-- Filtros visibles: buscar, estado; en "Más filtros": cliente, responsable, periodo.
-  Chips de filtros aplicados. Estado en la URL (ya existe; conservarlo).
-- Acción principal "+ Nuevo proyecto" → modal en 3 secciones (principal, económica,
-  complementaria; campos del punto 14) → "Guardar proyecto"/"Cancelar" → toast
-  "Proyecto creado" y la fila aparece (persistencia en `localStorage` con
-  `variantStorageKey`, marcada como demostración y fuera de los totales).
-- En móvil, filas como tarjetas.
+### B. Tokens y tema (`_variables.scss`, `app-shell-template.mjs`, `variants.js`)
+- Reemplazar la escala tipográfica por la de `DESIGN.md` (cuerpo 15 px, cifras 32 px,
+  título de página 30 px, panel 18 px, mínimo 12,5 px). Actualizar los `--fs-*`.
+- Paleta de superficies e ink de la referencia (claro y oscuro) y tokens nuevos:
+  `--rail*` (riel), `--hero-a/--hero-b` (degradado), `--solid` (botón principal),
+  serie de datos `--s1..--s4` + `--s-other`, estados `--good/--warn/--bad` y sus `-soft`.
+  Los de marca se siguen derivando por variante en `app-shell-template.mjs`.
+- J&Y: misma estructura con su paleta neutral (riel gris pizarra profundo, acento azul).
 
-### C. Ficha Integral (`project.html`)
-- Breadcrumb Proyectos / PR-2027-001 / <pestaña>. Encabezado: código, nombre,
-  cliente, responsable, estado, avance, fecha final, "Volver a Proyectos".
-- 6 KPI: Presupuesto, Costo ejecutado, Disponible (S/ 72 550 en PR-2027-001), Avance,
-  Documentos, Alertas.
-- 9 pestañas: Resumen, Presupuesto, Compras, Rendiciones, Personal, Materiales,
-  Costos, Documentos, Indicadores. Pestaña activa en el hash (`#costos`), navegable
-  con teclado, y en móvil desplazable horizontalmente.
-- Resumen: descripción, cronograma por hitos, responsables, alertas, últimas actividades,
-  gráfico pequeño presupuesto vs. costo.
-- Cada pestaña muestra un resumen de su módulo con enlace "Abrir en <módulo>"; cada
-  registro enlaza a su ficha y cada ficha de módulo tiene "Ver proyecto" (punto 123).
-- Materiales solo con datos en PETI; en las otras variantes, estado vacío explicativo.
-- Selector de proyecto del header sincronizado con la ficha (ya existe; conservarlo).
+### C. Shell
+- **Riel de navegación** azul profundo (en J&Y, pizarra) con el logo oficial recortado,
+  grupos en mayúsculas pequeñas, ítem activo con fondo y filete interior, contador en
+  "Aprobaciones" si aplica. Íconos de trazo uniforme (Bootstrap Icons).
+- Header claro y limpio como la referencia; mantener todo lo de la Entrega 1 (búsqueda,
+  proyecto actual, distintivo de demostración, aprobaciones, notificaciones, usuario).
+- **Pantalla completa:** quitar el `max-width: 1700px` centrado de `.shell-page`; márgenes
+  laterales consistentes. Revisar `_metis-restoration.scss` y eliminar lo que contradiga
+  el nuevo estilo (o fusionarlo en `_design-system.scss`).
+
+### D. Componentes visuales (`_design-system.scss`)
+- **Franja de KPI** (`.kpi-strip` / `.kpi`): un panel con celdas divididas por líneas finas,
+  etiqueta con punto de color, cifra grande en Plus Jakarta Sans, pie de contexto
+  (píldora, mini barra o mini gráfico). Reutilizable en todos los módulos.
+- **Bloque protagonista** (`.hero-panel`): degradado de marca + textura de red en canvas.
+  Regla: máximo uno por pantalla.
+- **Paneles**, botones, píldoras de estado (mantener `utils/status.js`), tablas, pestañas,
+  modales, toasts y formularios con el nuevo estilo. Las tablas de la Entrega 1 conservan
+  su comportamiento.
+- **Movimiento** (`emil-design-eng`): conteo de cifras (`[data-count]`), gráficos que se
+  dibujan al cargar, botones con escala al presionar, hover en filas y KPI, menús que
+  entran desde su origen. Todo con `prefers-reduced-motion`.
+
+### E. Kit de gráficos D3 (`src-modern/scripts/charts/`)
+Un módulo por patrón, con la misma API (`render(element, data, options)` que devuelve
+`{ update, destroy }`), colores desde tokens CSS, re-render al cambiar tema o tamaño,
+tooltip compartido y `aria-label`/tabla alternativa:
+- `flow.js` — trazabilidad (fuentes → ejecutado → presupuesto).
+- `execution-bars.js` — ejecución frente al avance (barra + marca, rojo si adelantado).
+- `area.js` — serie temporal con área degradada, cruz de lectura y punto final.
+- `sparkline.js`, `split-bar.js`, `donut.js`, `bars.js` (barras finas redondeadas).
+- `tooltip.js`, `theme.js` (lee tokens, observa `data-bs-theme`).
+- Validar la paleta con la skill `dataviz` (`scripts/validate_palette.js`) en ambos modos.
+Migrar a este kit los gráficos ApexCharts que ya existen **solo si es directo**; si no,
+dejarlos funcionando y anotarlos en "Notas para la siguiente" (se migran en su entrega y
+ApexCharts se elimina en la Entrega 7).
+
+### F. Documentación
+Actualizar `DESIGN.md` con lo que realmente quedó implementado (clases, tokens, API del kit).
 
 ## Fuera de alcance
-Crear presupuestos, OC o rendiciones reales (Entrega 3); rediseñar los módulos enlazados.
+Rediseñar el contenido de Panel, Proyectos o Ficha (Entrega 3) y de los demás módulos.
 
 ## Terminado cuando
-- Escenario 1 del punto 156 recorrible: Panel → PR-2027-001 → Costos → Compras → OC-025 → documento.
-- Las cifras coinciden entre Panel, Ficha y Costos en las 3 variantes.
-- Escritorio y móvil revisados con capturas; verificación y cierre del protocolo completos.
+- Todas las vistas de las 3 variantes muestran el nuevo estilo en claro y oscuro, sin
+  regresiones de contraste ni desbordes (capturas antes/después a 1440 y 390 px).
+- El kit D3 renderiza los patrones con datos reales en una página o en el Panel, con
+  tooltips, animación de entrada y cambio de tema correcto.
+- `npm test` sigue sin peticiones externas; verificación y cierre del protocolo completos.
