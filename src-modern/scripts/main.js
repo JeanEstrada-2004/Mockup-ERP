@@ -38,6 +38,7 @@ import { integrationsWorkspace } from './components/integration-views.js';
 import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
 import { designSystemView } from './components/design-system-view.js';
+import { initPresentationSwitcher } from './components/presentation-switcher.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -115,6 +116,9 @@ class AdminApp {
 
       // Network texture on hero panels (decorative canvas, resized with its box).
       this.stopHeroNetworks = mountHeroNetworks();
+
+      // Hidden presentation switcher: triple click on the rail label or Alt+Shift+P.
+      this.stopPresentationSwitcher = initPresentationSwitcher();
 
       this.isInitialized = true;
 
@@ -659,6 +663,7 @@ class AdminApp {
   // Cleanup method
   destroy() {
     this.stopHeroNetworks?.();
+    this.stopPresentationSwitcher?.();
     this.components.forEach((component) => {
       if (component.destroy) {
         component.destroy();

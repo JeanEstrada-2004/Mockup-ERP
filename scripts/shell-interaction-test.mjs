@@ -391,9 +391,39 @@ try {
     await page.screenshot({ path: path.join(out, 'surtec-desktop.png'), fullPage: true });
   }
 
+  // Hidden presentation switcher: not in the page until opened; Alt+Shift+P or
+  // a triple click on the rail label; same screen in the other build when it
+  // has the module, otherwise its Panel; the last presentation is remembered.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(pageUrl('surtec-peti', 'warehouse.html'));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.equal(await page.locator('#presentation-switcher').count(), 0);
+  assert.equal(await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')), 'surtec-peti');
+  await page.keyboard.press('Alt+Shift+KeyP');
+  await page.locator('#presentation-switcher').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.presentation-option').count(), 3);
+  assert.equal(
+    await page.locator('.presentation-option.is-current').getAttribute('data-variant'),
+    'surtec-peti'
+  );
+  assert.match(
+    await page.locator('a.presentation-option[data-variant="jy-pmi"]').getAttribute('href'),
+    new RegExp(`${pagesBase}jy-pmi/index\\.html$`)
+  );
+  await page.locator('#presentation-switcher .btn-close').click();
+  await page.locator('#presentation-switcher').waitFor({ state: 'detached' });
+  await page.goto(pageUrl('surtec-peti', 'costs.html'));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  await page.locator('.shell-presentation').click({ clickCount: 3 });
+  await page.locator('#presentation-switcher').waitFor({ state: 'visible' });
+  await page.locator('a.presentation-option[data-variant="jy-demo"]').click();
+  await page.waitForURL(new RegExp(`${pagesBase}jy-demo/costs\\.html$`));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.equal(await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')), 'jy-demo');
+
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log(
-    'Shell y recorrido Panel → Proyectos → Ficha → regreso: correctos en tres variantes.'
+    'Shell, cambio oculto de presentación y recorrido Panel → Proyectos → Ficha → regreso: correctos en tres variantes.'
   );
 } finally {
   await browser.close();

@@ -99,6 +99,11 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
   **Demo** · Propuesta para J&Y). Contraído: isotipo + código. En móvil el riel es un
   panel deslizable y el header muestra isotipo + nombre corto + código
   (`.shell-header-mark`). El `<title>` termina en "· SurTec PETI", "· J&Y PMI"…
+- **Cambio oculto de presentación** (`components/presentation-switcher.js`): triple clic
+  (o triple toque) sobre la etiqueta PETI/PMI/Demo del riel, o **Alt + Shift + P**. Abre la
+  misma pantalla en otra presentación (o su Panel si no tiene el módulo). No hay selector
+  visible. La raíz `/Mockup-ERP/` reabre la última presentación usada
+  (`mockup-erp:last-variant`); sin ella, J&Y Demo.
 - **Header** claro (70 px): menú, búsqueda, proyecto actual, distintivo
   "Datos de demostración", aprobaciones, notificaciones y usuario.
 - **Saludo** ("Buenos días, Jean") + contexto + acción principal a la derecha.

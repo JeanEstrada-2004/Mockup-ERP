@@ -35,8 +35,9 @@ for (const variant of variants) {
 
 await mkdir(pagesDir, { recursive: true });
 await writeFile(join(pagesDir, '.nojekyll'), '');
-// Pages requires a root entry file. The root leads to the public J&Y demo
-// without exposing a variant picker or linking the presentations together.
+// Pages requires a root entry file. It reopens the last presentation used in
+// this browser (stored by the app as `mockup-erp:last-variant`) and otherwise
+// leads to the public J&Y demo. There is still no visible variant picker.
 await writeFile(
   join(pagesDir, 'index.html'),
   `<!doctype html>
@@ -45,12 +46,19 @@ await writeFile(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <meta http-equiv="refresh" content="0;url=./jy-demo/">
+  <noscript><meta http-equiv="refresh" content="0;url=./jy-demo/"></noscript>
   <title>Plataforma de gestión de proyectos</title>
 </head>
 <body>
-  <p>Abriendo la demostración de J&amp;Y… <a href="./jy-demo/">Continuar</a></p>
-  <script>location.replace('./jy-demo/')</script>
+  <p>Abriendo la demostración… <a href="./jy-demo/">Continuar</a></p>
+  <script>
+    var target = 'jy-demo';
+    try {
+      var last = localStorage.getItem('mockup-erp:last-variant');
+      if (${JSON.stringify(variants)}.indexOf(last) !== -1) target = last;
+    } catch (error) {}
+    location.replace('./' + target + '/');
+  </script>
 </body>
 </html>
 `,

@@ -2676,6 +2676,77 @@ th.text-end .data-sort {
   }
 }
 
+// Hidden presentation switcher (components/presentation-switcher.js).
+.shell-presentation {
+  cursor: default;
+  user-select: none;
+}
+
+.presentation-switcher-hint {
+  margin: 0 0 14px;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.presentation-switcher-list {
+  display: grid;
+  gap: 8px;
+}
+
+.presentation-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
+
+  &:is(a):hover,
+  &:is(a):focus-visible {
+    border-color: var(--brand-accent-border);
+    background: var(--panel-2);
+    color: var(--ink);
+  }
+
+  &.is-current {
+    background: var(--panel-2);
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+  }
+}
+
+.presentation-option-code {
+  display: grid;
+  place-items: center;
+  min-width: 52px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--rail);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
 // --------------------------------------------------------------------------
 // 14. Charts (D3 kit, src-modern/scripts/charts/)
 // --------------------------------------------------------------------------
