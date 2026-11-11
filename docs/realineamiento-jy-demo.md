@@ -1,6 +1,6 @@
 # Realineamiento funcional de J&Y Demo — auditoría y propuesta
 
-> Estado: **R1 terminada** (11/11/2026); siguiente: R2 (Rendiciones J&Y). Análisis sobre `6b7dc4e`.
+> Estado: **R1 y R2 terminadas** (11/11/2026); siguiente: R3 (Costos, Documentos, Pendientes, Inicio). Análisis sobre `6b7dc4e`.
 > Fuente de requisitos: prompt "Revisión funcional integral" del usuario (secciones 1–40),
 > resumido aquí. Este documento es la referencia para las fases R1–R6 (sección 9).
 
@@ -536,3 +536,41 @@ Preguntas originales:
 - **Para R2:** la rendición del Demo sigue el flujo heredado (Aprobada, `R-26-NNN`); R2 introduce
   numeración por trabajador y año, las tres personas, gastos con categoría, visor de evidencia,
   gasto no documentado y el vocabulario de revisión, detrás de `variant.rules`.
+
+## 11. Notas de R2 (11/11/2026) — Rendiciones de J&Y
+
+- **Regla:** `variant.rules.expenseFlow = 'review'` (Demo); PETI y PMI siguen con `'approval'`.
+- **Vistas solo del Demo, sin tocar PETI/PMI:** `expenses.html` y `expense.html` envuelven su
+  contenido en `<!-- IF expenseFlow=review --><!-- INCLUDE expense-review-… --><!-- ELSE -->…<!-- /IF -->`;
+  el plugin del shell resuelve los bloques al compilar (`applyPageBlocks`). Parciales en
+  `src-modern/partials/`; componentes `expenseReviewList` / `expenseReviewDetail`
+  (`components/expense-review-views.js`); modelo y reglas en `data/expense-reports.js`.
+- **Datos:** `jy-demo.js` › `expenseReports` (6 rendiciones, 27 gastos, una por cada situación:
+  Presentada, Observada, Corregida, Aceptada, Entregada a Contabilidad ×2) y `expenseSamples`
+  (5 evidencias para "Tomar foto / Subir archivo"). Las operaciones de costo de tipo rendición se
+  **derivan** de los gastos (`expenseOperation`): solo las aceptadas o entregadas son costo; llevan
+  `label` "N.º 7-2026". Costo ejecutado de la cartera: S/ 127 618.
+- **AS-IS representado:** numeración por trabajador y año; responsable del gasto, quien prepara
+  (la Administradora con fotos de campo) y quien revisa; autorización informal como texto;
+  columnas V.V., IGV, No gravado y No documentado; gasto sin documento con motivo, marcado
+  NO DOCUMENTADO y sin comprobante ficticio.
+- **TO-BE (marcado):** visor de evidencia (factura/boleta, foto de boleta, captura de Yape/Plin,
+  constancia de transferencia/depósito) con zoom y vista ampliada; datos sugeridos por OCR con
+  confianza por campo y corrección humana registrada; clasificación sugerida por IA; revisión por
+  gasto (Conforme / Observado / Corregido / corrección administrativa); historial con usuario.
+- **Por validar:** nombres exactos de las situaciones (Presentada → Observada → Corregida →
+  Aceptada → Entregada a Contabilidad), si la entrega a Contabilidad es un paso explícito y que el
+  costo se reconozca al aceptar.
+- **Tratamiento:** las evidencias sin comprobante tributario (Yape, Plin, transferencias, sin
+  documento) se registran como No documentado; no hay reglas tributarias automáticas.
+- **Bandeja:** en el Demo, las rendiciones pendientes salen de su estado (base o local) y solo
+  ofrecen "Revisar"; los contadores del encabezado se actualizan al cambiar el estado.
+- **Pruebas:** `expense-review-interaction-test.mjs` (`npm run test:jy-expenses`, en
+  `test:delivery10`); `validate-mock-data` valida numeración, personas, gastos (`itemProblems`),
+  totales y costo derivado; la prueba de rendiciones antigua cubre PETI y PMI.
+- **Corrección transversal:** `d-block` de Bootstrap lleva `!important` y anulaba `x-show`
+  (por ejemplo, "Simulación local" en todas las filas de Rendiciones de PETI/PMI). Usar
+  `.show-block` cuando un elemento con `x-show` debe ser bloque.
+- **Para R3:** Costos muestra todavía el id técnico `R-26-NNN`; usar `operation.label`. Añadir
+  J&Y Real vs. tratamiento formal y la clasificación por categoría con los gastos de las
+  rendiciones.

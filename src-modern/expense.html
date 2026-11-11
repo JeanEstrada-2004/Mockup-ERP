@@ -16,6 +16,7 @@
         <!-- APP_SIDEBAR -->
         <div class="sidebar-backdrop" aria-hidden="true"></div>
         <main id="main-content" class="admin-main">
+          <!-- IF expenseFlow=review --><!-- INCLUDE expense-review-detail --><!-- ELSE -->
           <div
             class="container-fluid shell-page project-workspace expense-workspace"
             x-data="expenseDetail"
@@ -535,6 +536,7 @@
                 </section></div
             ></template>
           </div>
+          <!-- /IF -->
         </main>
         <!-- APP_FOOTER -->
       </div>

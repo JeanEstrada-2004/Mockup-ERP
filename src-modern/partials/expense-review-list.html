@@ -1,0 +1,201 @@
+          <div
+            class="container-fluid shell-page project-workspace expense-workspace review-expenses"
+            x-data="expenseReviewList"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Rendiciones</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Rendiciones de Gastos</h1>
+                <p class="shell-page-subtitle">
+                  Gastos con su evidencia, revisión de Administración y entrega a Contabilidad.
+                </p>
+              </div>
+              <a class="btn btn-primary expense-new-button" href="./expense.html?new=1">
+                <i class="bi bi-plus-circle" aria-hidden="true"></i> Nueva rendición
+              </a>
+            </div>
+
+            <section class="kpi-strip kpi-strip--5" aria-label="Situación de las rendiciones">
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'Presentada'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Por revisar</span>
+                <span class="kpi-value" x-count="toReview.length"></span>
+                <span class="kpi-foot">Presentadas o corregidas</span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'Observada'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--bad" aria-hidden="true"></i>Observadas</span>
+                <span class="kpi-value" x-count="observedCount"></span>
+                <span class="kpi-foot">Esperan corrección</span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'Aceptada'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Aceptadas</span>
+                <span class="kpi-value" x-count="acceptedPending"></span>
+                <span class="kpi-foot">Por entregar a Contabilidad</span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'Entregada a Contabilidad'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Entregadas a Contabilidad</span>
+                <span class="kpi-value" x-count="delivered.length"></span>
+                <span class="kpi-foot" x-text="formatAmount(deliveredAmount)"></span>
+              </button>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>No documentado</span>
+                <span class="kpi-value" x-count.money="undocumentedAmount"></span>
+                <span class="kpi-foot">Gasto real sin comprobante tributario</span>
+              </div>
+            </section>
+
+            <section class="my-expenses" aria-labelledby="my-expenses-title">
+              <h2 id="my-expenses-title">Mis Rendiciones</h2>
+              <a class="btn btn-primary btn-lg my-expenses-new" href="./expense.html?new=1">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva rendición
+              </a>
+              <ul class="my-expenses-list">
+                <template x-for="item in myRecords" :key="item.id">
+                  <li>
+                    <a :href="detailHref(item)">
+                      <span>
+                        <strong x-text="`${reportNumber(item)} · ${workerName(item.workerId)}`"></strong>
+                        <small x-text="`${item.projectId} · ${item.totals.count} gastos · ${formatDate(item.date)}`"></small>
+                      </span>
+                      <span class="text-end">
+                        <b x-text="formatAmount(item.totals.total)"></b>
+                        <span class="badge" :class="$statusClass(item.status)" x-text="item.status"></span>
+                      </span>
+                    </a>
+                  </li>
+                </template>
+              </ul>
+            </section>
+
+            <section class="card" aria-labelledby="expenses-list-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div
+                    class="master-title-row"
+                    data-maturity="as-is"
+                    data-maturity-note="Numeración por trabajador y año; quien gasta, quien prepara y quien revisa pueden ser personas distintas."
+                  >
+                    <h2 id="expenses-list-title">Rendiciones</h2>
+                  </div>
+                  <span class="text-muted small" aria-live="polite" x-text="`${filtered.length} de ${records.length} rendiciones`"></span>
+                </div>
+                <div class="workspace-filters expense-filters mb-3">
+                  <div>
+                    <label class="form-label" for="expenses-search">Buscar</label>
+                    <input
+                      id="expenses-search"
+                      class="form-control"
+                      type="search"
+                      placeholder="N.º, trabajador o proyecto"
+                      x-model="search"
+                      @input="updateUrl()"
+                    />
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-project">Proyecto</label>
+                    <select id="expenses-project" class="form-select" x-model="projectFilter" @change="updateUrl()">
+                      <option value="">Todos</option>
+                      <template x-for="item in projects" :key="item.id"
+                        ><option :value="item.id" x-text="item.id" :selected="item.id === projectFilter"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-worker">Responsable del gasto</label>
+                    <select id="expenses-worker" class="form-select" x-model="workerFilter" @change="updateUrl()">
+                      <option value="">Todos</option>
+                      <template x-for="item in workers" :key="item.id"
+                        ><option :value="item.id" x-text="item.name" :selected="item.id === workerFilter"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-status">Situación</label>
+                    <select id="expenses-status" class="form-select" x-model="statusFilter" @change="updateUrl()">
+                      <option value="">Todas</option>
+                      <template x-for="item in statuses" :key="item"
+                        ><option :value="item" x-text="item" :selected="item === statusFilter"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    x-show="search || projectFilter || workerFilter || statusFilter"
+                    @click="clearFilters()"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+                <div class="table-responsive workspace-project-table expense-table" x-show="filtered.length">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">N.º</th>
+                        <th scope="col">Responsable del gasto</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col" class="text-end">Gastos</th>
+                        <th scope="col" class="text-end">Total</th>
+                        <th scope="col">Situación</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filtered" :key="item.id"
+                        ><tr>
+                          <td>
+                            <a class="data-code" :href="detailHref(item)" x-text="reportNumber(item)"></a
+                            ><small class="review-sub text-muted" x-show="!item.base">Creada en esta demostración</small
+                            ><small class="review-sub text-muted" x-show="item.edited">Con cambios locales</small>
+                          </td>
+                          <td>
+                            <span x-text="workerName(item.workerId)"></span
+                            ><small class="review-sub text-muted" x-text="item.preparedBy === item.workerId ? 'Preparada por la misma persona' : `Preparó: ${workerName(item.preparedBy)}`"></small>
+                          </td>
+                          <td>
+                            <span class="data-code" x-text="item.projectId"></span
+                            ><small class="d-block text-muted" x-text="projectName(item.projectId)"></small>
+                          </td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td class="text-end">
+                            <span x-text="item.totals.count"></span
+                            ><small class="review-sub text-muted" x-show="item.totals.withoutDocument" x-text="`${item.totals.withoutDocument} sin documento`"></small>
+                          </td>
+                          <td class="text-end data-money" x-text="formatAmount(item.totals.total)"></td>
+                          <td><span class="badge" :class="$statusClass(item.status)" x-text="item.status"></span></td>
+                        </tr></template
+                      >
+                    </tbody>
+                  </table>
+                </div>
+                <div class="workspace-project-cards">
+                  <template x-for="item in filtered" :key="item.id"
+                    ><a class="workspace-project-card" :href="detailHref(item)">
+                      <span class="workspace-project-card-top"
+                        ><strong x-text="reportNumber(item)"></strong
+                        ><span class="badge" :class="$statusClass(item.status)" x-text="item.status"></span
+                      ></span>
+                      <span class="workspace-project-card-name" x-text="workerName(item.workerId)"></span>
+                      <small x-text="`${item.projectId} · preparó ${workerName(item.preparedBy)}`"></small>
+                      <span class="workspace-project-card-metrics"
+                        ><span><small>Gastos</small><strong x-text="item.totals.count"></strong></span
+                        ><span><small>Total</small><strong x-text="formatAmount(item.totals.total)"></strong></span
+                      ></span>
+                      <span class="workspace-project-card-end">Abrir rendición →</span>
+                    </a></template
+                  >
+                </div>
+                <div class="workspace-empty" x-show="filtered.length === 0" role="status">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <p>No se encontraron rendiciones.</p>
+                  <button class="btn btn-outline-primary btn-sm" type="button" @click="clearFilters()">
+                    Mostrar todas
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>

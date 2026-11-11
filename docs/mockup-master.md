@@ -459,3 +459,10 @@ tres variantes bajo la subruta de Pages.
 - J&Y Demo tiene datos propios (escenario 2026, proyectos `PY-26-NNN`) y deja de reflejar a PMI.
 - Clientes y Proveedores con lista, filtros, alta, edición y ficha en las tres presentaciones.
 - Marcas AS-IS / TO-BE / por validar en el Demo, activables por el presentador.
+
+## Realineamiento de J&Y Demo — R2: rendiciones (11/11/2026)
+
+- Rendiciones numeradas por trabajador y año, con responsable del gasto, preparador y revisor.
+- Visor de evidencia (factura, boleta, foto, Yape/Plin, transferencia) con datos sugeridos por OCR
+  corregibles, gasto sin documento con motivo y revisión de Administración hasta la entrega a
+  Contabilidad. PETI y PMI conservan su flujo de aprobación.

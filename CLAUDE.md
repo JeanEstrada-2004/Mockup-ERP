@@ -4,7 +4,7 @@ Prototipo frontend sin backend. Vite compila 29 páginas en `src-modern/` y tres
 
 ## Antes de editar
 
-Lee [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md), [docs/plan-mejoras.md](docs/plan-mejoras.md) y [docs/mockup-master.md](docs/mockup-master.md). La referencia visual aprobada está en `docs/referencia/red-de-integracion.html`; la especificación en `docs/especificacion/`. Respeta el alcance de `surtec-peti`, `jy-pmi` y `jy-demo`, y mantén los datos de las empresas separados. J&Y Demo se está realineando a los procesos reales de J&Y por fases (R1–R6, [docs/realineamiento-jy-demo.md](docs/realineamiento-jy-demo.md)): tiene datos propios (`data/jy-demo.js`, proyectos `PY-26-NNN`), reglas en `variant.rules` y marcas AS-IS / TO-BE / por validar (`data-maturity`).
+Lee [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md), [docs/plan-mejoras.md](docs/plan-mejoras.md) y [docs/mockup-master.md](docs/mockup-master.md). La referencia visual aprobada está en `docs/referencia/red-de-integracion.html`; la especificación en `docs/especificacion/`. Respeta el alcance de `surtec-peti`, `jy-pmi` y `jy-demo`, y mantén los datos de las empresas separados. J&Y Demo se está realineando a los procesos reales de J&Y por fases (R1–R6, [docs/realineamiento-jy-demo.md](docs/realineamiento-jy-demo.md)): tiene datos propios (`data/jy-demo.js`, proyectos `PY-26-NNN`), reglas en `variant.rules` y marcas AS-IS / TO-BE / por validar (`data-maturity`). En HTML, `<!-- IF regla=valor --> … <!-- ELSE --> … <!-- /IF -->` y `<!-- INCLUDE nombre -->` (`src-modern/partials/`) se resuelven al compilar cada variante: así una página compartida lleva vistas propias del Demo sin enviarlas a PETI ni PMI.
 
 ## Comandos
 
@@ -21,7 +21,7 @@ npm run build                    # dist-modern/
 npm test                         # smoke test de 29 páginas
 ```
 
-Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
+Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:jy-expenses`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
 
 ## Arquitectura
 

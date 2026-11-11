@@ -16,6 +16,7 @@
         <!-- APP_SIDEBAR -->
         <div class="sidebar-backdrop" aria-hidden="true"></div>
         <main id="main-content" class="admin-main">
+          <!-- IF expenseFlow=review --><!-- INCLUDE expense-review-list --><!-- ELSE -->
           <div
             class="container-fluid shell-page project-workspace expense-workspace"
             x-data="expensesList"
@@ -177,7 +178,7 @@
                         ><tr>
                           <td>
                             <a :href="detailHref(item)" x-text="item.id"></a
-                            ><small class="d-block text-muted" x-show="!item.base"
+                            ><small class="show-block text-muted" x-show="!item.base"
                               >Simulación local</small
                             >
                           </td>
@@ -243,6 +244,7 @@
               </div>
             </section>
           </div>
+          <!-- /IF -->
         </main>
         <!-- APP_FOOTER -->
       </div>

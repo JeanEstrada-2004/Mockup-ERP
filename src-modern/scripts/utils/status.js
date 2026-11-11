@@ -7,7 +7,17 @@
 // Every view renders a status through statusClass() so the same word always
 // gets the same colour. Unknown statuses fall back to neutral.
 const TONES = {
-  info: ['Activo', 'Activa', 'Enviada', 'Emitida', 'Corregida', 'Conectado', 'En curso', 'Vigente'],
+  info: [
+    'Activo',
+    'Activa',
+    'Enviada',
+    'Emitida',
+    'Corregida',
+    'Corregido',
+    'Conectado',
+    'En curso',
+    'Vigente',
+  ],
   neutral: ['Borrador', 'Planificado', 'Cerrado', 'Cerrada', 'Vencido', 'Ignorada', 'Referencia mock'],
   success: [
     'Aprobado',
@@ -22,6 +32,9 @@ const TONES = {
     'Revisada',
     'Justificada',
     'Validado (ejemplo)',
+    'Aceptada',
+    'Entregada a Contabilidad',
+    'Conforme',
   ],
   warning: [
     'Pendiente',
@@ -32,6 +45,9 @@ const TONES = {
     'Stock bajo',
     'Sincronización pendiente',
     'Negociación',
+    'Presentada',
+    'Observado',
+    'No documentado',
   ],
   danger: ['En riesgo', 'Rechazado', 'Rechazada', 'Perdido', 'Error', 'Fallido'],
 };

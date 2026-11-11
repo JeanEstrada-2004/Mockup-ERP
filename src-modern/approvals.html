@@ -88,7 +88,7 @@
                       <template x-for="item in rows" :key="item.id">
                         <tr>
                           <td><span class="badge status-badge status-badge--warning" x-text="item.kind"></span></td>
-                          <td><a class="data-code" :href="reviewHref(item)" x-text="item.id"></a></td>
+                          <td><a class="data-code" :href="reviewHref(item)" x-text="item.label || item.id"></a></td>
                           <td x-text="item.responsible"></td>
                           <td>
                             <a class="data-code" :href="projectHref(item)" x-text="item.projectId"></a>
@@ -99,8 +99,8 @@
                           <td class="text-end">
                             <div class="approval-actions">
                               <a class="btn btn-outline-secondary btn-sm" :href="reviewHref(item)">Revisar</a>
-                              <button type="button" class="btn btn-outline-secondary btn-sm" @click="openObservation(item)">Observar</button>
-                              <button type="button" class="btn btn-primary btn-sm" @click="approve(item)">Aprobar</button>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" x-show="!item.reviewOnly" @click="openObservation(item)">Observar</button>
+                              <button type="button" class="btn btn-primary btn-sm" x-show="!item.reviewOnly" @click="approve(item)">Aprobar</button>
                             </div>
                           </td>
                         </tr>
@@ -128,7 +128,7 @@
                   <template x-for="item in resolved" :key="item.id">
                     <li>
                       <span class="badge status-badge" :class="item.decision.status === 'Aprobada' ? 'status-badge--success' : 'status-badge--danger'" x-text="item.decision.status"></span>
-                      <span><b x-text="item.id"></b> · <span x-text="item.projectId"></span><small class="d-block text-muted" x-show="item.decision.reason" x-text="item.decision.reason"></small></span>
+                      <span><b x-text="item.id"></b> · <span x-text="item.projectId"></span><small class="show-block text-muted" x-show="item.decision.reason" x-text="item.decision.reason"></small></span>
                       <button type="button" class="btn btn-link btn-sm" @click="undo(item)">Deshacer</button>
                     </li>
                   </template>

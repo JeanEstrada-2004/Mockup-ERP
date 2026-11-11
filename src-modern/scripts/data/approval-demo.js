@@ -5,8 +5,9 @@
 // or observing here is a demonstration stored per variant in localStorage:
 // it never changes executed costs, commitments or the base records.
 
-import { activeVariant, variantStorageKey } from '../config/variants.js';
+import { activeVariant, variantRule, variantStorageKey } from '../config/variants.js';
 import { getDataForVariant, getPendingApprovals, getProject } from './mock-data.js';
+import { REVIEW_PENDING, loadReports, reportNumber, reportTotals } from './expense-reports.js';
 
 const decisionKey = variantStorageKey('approval-decisions');
 const DECISIONS = ['Aprobada', 'Observada'];
@@ -67,7 +68,28 @@ export function removeDecision(id) {
 /** Pending records enriched with responsible person and date. */
 export function approvalRecords(data = getDataForVariant(activeVariant), variant = activeVariant) {
   const workerName = (id) => data.workers.find((item) => item.id === id)?.name || '—';
-  return getPendingApprovals(data, variant).map((item) => {
+  let pending = getPendingApprovals(data, variant);
+  // J&Y Demo (R2): rendiciones are reviewed in their own page, so the inbox
+  // follows their current state (base or local) instead of approval decisions.
+  if (variantRule('expenseFlow', variant) === 'review' && variant.enabledModules.includes('expenses')) {
+    pending = [
+      ...pending.filter((item) => item.moduleId !== 'expenses'),
+      ...loadReports(data)
+        .filter((report) => REVIEW_PENDING.includes(report.status))
+        .map((report) => ({
+          id: report.id,
+          label: reportNumber(report),
+          kind: 'Rendición',
+          moduleId: 'expenses',
+          projectId: report.projectId,
+          amount: reportTotals(report).total,
+          workerId: report.workerId,
+          reportDate: report.date,
+          reviewOnly: true,
+        })),
+    ];
+  }
+  return pending.map((item) => {
     const project = getProject(data, item.projectId);
     const operation = data.operations.find((op) => op.id === item.id);
     const budget = data.budgets.find((entry) => entry.id === item.id);
@@ -75,8 +97,8 @@ export function approvalRecords(data = getDataForVariant(activeVariant), variant
       ...item,
       tab: item.moduleId,
       projectName: project?.name || item.projectId,
-      responsible: workerName(operation?.workerId || project?.managerId),
-      date: operation?.date || budget?.date || project?.startDate || '',
+      responsible: workerName(item.workerId || operation?.workerId || project?.managerId),
+      date: item.reportDate || operation?.date || budget?.date || project?.startDate || '',
     };
   });
 }

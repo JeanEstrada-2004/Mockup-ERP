@@ -217,6 +217,10 @@ export function projectShortName(name) {
   return short.charAt(0).toUpperCase() + short.slice(1);
 }
 
+// Expense statuses that wait for someone: SurTec/PMI review ("En revisión")
+// and J&Y Demo administrative review ("Presentada", "Corregida").
+export const EXPENSE_PENDING_STATUSES = ['En revisión', 'Presentada', 'Corregida'];
+
 // Records waiting for someone's approval. Shared by the header and, from
 // Entrega 3, by the approvals inbox.
 export function getPendingApprovals(data, variant) {
@@ -242,9 +246,10 @@ export function getPendingApprovals(data, variant) {
         amount: operation.amount,
       });
     }
-    if (operation.type === 'expense' && operation.status === 'En revisión') {
+    if (operation.type === 'expense' && EXPENSE_PENDING_STATUSES.includes(operation.status)) {
       items.push({
         id: operation.id,
+        label: operation.label || operation.id,
         kind: 'Rendición',
         moduleId: 'expenses',
         projectId: operation.projectId,
@@ -271,10 +276,10 @@ export function getShellNotifications(data, variant) {
         category: 'Aprobación',
       });
     }
-    if (operation.type === 'expense' && operation.status === 'En revisión') {
+    if (operation.type === 'expense' && EXPENSE_PENDING_STATUSES.includes(operation.status)) {
       notifications.push({
         id: `notification-${operation.id}`,
-        text: `Rendición ${operation.id} pendiente de revisión.`,
+        text: `Rendición ${operation.label || operation.id} pendiente de revisión.`,
         moduleId: 'expenses',
         recordId: operation.id,
         level: 'approval',

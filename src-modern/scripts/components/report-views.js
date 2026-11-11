@@ -5,6 +5,7 @@ import {
   getDataForVariant,
   getDocuments,
   getProjectFinancials,
+  EXPENSE_PENDING_STATUSES,
 } from '../data/mock-data.js';
 import { COST_SOURCES } from '../data/cost-data.js';
 import { COST_SOURCE_TOKENS, formatDate } from './project-views.js';
@@ -115,7 +116,7 @@ export function reportsWorkspace() {
           (item) =>
             this.projectIds.has(item.projectId) &&
             item.type === 'expense' &&
-            item.status === 'En revisión'
+            EXPENSE_PENDING_STATUSES.includes(item.status)
         ).length,
       };
     },

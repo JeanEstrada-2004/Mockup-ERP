@@ -44,7 +44,11 @@ export function projectCostModel(data, projectId) {
       ...entry,
       date: operation.date,
       status: operation.status,
-      kind: operationKinds[operation.type] || operation.type,
+      kind:
+        operation.type === 'expense'
+          ? `Rendición ${operation.status.toLowerCase()}`
+          : operationKinds[operation.type] || operation.type,
+      label: operation.label || operation.id,
       sourceLabel: COST_SOURCES.find((item) => item.id === entry.source)?.label || entry.source,
       supplierId: operation.supplierId || null,
       workerId: operation.workerId || null,

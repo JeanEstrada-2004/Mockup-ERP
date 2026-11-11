@@ -3572,6 +3572,606 @@ button.kpi {
   color: var(--ink-3);
 }
 
+// Rendiciones de J&Y (R2: partials/expense-review-*.html).
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.review-create .card-footer {
+  justify-content: flex-end;
+  background: var(--panel-2);
+}
+.review-number {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.review-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: review-step;
+}
+.review-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  counter-increment: review-step;
+}
+.review-steps li::before {
+  content: counter(review-step);
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--track);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+.review-steps li.done {
+  color: var(--ink-2);
+}
+.review-steps li.done::before {
+  content: '✓';
+  background: var(--good-soft);
+  color: var(--good);
+}
+.review-steps li.current {
+  border-color: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+}
+.review-steps li.current::before {
+  background: var(--accent);
+  color: #fff;
+}
+.review-hint {
+  margin: 0 0 1rem;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.review-observe {
+  border-color: var(--warn);
+}
+.review-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.review-summary .card {
+  margin: 0;
+}
+.review-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+  margin: 0;
+}
+.review-facts > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.review-facts dt {
+  margin-bottom: 0.1rem;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.review-facts dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+.review-facts dd small {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+.review-facts-wide {
+  grid-column: 1 / -1;
+}
+.review-total {
+  margin: 0 0 0.75rem;
+  color: var(--ink);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.review-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0 0 0.75rem;
+}
+.review-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+}
+.review-breakdown dt {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.review-breakdown dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.review-breakdown .is-undocumented dt,
+.review-breakdown .is-undocumented dd {
+  color: var(--warn);
+}
+.review-capture-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.review-capture-options .btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 84px;
+  justify-content: center;
+  font-weight: 600;
+}
+.review-capture-options .bi {
+  font-size: 1.5rem;
+}
+.review-table tbody tr {
+  cursor: default;
+}
+.review-table tbody tr.is-selected > * {
+  background: var(--accent-soft);
+}
+.review-table tfoot th,
+.review-table tfoot td {
+  border-top: 2px solid var(--line-strong);
+  font-weight: 700;
+}
+.review-item-link {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--accent);
+  font-weight: 700;
+}
+.review-item-link:hover,
+.review-item-link:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.review-item-cards {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.review-item-cards button {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  text-align: left;
+}
+.review-item-cards button.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.review-item-cards small {
+  color: var(--ink-3);
+}
+.review-item-cards .badge {
+  justify-self: start;
+}
+.review-item-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.review-item-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.review-data {
+  min-width: 0;
+}
+.review-form-intro {
+  margin-bottom: 0.75rem;
+  color: var(--ink-2);
+}
+.review-expenses .expense-table .badge {
+  max-width: 9.5rem;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.25;
+}
+.review-sub,
+.show-block {
+  display: block;
+}
+.review-ocr-table th {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.review-ocr-table th[scope='row'] {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.review-table table {
+  font-size: var(--fs-sm);
+}
+.review-table th,
+.review-table .data-money {
+  white-space: nowrap;
+}
+.review-table td:nth-child(3) {
+  min-width: 7.5rem;
+}
+.review-table td:nth-child(4) {
+  min-width: 12rem;
+}
+.review-ocr-table tr.is-corrected td:last-child {
+  color: var(--warn);
+}
+.review-ocr-table small {
+  color: var(--warn);
+  font-size: var(--fs-xs);
+}
+.review-note {
+  margin: 0.75rem 0;
+}
+.review-observe-item {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+.confidence {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+.confidence:empty {
+  display: none;
+}
+.confidence--alta {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.confidence--media {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.confidence--baja {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.review-history {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.review-history li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  border-radius: 8px;
+}
+.review-history small {
+  color: var(--ink-3);
+}
+
+// Evidence viewer: the document on the left, with zoom and a full view.
+.evidence-stage {
+  position: sticky;
+  top: 88px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.evidence-stage.is-full {
+  position: fixed;
+  top: 16px;
+  inset: 16px;
+  z-index: 1060;
+  box-shadow: var(--shadow-float);
+}
+.evidence-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.evidence-toolbar-title {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.evidence-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.evidence-toolbar-actions .btn {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+.evidence-zoom-value {
+  min-width: 3.2rem;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.evidence-canvas {
+  min-height: 360px;
+  padding: 1.25rem;
+  overflow: auto;
+}
+.evidence-stage.is-full .evidence-canvas {
+  min-height: 0;
+}
+.evidence-zoom {
+  --zoom: 1;
+  width: calc(100% * var(--zoom));
+  min-width: 100%;
+  transform-origin: top left;
+  font-size: calc(0.8rem * var(--zoom));
+}
+.ev-doc {
+  position: relative;
+  max-width: calc(440px * var(--zoom));
+  margin: 0 auto;
+  padding: 1.4em;
+  border: 1px solid var(--paper-line);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 6px 18px rgba(15, 30, 51, 0.12);
+  line-height: 1.4;
+}
+.ev-doc dt {
+  color: var(--paper-muted);
+  font-weight: 500;
+}
+.ev-doc dd {
+  margin: 0;
+  font-weight: 600;
+}
+.ev-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+.ev-issuer {
+  display: grid;
+  gap: 0.2em;
+}
+.ev-issuer strong {
+  font-size: 1.1em;
+}
+.ev-issuer small {
+  color: var(--paper-muted);
+}
+.ev-ruc {
+  display: grid;
+  gap: 0.15em;
+  min-width: 40%;
+  padding: 0.6em;
+  border: 1.5px solid var(--paper-ink);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.92em;
+}
+.ev-meta {
+  display: grid;
+  gap: 0.35em;
+  margin: 0 0 1em;
+}
+.ev-meta > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+.ev-lines {
+  width: 100%;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+}
+.ev-lines th,
+.ev-lines td {
+  padding: 0.45em 0.3em;
+  border-bottom: 1px solid var(--paper-line);
+  text-align: left;
+}
+.ev-lines th {
+  background: var(--paper-shade);
+  font-weight: 600;
+}
+.ev-lines td:last-child,
+.ev-lines th:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.ev-totals {
+  display: grid;
+  gap: 0.3em;
+  margin: 0 0 1em auto;
+  width: min(100%, 15em);
+}
+.ev-totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+.ev-totals .ev-grand {
+  padding-top: 0.35em;
+  border-top: 1.5px solid var(--paper-ink);
+  font-size: 1.08em;
+}
+.ev-foot {
+  color: var(--paper-muted);
+  font-size: 0.85em;
+  text-align: center;
+}
+// Photo of a paper receipt sent from the field.
+.ev-doc--photo {
+  transform: rotate(-1.2deg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(0, 0, 0, 0.04)),
+    var(--paper);
+  box-shadow: 0 14px 30px rgba(15, 30, 51, 0.22);
+}
+.ev-doc--wallet,
+.ev-doc--transfer {
+  max-width: calc(300px * var(--zoom));
+  border-radius: 18px;
+  text-align: center;
+}
+.ev-doc--wallet .ev-meta,
+.ev-doc--transfer .ev-meta {
+  margin-top: 1em;
+  text-align: left;
+}
+.ev-wallet-app {
+  margin: 0 0 0.75em;
+  color: var(--paper-muted);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ev-wallet-ok {
+  color: var(--good);
+  font-size: 2.6em;
+}
+.ev-wallet-title {
+  margin: 0.25em 0 0;
+  font-weight: 600;
+}
+.ev-wallet-amount {
+  margin: 0.2em 0 0;
+  font-size: 2em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ev-doc--transfer .ev-head {
+  align-items: center;
+  text-align: left;
+}
+.ev-doc--none {
+  display: grid;
+  justify-items: center;
+  gap: 0.6em;
+  padding: 2.2em 1.4em;
+  border-style: dashed;
+  text-align: center;
+}
+.ev-doc--none .bi {
+  color: var(--paper-muted);
+  font-size: 2.6em;
+}
+.ev-undocumented {
+  padding: 0.25em 0.8em;
+  border: 2px solid var(--warn);
+  border-radius: 4px;
+  color: var(--warn);
+  font-size: 1.15em;
+  letter-spacing: 0.06em;
+}
+.ev-doc--none p {
+  margin: 0;
+  color: var(--paper-muted);
+}
+@media (max-width: 1199.98px) {
+  .review-item-grid,
+  .review-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .evidence-stage {
+    position: static;
+  }
+}
+@media (max-width: 575.98px) {
+  .review-capture-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .review-capture-options .btn {
+    flex-direction: row;
+    min-height: 52px;
+  }
+  .review-facts,
+  .review-breakdown {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .review-actions .btn {
+    flex: 1 1 140px;
+    min-height: 44px;
+  }
+  .evidence-canvas {
+    min-height: 280px;
+    padding: 0.75rem;
+  }
+  .evidence-stage.is-full {
+    inset: 0;
+    border-radius: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-doc--photo {
+    transform: none;
+  }
+}
+
 // Maturity badges (utils/maturity.js): J&Y Demo only, hidden until the
 // presenter turns them on. Text and colour together, never colour alone.
 .maturity {

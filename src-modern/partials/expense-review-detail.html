@@ -1,0 +1,569 @@
+          <div
+            class="container-fluid shell-page project-workspace expense-workspace review-expense"
+            x-data="expenseReviewDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./expenses.html">Rendiciones</a></li>
+                <li
+                  class="breadcrumb-item active"
+                  aria-current="page"
+                  x-text="record ? reportNumber(record) : isNew ? 'Nueva rendición' : 'No encontrada'"
+                ></li>
+              </ol>
+            </nav>
+
+            <!-- Not found -->
+            <template x-if="!record && !isNew"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  <h1>Rendición no encontrada</h1>
+                  <p>El registro solicitado no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./expenses.html">Ver rendiciones</a>
+                </div>
+              </div></template
+            >
+
+            <!-- New report -->
+            <template x-if="isNew"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <h1>Nueva rendición</h1>
+                    <p class="shell-page-subtitle">
+                      Quien gastó, quien prepara la rendición y el proyecto al que se carga.
+                    </p>
+                  </div>
+                </div>
+                <form class="card review-create" novalidate @submit.prevent="createReport()">
+                  <div class="card-body">
+                    <div class="alert alert-danger" role="alert" x-show="createError" x-text="createError"></div>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-project">Proyecto</label>
+                        <select id="review-project" class="form-select" x-model="create.projectId" required>
+                          <option value="">Selecciona un proyecto</option>
+                          <template x-for="item in projects" :key="item.id"
+                            ><option :value="item.id" x-text="`${item.id} · ${item.name}`" :selected="item.id === create.projectId"></option
+                          ></template>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-date">Fecha de la rendición</label>
+                        <input id="review-date" class="form-control" type="date" x-model="create.date" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-worker">Responsable del gasto</label>
+                        <select id="review-worker" class="form-select" x-model="create.workerId" required>
+                          <option value="">¿Quién realizó el gasto?</option>
+                          <template x-for="item in workers" :key="item.id"
+                            ><option :value="item.id" x-text="`${item.name} · ${item.role}`"></option
+                          ></template>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-prepared">Preparada por</label>
+                        <select id="review-prepared" class="form-select" x-model="create.preparedBy">
+                          <option value="">La misma persona que gastó</option>
+                          <template x-for="item in workers" :key="item.id"
+                            ><option :value="item.id" x-text="`${item.name} · ${item.role}`"></option
+                          ></template>
+                        </select>
+                        <small class="form-text">En campo, Administración puede prepararla con las fotos que envía el trabajador.</small>
+                      </div>
+                      <div class="col-12">
+                        <div class="review-number" aria-live="polite">
+                          <i class="bi bi-hash" aria-hidden="true"></i>
+                          <span x-text="nextNumberLabel"></span>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-authorization">Autorización (opcional)</label>
+                        <input id="review-authorization" class="form-control" maxlength="200" x-model="create.authorization" placeholder="Ejemplo: coordinado por WhatsApp con el ingeniero" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="review-notes">Observaciones</label>
+                        <input id="review-notes" class="form-control" maxlength="200" x-model="create.notes" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer review-actions">
+                    <a class="btn btn-outline-secondary" href="./expenses.html">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Crear borrador</button>
+                  </div>
+                </form>
+              </div></template
+            >
+
+            <!-- Report -->
+            <template x-if="record"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="project-code" x-text="`${record.projectId} · ${projectName(record.projectId)}`"></p>
+                    <h1 x-text="`Rendición ${reportNumber(record)}`"></h1>
+                    <div class="project-meta">
+                      <span x-text="workerName(record.workerId)"></span><span>·</span
+                      ><span x-text="formatDate(record.date)"></span
+                      ><span class="badge" :class="$statusClass(record.status)" x-text="record.status"></span
+                      ><span class="badge text-bg-secondary" x-show="!record.base">Creada en esta demostración</span
+                      ><span class="badge text-bg-light" x-show="record.edited">Con cambios locales</span>
+                    </div>
+                  </div>
+                  <div class="review-actions">
+                    <button type="button" class="btn btn-primary" x-show="canEdit" :disabled="!canSubmit" @click="submit()" x-text="submitLabel"></button>
+                    <button type="button" class="btn btn-outline-secondary" x-show="canReview" @click="toggleReportObserve()">Observar</button>
+                    <button type="button" class="btn btn-primary" x-show="canReview" :disabled="!canAccept" @click="accept()">Aceptar rendición</button>
+                    <button type="button" class="btn btn-primary" x-show="record.status === 'Aceptada'" @click="deliver()">Entregar a Contabilidad</button>
+                    <a class="btn btn-outline-primary" href="./expenses.html"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Rendiciones</a>
+                  </div>
+                </div>
+
+                <ol class="review-steps" aria-label="Avance de la rendición">
+                  <template x-for="(label, index) in steps" :key="label"
+                    ><li :class="{ done: index < stepIndex, current: index === stepIndex }" :aria-current="index === stepIndex ? 'step' : null">
+                      <span x-text="index === 2 && ['Observada', 'Corregida'].includes(record.status) ? record.status : label"></span>
+                    </li></template
+                  >
+                </ol>
+                <p class="review-hint" x-show="canReview && !canAccept" x-text="`Revisa cada gasto: ${pendingItems} pendiente${pendingItems === 1 ? '' : 's'} de conformidad.`"></p>
+                <p class="review-hint" x-show="canEdit && !canSubmit && record.items.length" x-text="record.status === 'Observada' ? 'Corrige los gastos observados y vuelve a presentar.' : 'Completa los datos de cada gasto para presentar.'"></p>
+
+                <section class="card review-observe" x-show="reportObserveOpen" x-cloak aria-labelledby="review-observe-title">
+                  <div class="card-body">
+                    <h2 id="review-observe-title" class="workspace-subheading mt-0">Observar la rendición</h2>
+                    <p class="workspace-caption">Se devuelve a quien la preparó con los gastos observados y este comentario.</p>
+                    <label class="form-label" for="review-observe-note">Comentario</label>
+                    <textarea id="review-observe-note" class="form-control" rows="2" maxlength="300" x-model="reportNote" placeholder="Ejemplo: adjuntar la factura a nombre de J&Y del ítem 2"></textarea>
+                    <div class="review-actions mt-2">
+                      <button type="button" class="btn btn-outline-secondary" @click="toggleReportObserve()">Cancelar</button>
+                      <button type="button" class="btn btn-primary" @click="observeReport()">Registrar observación</button>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="review-summary">
+                  <section class="card" aria-labelledby="review-people-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <div class="master-title-row" data-maturity="as-is" data-maturity-note="Quien gastó, quien preparó y quien revisa se registran por separado. La autorización hoy es informal (WhatsApp, verbal, directa).">
+                          <h2 id="review-people-title">Datos de la rendición</h2>
+                        </div>
+                      </div>
+                      <dl class="review-facts">
+                        <div><dt>Responsable del gasto</dt><dd x-text="workerName(record.workerId)"></dd></div>
+                        <div><dt>Preparada por</dt><dd x-text="workerName(record.preparedBy)"></dd></div>
+                        <div><dt>Revisa</dt><dd x-text="workerName(record.reviewerId)"></dd></div>
+                        <div><dt>Proyecto</dt><dd><a :href="projectHref" x-text="record.projectId"></a></dd></div>
+                        <div class="review-facts-wide"><dt>Autorización</dt><dd x-text="record.authorization || 'No registrada'"></dd></div>
+                        <div class="review-facts-wide" x-show="record.notes"><dt>Observaciones</dt><dd x-text="record.notes"></dd></div>
+                      </dl>
+                    </div>
+                  </section>
+                  <section class="card" aria-labelledby="review-totals-title">
+                    <div class="card-body">
+                      <div class="shell-section-header">
+                        <div class="master-title-row" data-maturity="as-is" data-maturity-note="Columnas de la rendición de J&Y. El gasto sin comprobante tributario sigue siendo costo real.">
+                          <h2 id="review-totals-title">Total rendido</h2>
+                        </div>
+                        <a class="btn btn-outline-primary btn-sm" x-show="costHref" :href="costHref">Ver en Costos</a>
+                      </div>
+                      <p class="review-total" x-text="formatAmount(totals.total)"></p>
+                      <dl class="review-breakdown">
+                        <div><dt>V.V.</dt><dd x-text="formatAmount(totals.vv)"></dd></div>
+                        <div><dt>IGV</dt><dd x-text="formatAmount(totals.igv)"></dd></div>
+                        <div><dt>No gravado</dt><dd x-text="formatAmount(totals.nonTaxed)"></dd></div>
+                        <div class="is-undocumented"><dt>No documentado</dt><dd x-text="formatAmount(totals.undocumented)"></dd></div>
+                      </dl>
+                      <p class="workspace-caption mb-0" x-text="`${totals.count} gastos · ${totals.informal} sin comprobante tributario · ${totals.withoutDocument} sin ninguna evidencia`"></p>
+                    </div>
+                  </section>
+                </div>
+
+                <!-- Add expense (spender / Administración while editing) -->
+                <section class="card review-capture" x-show="canEdit && !draft" aria-labelledby="review-capture-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: foto o archivo del comprobante con lectura automática (OCR) y datos sugeridos editables.">
+                        <h2 id="review-capture-title">Agregar gasto</h2>
+                      </div>
+                    </div>
+                    <div class="review-capture-options">
+                      <button type="button" class="btn btn-outline-primary" @click="capture('foto')"><i class="bi bi-camera" aria-hidden="true"></i><span>Tomar foto</span></button>
+                      <button type="button" class="btn btn-outline-primary" @click="capture('archivo')"><i class="bi bi-file-earmark-arrow-up" aria-hidden="true"></i><span>Subir imagen o PDF</span></button>
+                      <button type="button" class="btn btn-outline-secondary" @click="addWithoutDocument()"><i class="bi bi-file-earmark-x" aria-hidden="true"></i><span>Gasto sin documento</span></button>
+                    </div>
+                    <p class="workspace-caption mb-0">En la demostración, la foto y el archivo usan comprobantes de ejemplo.</p>
+                  </div>
+                </section>
+
+                <!-- Expenses table -->
+                <section class="card" aria-labelledby="review-items-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="review-items-title">Gastos</h2>
+                      <span class="workspace-caption" x-text="`${record.items.length} gastos`"></span>
+                    </div>
+                    <div class="table-responsive review-table d-none d-lg-block" x-show="record.items.length">
+                      <table class="table table-hover align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th scope="col">Ítem</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Evidencia</th>
+                            <th scope="col">Proveedor y descripción</th>
+                            <th scope="col">Clasificación</th>
+                            <th scope="col" class="text-end">V.V.</th>
+                            <th scope="col" class="text-end">IGV</th>
+                            <th scope="col" class="text-end">No gravado</th>
+                            <th scope="col" class="text-end">No doc.</th>
+                            <th scope="col" class="text-end">Total</th>
+                            <th scope="col">Revisión</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="(item, index) in record.items" :key="item.id"
+                            ><tr :class="{ 'is-selected': item.id === selectedId }">
+                              <td><button type="button" class="review-item-link" @click="selectItem(item.id)" :aria-label="`Ver gasto ${index + 1}`" x-text="index + 1"></button></td>
+                              <td x-text="formatDate(item.date)"></td>
+                              <td>
+                                <span x-text="typeShort(item)"></span
+                                ><small class="d-block text-muted" x-text="docCode(item)"></small>
+                              </td>
+                              <td>
+                                <span x-text="itemCounterpart(item)"></span
+                                ><small class="d-block text-muted" x-text="item.description"></small>
+                              </td>
+                              <td x-text="item.category"></td>
+                              <td class="text-end data-money" x-text="formatAmount(amountsOf(item).vv)"></td>
+                              <td class="text-end data-money" x-text="formatAmount(amountsOf(item).igv)"></td>
+                              <td class="text-end data-money" x-text="formatAmount(amountsOf(item).nonTaxed)"></td>
+                              <td class="text-end data-money" x-text="formatAmount(amountsOf(item).undocumented)"></td>
+                              <td class="text-end data-money" x-text="formatAmount(item.total)"></td>
+                              <td><span class="badge" :class="$statusClass(item.review)" x-text="item.review"></span></td>
+                            </tr></template
+                          >
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <th scope="row" colspan="5">Totales</th>
+                            <td class="text-end data-money" x-text="formatAmount(totals.vv)"></td>
+                            <td class="text-end data-money" x-text="formatAmount(totals.igv)"></td>
+                            <td class="text-end data-money" x-text="formatAmount(totals.nonTaxed)"></td>
+                            <td class="text-end data-money" x-text="formatAmount(totals.undocumented)"></td>
+                            <td class="text-end data-money" x-text="formatAmount(totals.total)"></td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                    <ul class="review-item-cards d-lg-none" x-show="record.items.length">
+                      <template x-for="(item, index) in record.items" :key="item.id"
+                        ><li>
+                          <button type="button" :class="{ 'is-selected': item.id === selectedId }" @click="selectItem(item.id)">
+                            <span class="review-item-card-top">
+                              <strong x-text="`${index + 1}. ${itemCounterpart(item)}`"></strong>
+                              <b x-text="formatAmount(item.total)"></b>
+                            </span>
+                            <small x-text="`${typeShort(item)} · ${formatDate(item.date)} · ${item.category}`"></small>
+                            <span class="badge" :class="$statusClass(item.review)" x-text="item.review"></span>
+                          </button>
+                        </li></template
+                      >
+                    </ul>
+                    <div class="workspace-empty" x-show="!record.items.length && !draft">
+                      <i class="bi bi-receipt" aria-hidden="true"></i>
+                      <p>Aún no hay gastos. Toma una foto del comprobante o registra un gasto sin documento.</p>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Selected expense: evidence on the left, data on the right -->
+                <section class="card review-item" id="expense-item-panel" x-show="selected || draft" aria-labelledby="review-item-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="review-item-title" x-text="draft && draftMode === 'new' ? 'Nuevo gasto' : `Gasto ${selected ? itemIndex(selected) : ''} de ${record.items.length}`"></h2>
+                        <p class="workspace-caption" x-text="ev ? typeLabel(ev) : ''"></p>
+                      </div>
+                      <span class="badge" x-show="selected && !draft" :class="$statusClass(selected?.review)" x-text="selected?.review"></span>
+                    </div>
+                    <div class="review-item-grid">
+                      <!-- Evidence viewer -->
+                      <div class="evidence-stage" :class="{ 'is-full': viewerFull }" x-show="ev">
+                        <div class="evidence-toolbar">
+                          <span class="evidence-toolbar-title" x-text="ev ? typeLabel(ev) : ''"></span>
+                          <div class="evidence-toolbar-actions" x-show="ev && layout(ev) !== 'none'">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="zoomBy(-0.25)" aria-label="Alejar"><i class="bi bi-zoom-out" aria-hidden="true"></i></button>
+                            <span class="evidence-zoom-value" x-text="`${Math.round(zoom * 100)} %`"></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="zoomBy(0.25)" aria-label="Acercar"><i class="bi bi-zoom-in" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="toggleFull()" :aria-label="viewerFull ? 'Cerrar vista ampliada' : 'Vista ampliada'"><i class="bi" :class="viewerFull ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i></button>
+                          </div>
+                        </div>
+                        <div class="evidence-canvas" @keydown.escape.window="viewerFull && toggleFull()">
+                          <div class="evidence-zoom" :style="`--zoom: ${zoom}`">
+                            <!-- Invoice / receipt -->
+                            <template x-if="ev && ['invoice', 'photo'].includes(layout(ev))"
+                              ><article class="ev-doc" :class="layout(ev) === 'photo' ? 'ev-doc--photo' : 'ev-doc--invoice'" aria-label="Ilustración del comprobante">
+                                <header class="ev-head">
+                                  <div class="ev-issuer">
+                                    <strong x-text="ev.vendor"></strong>
+                                    <small>Arequipa · Perú</small>
+                                  </div>
+                                  <div class="ev-ruc">
+                                    <span x-text="`R.U.C. ${ev.ruc}`"></span>
+                                    <strong x-text="ev.docType === 'factura' ? 'FACTURA ELECTRÓNICA' : layout(ev) === 'photo' ? 'BOLETA DE VENTA' : 'BOLETA DE VENTA ELECTRÓNICA'"></strong>
+                                    <span x-text="`${ev.series}-${ev.number}`"></span>
+                                  </div>
+                                </header>
+                                <dl class="ev-meta">
+                                  <div><dt>Fecha de emisión</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>Señor(es)</dt><dd x-text="ev.buyer || companyName"></dd></div>
+                                  <div><dt>Moneda</dt><dd>Soles</dd></div>
+                                </dl>
+                                <table class="ev-lines">
+                                  <thead><tr><th scope="col">Cant.</th><th scope="col">Descripción</th><th scope="col">Importe</th></tr></thead>
+                                  <tbody><tr><td>1</td><td x-text="ev.description"></td><td x-text="formatAmount(Number(ev.vv) + Number(ev.nonTaxed))"></td></tr></tbody>
+                                </table>
+                                <dl class="ev-totals">
+                                  <div x-show="Number(ev.vv)"><dt>Op. gravada</dt><dd x-text="formatAmount(ev.vv)"></dd></div>
+                                  <div x-show="Number(ev.nonTaxed)"><dt>Op. inafecta</dt><dd x-text="formatAmount(ev.nonTaxed)"></dd></div>
+                                  <div x-show="Number(ev.igv)"><dt>IGV 18 %</dt><dd x-text="formatAmount(ev.igv)"></dd></div>
+                                  <div class="ev-grand"><dt>Importe total</dt><dd x-text="formatAmount(ev.total)"></dd></div>
+                                </dl>
+                                <footer class="ev-foot" x-text="layout(ev) === 'photo' ? 'Fotografía enviada desde obra' : 'Representación impresa del comprobante electrónico'"></footer>
+                              </article></template
+                            >
+                            <!-- Digital wallet capture -->
+                            <template x-if="ev && layout(ev) === 'wallet'"
+                              ><article class="ev-doc ev-doc--wallet" aria-label="Ilustración de la captura de pago">
+                                <p class="ev-wallet-app" x-text="ev.docType === 'yape' ? 'Yape' : 'Plin'"></p>
+                                <i class="bi bi-check-circle-fill ev-wallet-ok" aria-hidden="true"></i>
+                                <p class="ev-wallet-title">Pago realizado</p>
+                                <p class="ev-wallet-amount" x-text="formatAmount(ev.total)"></p>
+                                <dl class="ev-meta">
+                                  <div><dt>Para</dt><dd x-text="ev.payee"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>N.º de operación</dt><dd x-text="ev.operationCode"></dd></div>
+                                </dl>
+                              </article></template
+                            >
+                            <!-- Transfer / deposit -->
+                            <template x-if="ev && layout(ev) === 'transfer'"
+                              ><article class="ev-doc ev-doc--transfer" aria-label="Ilustración de la constancia">
+                                <header class="ev-head">
+                                  <strong x-text="ev.docType === 'deposito' ? 'Constancia de depósito' : 'Constancia de transferencia'"></strong>
+                                  <span class="badge status-badge status-badge--success">Operación exitosa</span>
+                                </header>
+                                <p class="ev-wallet-amount" x-text="formatAmount(ev.total)"></p>
+                                <dl class="ev-meta">
+                                  <div><dt>Cuenta de origen</dt><dd x-text="ev.account || '—'"></dd></div>
+                                  <div><dt>Beneficiario</dt><dd x-text="ev.payee"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>N.º de operación</dt><dd x-text="ev.operationCode"></dd></div>
+                                </dl>
+                              </article></template
+                            >
+                            <!-- No document -->
+                            <template x-if="ev && layout(ev) === 'none'"
+                              ><article class="ev-doc ev-doc--none" aria-label="Gasto sin documento">
+                                <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
+                                <strong class="ev-undocumented">NO DOCUMENTADO</strong>
+                                <p>Gasto real sin comprobante ni constancia. Se registra con su motivo; nunca se genera un comprobante.</p>
+                              </article></template
+                            >
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Data: read view -->
+                      <div class="review-data" x-show="selected && !draft">
+                        <template x-if="selected && !draft"
+                          ><div>
+                            <div class="review-ocr" x-show="selected.docType !== 'sin-documento'">
+                              <h3 class="form-section-title" data-maturity="to-be" data-maturity-note="Propuesta: lectura automática (OCR/KIE) con confianza por campo; la persona confirma o corrige.">Datos sugeridos y registrados</h3>
+                              <table class="table table-sm align-middle review-ocr-table">
+                                <thead><tr><th scope="col">Dato</th><th scope="col">Sugerido</th><th scope="col">Registrado</th></tr></thead>
+                                <tbody>
+                                  <template x-for="field in isFormal(selected) ? ['ruc', 'vendor', 'date', 'series', 'number', 'vv', 'igv', 'nonTaxed', 'total'] : ['date', 'total']" :key="field"
+                                    ><tr :class="{ 'is-corrected': corrected(field) }">
+                                      <th scope="row" x-text="fieldLabels[field]"></th>
+                                      <td>
+                                        <span x-text="['vv', 'igv', 'nonTaxed', 'total'].includes(field) ? formatAmount(suggestion(field)) : field === 'date' ? formatDate(suggestion(field)) : suggestion(field) || '—'"></span
+                                        ><span class="confidence" :class="`confidence--${confidence(field)}`" x-text="confidence(field) ? `confianza ${confidence(field)}` : ''"></span>
+                                      </td>
+                                      <td>
+                                        <strong x-text="['vv', 'igv', 'nonTaxed', 'total'].includes(field) ? formatAmount(selected[field]) : field === 'date' ? formatDate(selected[field]) : selected[field] || '—'"></strong
+                                        ><small class="review-sub" x-show="corrected(field)">Corregido por una persona</small>
+                                      </td>
+                                    </tr></template
+                                  >
+                                </tbody>
+                              </table>
+                              <dl class="review-facts" x-show="!isFormal(selected)">
+                                <div><dt>Para</dt><dd x-text="selected.payee || '—'"></dd></div>
+                                <div><dt>N.º de operación</dt><dd x-text="selected.operationCode || '—'"></dd></div>
+                              </dl>
+                            </div>
+                            <dl class="review-facts">
+                              <div class="review-facts-wide"><dt>Descripción</dt><dd x-text="selected.description"></dd></div>
+                              <div class="review-facts-wide">
+                                <dt data-maturity="to-be" data-maturity-note="Propuesta: la IA sugiere la clasificación y la persona la confirma o corrige.">Clasificación</dt>
+                                <dd>
+                                  <strong x-text="selected.category"></strong
+                                  ><small class="d-block" x-text="selected.suggestedCategory === selected.category ? `Sugerida: ${selected.suggestedCategory} · confirmada` : `Sugerida: ${selected.suggestedCategory} · corregida por una persona`"></small>
+                                </dd>
+                              </div>
+                              <div class="review-facts-wide" x-show="!isFormal(selected)">
+                                <dt>Tratamiento</dt>
+                                <dd><span class="badge status-badge status-badge--warning">No documentado</span> <small x-text="selected.docType === 'sin-documento' ? 'Sin evidencia: se registra con su motivo.' : 'Con evidencia de pago, sin comprobante tributario.'"></small></dd>
+                              </div>
+                              <div class="review-facts-wide" x-show="selected.justification"><dt>Motivo</dt><dd x-text="selected.justification"></dd></div>
+                            </dl>
+                            <div class="alert alert-warning review-note" role="note" x-show="selected.reviewNote">
+                              <strong x-text="selected.review === 'Corregido' ? 'Observación atendida:' : 'Observación:'"></strong>
+                              <span x-text="selected.reviewNote"></span>
+                            </div>
+                            <!-- Item actions -->
+                            <div class="review-actions">
+                              <button type="button" class="btn btn-primary" x-show="canReview && selected.review !== 'Conforme'" @click="markConforme(selected)">Conforme</button>
+                              <button type="button" class="btn btn-outline-secondary" x-show="canReview" @click="toggleItemObserve()">Observar gasto</button>
+                              <button type="button" class="btn btn-outline-secondary" x-show="canReview" @click="editItem(selected, 'review')">Corregir dato</button>
+                              <button type="button" class="btn btn-primary" x-show="canEdit && (record.status === 'Borrador' || selected.review === 'Observado')" @click="editItem(selected)">Editar gasto</button>
+                              <button type="button" class="btn btn-outline-danger" x-show="canEdit && record.status === 'Borrador'" @click="removeItem(selected)">Quitar</button>
+                            </div>
+                            <div class="review-observe-item" x-show="itemObserveOpen">
+                              <label class="form-label" for="review-item-note">¿Qué debe corregirse?</label>
+                              <textarea id="review-item-note" class="form-control" rows="2" maxlength="240" x-model="itemNote"></textarea>
+                              <div class="review-actions mt-2">
+                                <button type="button" class="btn btn-outline-secondary" @click="toggleItemObserve()">Cancelar</button>
+                                <button type="button" class="btn btn-primary" @click="observeItem(selected)">Registrar observación del gasto</button>
+                              </div>
+                            </div>
+                          </div></template
+                        >
+                      </div>
+
+                      <!-- Data: edit form (new, correction or administrative fix) -->
+                      <form class="review-data review-form" x-show="draft" novalidate @submit.prevent="saveDraft()">
+                        <template x-if="draft"
+                          ><div>
+                            <p class="review-form-intro" x-text="draftMode === 'new' && draft.docType !== 'sin-documento' ? 'Revisa los datos sugeridos contra la imagen y corrige lo que se leyó mal.' : draftMode === 'review' ? 'Corrección menor de Administración: queda registrada en el historial.' : 'Completa los datos del gasto.'"></p>
+                            <div class="alert alert-danger" role="alert" x-show="draftError" x-text="draftError"></div>
+                            <div class="row g-2">
+                              <div class="col-sm-6">
+                                <label class="form-label" for="draft-date">Fecha</label>
+                                <input id="draft-date" class="form-control" type="date" x-model="draft.date" />
+                              </div>
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-sm-6">
+                                  <label class="form-label" for="draft-ruc">RUC <span class="confidence" :class="`confidence--${draftConfidence('ruc')}`" x-text="draftConfidence('ruc') ? `confianza ${draftConfidence('ruc')}` : ''"></span></label>
+                                  <input id="draft-ruc" class="form-control" inputmode="numeric" maxlength="11" x-model="draft.ruc" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-12">
+                                  <label class="form-label" for="draft-vendor">Razón social</label>
+                                  <input id="draft-vendor" class="form-control" maxlength="120" x-model="draft.vendor" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-6">
+                                  <label class="form-label" for="draft-series">Serie</label>
+                                  <input id="draft-series" class="form-control" maxlength="4" x-model="draft.series" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-6">
+                                  <label class="form-label" for="draft-number">Número</label>
+                                  <input id="draft-number" class="form-control" maxlength="10" x-model="draft.number" />
+                                </div></template
+                              >
+                              <template x-if="['wallet', 'transfer'].includes(layout(draft))"
+                                ><div class="col-sm-6">
+                                  <label class="form-label" for="draft-payee">Para / beneficiario</label>
+                                  <input id="draft-payee" class="form-control" maxlength="80" x-model="draft.payee" />
+                                </div></template
+                              >
+                              <template x-if="['wallet', 'transfer'].includes(layout(draft))"
+                                ><div class="col-sm-6">
+                                  <label class="form-label" for="draft-operation">N.º de operación</label>
+                                  <input id="draft-operation" class="form-control" maxlength="20" x-model="draft.operationCode" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-4">
+                                  <label class="form-label" for="draft-vv">V.V. <span class="confidence" :class="`confidence--${draftConfidence('vv')}`" x-text="draftConfidence('vv') ? `confianza ${draftConfidence('vv')}` : ''"></span></label>
+                                  <input id="draft-vv" class="form-control" type="number" step="0.01" min="0" x-model="draft.vv" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-4">
+                                  <label class="form-label" for="draft-igv">IGV <span class="confidence" :class="`confidence--${draftConfidence('igv')}`" x-text="draftConfidence('igv') ? `confianza ${draftConfidence('igv')}` : ''"></span></label>
+                                  <input id="draft-igv" class="form-control" type="number" step="0.01" min="0" x-model="draft.igv" />
+                                </div></template
+                              >
+                              <template x-if="isFormal(draft)"
+                                ><div class="col-4">
+                                  <label class="form-label" for="draft-nontaxed">No gravado</label>
+                                  <input id="draft-nontaxed" class="form-control" type="number" step="0.01" min="0" x-model="draft.nonTaxed" />
+                                </div></template
+                              >
+                              <div class="col-sm-6">
+                                <label class="form-label" for="draft-total">Total <span class="confidence" x-show="draft.docType !== 'sin-documento'" :class="`confidence--${draftConfidence('total')}`" x-text="draftConfidence('total') ? `confianza ${draftConfidence('total')}` : ''"></span></label>
+                                <input id="draft-total" class="form-control" type="number" step="0.01" min="0" x-model="draft.total" />
+                              </div>
+                              <div class="col-sm-6">
+                                <label class="form-label" for="draft-category">Clasificación</label>
+                                <select id="draft-category" class="form-select" x-model="draft.category">
+                                  <option value="">Selecciona</option>
+                                  <template x-for="item in categories" :key="item"><option :value="item" x-text="item" :selected="item === draft.category"></option></template>
+                                </select>
+                                <small class="form-text" x-show="draft.suggestedCategory" x-text="`Sugerida por IA: ${draft.suggestedCategory}`"></small>
+                              </div>
+                              <div class="col-12">
+                                <label class="form-label" for="draft-description">Descripción</label>
+                                <input id="draft-description" class="form-control" maxlength="160" x-model="draft.description" placeholder="Qué se compró o pagó" />
+                              </div>
+                              <template x-if="draft.docType === 'sin-documento'"
+                                ><div class="col-12">
+                                  <label class="form-label" for="draft-justification">Motivo del gasto sin documento</label>
+                                  <textarea id="draft-justification" class="form-control" rows="2" maxlength="240" x-model="draft.justification" placeholder="Ejemplo: transporte informal que no emite comprobante"></textarea>
+                                  <small class="form-text">Quedará marcado como NO DOCUMENTADO.</small>
+                                </div></template
+                              >
+                            </div>
+                            <div class="review-actions mt-3">
+                              <button type="button" class="btn btn-outline-secondary" @click="cancelDraft()">Cancelar</button>
+                              <button type="submit" class="btn btn-primary" x-text="draftMode === 'new' ? 'Confirmar gasto' : 'Guardar gasto'"></button>
+                            </div>
+                          </div></template
+                        >
+                      </form>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="card" aria-labelledby="review-history-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: cada acción queda con fecha, hora, usuario y comentario.">
+                        <h2 id="review-history-title">Historial</h2>
+                      </div>
+                    </div>
+                    <ol class="review-history">
+                      <template x-for="(entry, index) in history" :key="`${entry.at}-${index}`"
+                        ><li>
+                          <strong x-text="entry.action"></strong>
+                          <small x-text="`${formatDate(entry.at.slice(0, 10))} ${entry.at.slice(11, 16)} · ${entry.user}${entry.local ? ' · en esta demostración' : ''}`"></small>
+                          <span x-show="entry.note" x-text="entry.note"></span>
+                        </li></template
+                      >
+                    </ol>
+                  </div>
+                </section>
+              </div></template
+            >
+          </div>

@@ -13,6 +13,7 @@ import {
   getShellNotifications,
   getDataForVariant,
   projectShortName,
+  EXPENSE_PENDING_STATUSES,
 } from '../data/mock-data.js';
 import { formatMoney, writeProjectId } from './shell.js';
 import { tableControls } from '../utils/data-table.js';
@@ -652,8 +653,9 @@ export function projectDetail() {
         .slice(0, 5);
     },
     get pendingCount() {
-      return this.operations.filter((item) => ['Pendiente', 'En revisión'].includes(item.status))
-        .length;
+      return this.operations.filter(
+        (item) => item.status === 'Pendiente' || EXPENSE_PENDING_STATUSES.includes(item.status)
+      ).length;
     },
     get alertCount() {
       return this.pendingCount + (this.project?.status === 'En riesgo' ? 1 : 0);

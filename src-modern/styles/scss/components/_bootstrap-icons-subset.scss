@@ -35,6 +35,7 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-arrow-return-right::before { content: "\f132"; }
 .bi-arrow-right::before { content: "\f138"; }
 .bi-arrow-up-right::before { content: "\f144"; }
+.bi-arrows-fullscreen::before { content: "\f14d"; }
 .bi-bag-check::before { content: "\f171"; }
 .bi-bar-chart::before { content: "\f17e"; }
 .bi-bell::before { content: "\f18a"; }
@@ -63,19 +64,23 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-exclamation-triangle::before { content: "\f33b"; }
 .bi-exclamation-triangle-fill::before { content: "\f33a"; }
 .bi-eye::before { content: "\f341"; }
+.bi-file-earmark-arrow-up::before { content: "\f358"; }
 .bi-file-earmark-bar-graph::before { content: "\f35a"; }
 .bi-file-earmark-excel::before { content: "\f368"; }
 .bi-file-earmark-pdf::before { content: "\f63e"; }
 .bi-file-earmark-spreadsheet::before { content: "\f389"; }
 .bi-file-earmark-text::before { content: "\f38b"; }
+.bi-file-earmark-x::before { content: "\f38f"; }
 .bi-file-text::before { content: "\f3b9"; }
 .bi-fingerprint::before { content: "\f671"; }
 .bi-folder::before { content: "\f3d7"; }
 .bi-folder2-open::before { content: "\f3d8"; }
+.bi-fullscreen-exit::before { content: "\f3de"; }
 .bi-gear::before { content: "\f3e5"; }
 .bi-graph-up::before { content: "\f3f2"; }
 .bi-graph-up-arrow::before { content: "\f673"; }
 .bi-grid::before { content: "\f3fc"; }
+.bi-hash::before { content: "\f40a"; }
 .bi-hdd::before { content: "\f412"; }
 .bi-house::before { content: "\f425"; }
 .bi-image::before { content: "\f42a"; }
@@ -103,3 +108,5 @@ $bi-font-path: '~bootstrap-icons/font/fonts' !default;
 .bi-truck::before { content: "\f5ea"; }
 .bi-x::before { content: "\f62a"; }
 .bi-x-octagon::before { content: "\f627"; }
+.bi-zoom-in::before { content: "\f62c"; }
+.bi-zoom-out::before { content: "\f62d"; }

@@ -75,6 +75,10 @@ export const DEFAULT_RULES = {
   // Demo only: badges that tell a confirmed process (AS-IS) from a proposal
   // (TO-BE) and from what is still to be validated with the company.
   maturityTags: false,
+  // 'approval': SurTec/PMI flow (Borrador → En revisión → Observada → Aprobada).
+  // 'review': J&Y Demo (R2) — numbered per worker and year, three people,
+  // evidence per expense and administrative review instead of approval.
+  expenseFlow: 'approval',
 };
 
 // Fictitious signed-in user shown in the header (punto 3).
@@ -168,7 +172,7 @@ export const VARIANTS = {
       logoRailBox: LOGO_BOXES.jyDark,
     },
     presentation: { code: 'Demo', label: 'Propuesta para J&Y' },
-    rules: { maturityTags: true },
+    rules: { maturityTags: true, expenseFlow: 'review' },
     labels: { purchases: 'Compras / OC' },
     theme: {
       primary: '#334155',

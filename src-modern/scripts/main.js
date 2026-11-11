@@ -27,6 +27,7 @@ import {
   purchaseDetail,
 } from './components/commercial-views.js';
 import { expensesList, expenseDetail } from './components/expense-views.js';
+import { expenseReviewList, expenseReviewDetail } from './components/expense-review-views.js';
 import { personnelWorkspace, workerDetail } from './components/personnel-views.js';
 import { warehouseWorkspace, materialDetail } from './components/warehouse-views.js';
 import { costWorkspace } from './components/cost-views.js';
@@ -258,6 +259,8 @@ class AdminApp {
     Alpine.data('purchaseDetail', purchaseDetail);
     Alpine.data('expensesList', expensesList);
     Alpine.data('expenseDetail', expenseDetail);
+    Alpine.data('expenseReviewList', expenseReviewList);
+    Alpine.data('expenseReviewDetail', expenseReviewDetail);
     Alpine.data('personnelWorkspace', personnelWorkspace);
     Alpine.data('workerDetail', workerDetail);
     Alpine.data('warehouseWorkspace', warehouseWorkspace);

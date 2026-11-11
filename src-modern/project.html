@@ -345,7 +345,7 @@
                       <template x-for="item in rowsForTab(module.id)" :key="item.id"
                         ><a :href="operationHref(item) || moduleHref('costs', project.id)"
                           ><span
-                            ><strong x-text="item.id"></strong
+                            ><strong x-text="item.label || item.id"></strong
                             ><small x-text="recordSubtitle(item)"></small></span
                           ><span
                             ><strong x-text="formatMoney(item.amount)"></strong

@@ -88,10 +88,10 @@ async function flow(variant, projectId) {
   const id = await page.locator('.shell-page-heading h1').innerText();
   assert.equal(id, 'R-DEMO-001');
   assert.equal(await page.locator('#global-project-select').inputValue(), projectId);
-  if (variant === 'jy-demo') {
+  if (variant === 'jy-pmi') {
     await page.setViewportSize({ width: 390, height: 844 });
     await noOverflow();
-    await screenshot('jy-demo-mobile-comprobantes');
+    await screenshot('jy-pmi-mobile-comprobantes');
   }
   await page.getByRole('button', { name: /Factura de suministros/ }).click();
   await page.getByRole('button', { name: /Boleta de movilidad/ }).click();
@@ -103,7 +103,7 @@ async function flow(variant, projectId) {
   await page.locator('#expense-undocumented-note').fill('Movilidad de ejemplo');
   assert.ok((await page.locator('.expense-paper').first().innerText()).includes('S/ 100.00'));
   assert.ok((await page.locator('.expense-total-card').innerText()).includes('S/ 233.00'));
-  if (variant === 'jy-demo') await noOverflow();
+  if (variant === 'jy-pmi') await noOverflow();
   await screenshot(`${variant}-review`);
   await page.getByRole('link', { name: 'Abrir proyecto' }).click();
   await page.waitForURL(/project\.html\?id=/);
@@ -180,10 +180,7 @@ try {
   await page.waitForURL(/costs\.html\?record=COST-R-041/);
   assert.match(await page.locator('#cost-operation-detail').innerText(), /R-041/);
   await flow('jy-pmi', 'PR-JY-001');
-  await page.goto(url('jy-demo', 'expenses.html'));
-  await ready();
-  assert.equal(await page.locator('.expense-table tbody tr').count(), 4);
-  await flow('jy-demo', 'PY-26-001');
+  // J&Y Demo uses the review flow since R2: expense-review-interaction-test.mjs.
 
   // Entrega 4: "Mis Rendiciones" is the phone entry point; desktop keeps the table.
   await page.setViewportSize({ width: 390, height: 844 });

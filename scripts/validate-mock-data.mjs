@@ -24,6 +24,14 @@ import {
 } from '../src-modern/scripts/data/warehouse-data.js';
 import { projectCostModel } from '../src-modern/scripts/data/cost-data.js';
 import {
+  EVIDENCE_TYPES,
+  EXPENSE_CATEGORIES,
+  REVIEW_COST,
+  REVIEW_STATUSES,
+  itemProblems,
+  reportTotals,
+} from '../src-modern/scripts/data/expense-reports.js';
+import {
   personnelAssignments,
   baseAttendance,
   baseTimesheets,
@@ -359,8 +367,42 @@ const demo = getDataForVariant('jy-demo');
 assert.deepEqual(getPortfolioFinancials(demo), {
   activeProjectCount: 3,
   budgetAmount: 318000,
-  executedCost: 138950,
+  // R2: rendiciones derive from their expenses (accepted ones are cost).
+  executedCost: 127618,
 });
+
+// R2 — rendiciones of J&Y Demo.
+const reportKeys = new Set();
+for (const report of demo.expenseReports) {
+  const key = `${report.workerId}:${report.number}-${report.year}`;
+  assert.ok(!reportKeys.has(key), `${report.id}: número repetido para el trabajador`);
+  reportKeys.add(key);
+  assert.ok(REVIEW_STATUSES.includes(report.status), `${report.id}: situación`);
+  for (const person of [report.workerId, report.preparedBy, report.reviewerId]) {
+    assert.ok(demo.workers.some((worker) => worker.id === person), `${report.id}: persona ${person}`);
+  }
+  assert.ok(report.items.length > 0 && report.history.length > 0, `${report.id}: gastos e historial`);
+  for (const item of report.items) {
+    assert.deepEqual(itemProblems(item), [], `${item.id}: ${itemProblems(item).join(', ')}`);
+    assert.ok(EVIDENCE_TYPES[item.docType], `${item.id}: tipo de evidencia`);
+    assert.ok(EXPENSE_CATEGORIES.includes(item.suggestedCategory), `${item.id}: categoría sugerida`);
+    if (item.docType === 'sin-documento') assert.equal(item.ruc, '', `${item.id}: sin documento no lleva RUC`);
+    // Reports already accepted have every expense conforme.
+    if (REVIEW_COST.includes(report.status)) assert.equal(item.review, 'Conforme', item.id);
+  }
+  const operation = demo.operations.find((item) => item.id === report.id);
+  assert.ok(operation && operation.type === 'expense', `${report.id}: operación`);
+  assert.equal(operation.amount, reportTotals(report).total, `${report.id}: total`);
+  assert.equal(operation.costSource, REVIEW_COST.includes(report.status) ? 'expenses' : null);
+  assert.equal(operation.label, `N.º ${report.number}-${report.year}`);
+  // Totals stay in whole soles so the cost views (S/ without cents) agree.
+  assert.equal(reportTotals(report).total % 1, 0, `${report.id}: total sin céntimos`);
+}
+assert.deepEqual(
+  [...new Set(demo.expenseReports.map((item) => item.status))].sort(),
+  ['Aceptada', 'Corregida', 'Entregada a Contabilidad', 'Observada', 'Presentada']
+);
+for (const sample of demo.expenseSamples) assert.ok(EVIDENCE_TYPES[sample.docType], sample.id);
 for (const project of demo.projects) {
   assert.match(project.id, /^PY-26-\d{3}$/);
   assert.match(project.budgetId, /^PR26\d{2}-\d{4}$/);

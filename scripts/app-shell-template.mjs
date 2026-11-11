@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   VARIANT_IDS,
   getVariantConfig,
@@ -15,6 +18,22 @@ import {
   getShellNotifications,
   projectShortName,
 } from '../src-modern/scripts/data/mock-data.js';
+
+// Build-time page blocks (R2). Shared pages may hold presentation-specific
+// markup without shipping it to the other builds:
+//   <!-- IF rule=value --> … <!-- ELSE --> … <!-- /IF -->   (variant.rules)
+//   <!-- INCLUDE name -->   inserts src-modern/partials/name.html
+const partialsDir = fileURLToPath(new URL('../src-modern/partials/', import.meta.url));
+function applyPageBlocks(html, variant) {
+  const withIncludes = html.replace(/<!-- INCLUDE ([a-z0-9-]+) -->/g, (_match, name) =>
+    readFileSync(path.join(partialsDir, `${name}.html`), 'utf8')
+  );
+  return withIncludes.replace(
+    /<!-- IF (\w+)=([\w-]+) -->([\s\S]*?)(?:<!-- ELSE -->([\s\S]*?))?<!-- \/IF -->/g,
+    (_match, key, value, whenTrue, whenFalse = '') =>
+      String(variantRule(key, variant)) === value ? whenTrue : whenFalse
+  );
+}
 
 const escapeHtml = (value) =>
   String(value).replace(
@@ -287,6 +306,11 @@ function renderDemoTours(variant, data) {
     (item) => item.projectId === projectId && item.type === 'timesheet'
   );
   const isSurtec = variant.id === 'surtec-peti';
+  // J&Y Demo (R2): rendiciones are reviewed in their own page.
+  const reviewFlow = variantRule('expenseFlow', variant) === 'review';
+  const pendingReport = data.operations.find(
+    (item) => item.type === 'expense' && ['Presentada', 'Corregida'].includes(item.status)
+  );
   const step = (label, href) => ({ label, href });
   const scenarios = [
     {
@@ -303,14 +327,23 @@ function renderDemoTours(variant, data) {
     },
     {
       title: 'Rendición móvil',
-      description: 'Registrar, revisar, observar, corregir y aprobar.',
+      description: reviewFlow
+        ? 'Registrar con foto, revisar, observar, corregir, aceptar y entregar a Contabilidad.'
+        : 'Registrar, revisar, observar, corregir y aprobar.',
       icon: 'bi-receipt',
-      steps: [
-        step('Mis Rendiciones', './expenses.html'),
-        step('Nuevo registro y comprobante', `./expense.html?new=1&project=${projectId}`),
-        step('Revisión y aprobación', './approvals.html?tab=expenses'),
-        step('Fuente Rendiciones', `./costs.html?project=${projectId}&source=expenses`),
-      ],
+      steps: reviewFlow
+        ? [
+            step('Mis Rendiciones', './expenses.html'),
+            step('Nueva rendición con foto', `./expense.html?new=1&project=${projectId}`),
+            step(`Revisar ${pendingReport?.label || 'rendición'}`, `./expense.html?id=${pendingReport?.id || ''}`),
+            step('Fuente Rendiciones', `./costs.html?project=${projectId}&source=expenses`),
+          ]
+        : [
+            step('Mis Rendiciones', './expenses.html'),
+            step('Nuevo registro y comprobante', `./expense.html?new=1&project=${projectId}`),
+            step('Revisión y aprobación', './approvals.html?tab=expenses'),
+            step('Fuente Rendiciones', `./costs.html?project=${projectId}&source=expenses`),
+          ],
     },
     {
       title: isSurtec ? 'Compra y Kardex' : 'Compra y costo',
@@ -422,7 +455,8 @@ export function appShellPlugin(mode) {
     },
     transformIndexHtml: {
       order: 'pre',
-      handler(html) {
+      handler(source) {
+        const html = applyPageBlocks(source, variant);
         if (!html.includes('<!-- APP_HEADER -->')) return html;
 
         const themeKey = `mockup-erp:${variant.id}:theme`;
