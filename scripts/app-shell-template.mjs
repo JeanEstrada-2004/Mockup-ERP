@@ -217,6 +217,7 @@ function renderHeader(variant, data) {
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><span class="dropdown-header">${escapeHtml(user.name)} · ${escapeHtml(user.role)}</span></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="profile"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</button></li>
+                <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#demo-tours-modal"><i class="bi bi-diagram-3 me-2" aria-hidden="true"></i>Recorridos de demostración</button></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="settings"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configuración</button></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="logout"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Cerrar sesión</button></li>
@@ -270,6 +271,113 @@ function renderFooter(variant) {
   return `<footer class="admin-footer shell-footer"><div class="container-fluid"><span>${escapeHtml(variant.company.name)} · Plataforma de Gestión y Control de Proyectos</span><span>Datos ficticios con fines de demostración</span></div></footer>`;
 }
 
+function renderDemoTours(variant, data) {
+  const project = data.projects[0];
+  const projectId = project.id;
+  const purchase = data.operations.find(
+    (item) => item.projectId === projectId && item.costSource === 'purchases'
+  );
+  const timesheet = data.operations.find(
+    (item) => item.projectId === projectId && item.type === 'timesheet'
+  );
+  const isSurtec = variant.id === 'surtec-peti';
+  const step = (label, href) => ({ label, href });
+  const scenarios = [
+    {
+      title: 'Trazabilidad gerencial',
+      description: 'Del indicador al documento de la compra.',
+      icon: 'bi-diagram-3',
+      steps: [
+        step('Panel General', './index.html'),
+        step(projectId, `./project.html?id=${projectId}`),
+        step('Costos del proyecto', `./costs.html?project=${projectId}&source=purchases`),
+        step(purchase.id, `./purchase.html?id=${purchase.id}`),
+        step('Documento', `./document.html?id=${purchase.documentId}`),
+      ],
+    },
+    {
+      title: 'Rendición móvil',
+      description: 'Registrar, revisar, observar, corregir y aprobar.',
+      icon: 'bi-receipt',
+      steps: [
+        step('Mis Rendiciones', './expenses.html'),
+        step('Nuevo registro y comprobante', `./expense.html?new=1&project=${projectId}`),
+        step('Revisión y aprobación', './approvals.html?tab=expenses'),
+        step('Fuente Rendiciones', `./costs.html?project=${projectId}&source=expenses`),
+      ],
+    },
+    {
+      title: isSurtec ? 'Compra y Kardex' : 'Compra y costo',
+      description: isSurtec
+        ? 'De la orden recibida a la salida de material y su costo.'
+        : 'De la orden de compra a su proyecto y costo.',
+      icon: 'bi-box-seam',
+      steps: isSurtec
+        ? [
+            step('Orden de compra', './purchase.html?id=OC-035'),
+            step('Entrada al almacén', './warehouse.html?tab=entradas&record=ENT-035'),
+            step('Kardex', './warehouse.html?tab=kardex&record=SAL-015'),
+            step(
+              'Costo de material',
+              './costs.html?project=PR-2027-001&source=materials&operation=SAL-015'
+            ),
+          ]
+        : [
+            step('Orden de compra', `./purchase.html?id=${purchase.id}`),
+            step('Proyecto', `./project.html?id=${projectId}`),
+            step('Costo de compra', `./costs.html?project=${projectId}&source=purchases`),
+          ],
+    },
+    {
+      title: 'Asistencia y costo laboral',
+      description: isSurtec
+        ? 'De la marcación biométrica al tareo y costo.'
+        : 'De la asistencia registrada al tareo y costo.',
+      icon: 'bi-clock-history',
+      steps: [
+        ...(isSurtec ? [step('Biometría', './personnel.html?tab=biometria')] : []),
+        step('Asistencia', './personnel.html?tab=asistencia'),
+        step('Tareo', `./personnel.html?tab=tareo&record=${timesheet.id}`),
+        step('Proyecto', `./project.html?id=${projectId}`),
+        step(
+          'Costo laboral',
+          `./costs.html?project=${projectId}&source=personnel&operation=${timesheet.id}`
+        ),
+      ],
+    },
+  ];
+  if (isSurtec) {
+    scenarios.push({
+      title: 'Oportunidad a proyecto',
+      description: 'Del seguimiento comercial al presupuesto aceptado.',
+      icon: 'bi-briefcase',
+      steps: [
+        step('Oportunidad OP-001', './crm.html?id=OP-001'),
+        step('Presupuesto PRE-001', './budget.html?id=PRE-001'),
+        step('Proyecto PR-2027-001', './project.html?id=PR-2027-001'),
+      ],
+    });
+  }
+
+  const cards = scenarios
+    .map(
+      (scenario, index) => `
+    <article class="demo-tour" aria-labelledby="demo-tour-${index}-title">
+      <div class="demo-tour-heading"><span class="demo-tour-icon"><i class="bi ${scenario.icon}" aria-hidden="true"></i></span><div>
+        <h3 id="demo-tour-${index}-title">${escapeHtml(scenario.title)}</h3>
+        <p>${escapeHtml(scenario.description)}</p>
+      </div></div>
+      <ol class="demo-tour-steps">${scenario.steps.map((item) => `<li><a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></li>`).join('')}</ol>
+    </article>`
+    )
+    .join('');
+  return `<div class="modal fade" id="demo-tours-modal" tabindex="-1" aria-labelledby="demo-tours-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl"><div class="modal-content demo-tours-modal">
+      <div class="modal-header"><div><h2 class="modal-title" id="demo-tours-title">Recorridos de demostración</h2><p class="mb-0">Elige un paso para abrir esa pantalla y seguir la relación entre registros.</p></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+      <div class="modal-body"><div class="demo-tours-grid">${cards}</div></div>
+    </div></div></div>`;
+}
+
 export function appShellPlugin(mode) {
   const variant = getVariantConfig(VARIANT_IDS.includes(mode) ? mode : 'surtec-peti');
   const data = getDataForVariant(variant);
@@ -284,8 +392,11 @@ export function appShellPlugin(mode) {
       background_color: '#ffffff',
       theme_color: variant.theme.primary,
       icons: [
-        { src: './assets/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        { src: './assets/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        {
+          src: `./${variant.company.logoCompact}`,
+          sizes: variant.company.logoCompactSize,
+          type: 'image/png',
+        },
       ],
     },
     null,
@@ -315,12 +426,23 @@ export function appShellPlugin(mode) {
         return html
           .replace('<html lang="en"', '<html lang="es"')
           .replace('<html', `<html data-variant="${variant.id}"`)
-          .replace(/<title>([^<]*)<\/title>/, (_match, title) => `<title>${title} · ${escapeHtml(variant.company.shortName)} ${escapeHtml(variant.presentation.code)}</title>`)
+          .replace(
+            /<title>([^<]*)<\/title>/,
+            (_match, title) =>
+              `<title>${title} · ${escapeHtml(variant.company.shortName)} ${escapeHtml(variant.presentation.code)}</title>`
+          )
           .replace(
             '</head>',
             `<link rel="manifest" href="./manifest.json">${brandStyle}${earlyTheme}</head>`
           )
-          .replace('<!-- APP_HEADER -->', renderHeader(variant, data))
+          .replace(
+            '<!-- APP_FAVICON -->',
+            `<link rel="icon" type="image/png" href="./${escapeHtml(variant.company.logoCompact)}" />`
+          )
+          .replace(
+            '<!-- APP_HEADER -->',
+            renderHeader(variant, data) + renderDemoTours(variant, data)
+          )
           .replace('<!-- APP_SIDEBAR -->', renderSidebar(variant, data))
           .replace('<!-- APP_FOOTER -->', renderFooter(variant))
           .replace(

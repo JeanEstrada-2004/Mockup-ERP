@@ -3,12 +3,5 @@
 // ==========================================================================
 // Surfaces, ink and the Bootstrap bridge come from the dark tokens in
 // abstracts/_variables.scss and components/_design-system.scss (Entrega 2).
-// Only the legacy Metis showcase widgets need a lifted inset surface.
-
-[data-bs-theme='dark'] {
-  .stats-card .stats-icon,
-  .activity-feed .activity-icon {
-    background-color: var(--panel-2) !important;
-    color: var(--ink-2) !important;
-  }
-}
+// Dark surfaces and text are defined by shared tokens in _variables.scss
+// and _design-system.scss. Keep this entry point for future theme additions.

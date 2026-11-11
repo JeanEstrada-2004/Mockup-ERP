@@ -50,8 +50,10 @@ export function inventoryPurchaseBreakdown(purchase, material) {
 }
 
 export function formatAmount(amount) {
-  return `S/ ${new Intl.NumberFormat('es-PE', {
+  return `S/ ${new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount)}`;
+  })
+    .format(amount)
+    .replaceAll(',', ' ')}`;
 }

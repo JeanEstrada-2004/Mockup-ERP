@@ -1,6 +1,6 @@
 # Mockup Maestro: base de trabajo
 
-Esta es una aplicación **frontend demostrativa** basada en Metis 3.6.0. No hay
+Esta es una aplicación **frontend demostrativa** para gestionar proyectos. No hay
 backend, autenticación, OCR, biometría, carga de archivos ni integraciones reales.
 Los registros y documentos descritos aquí son ficticios.
 
@@ -29,11 +29,9 @@ entre presentaciones del mismo dominio.
 
 ## Decisiones sobre cifras y estados
 
-Los tres proyectos SurTec especificados suman S/ 426 000 de presupuesto y
-S/ 243 150 de costo ejecutado. El Panel General deriva sus KPI
-de estos tres registros; **12 proyectos, S/ 1 245 000 y S/ 768 400** describen
-un portafolio más amplio que aún no está documentado en los datos mock.
-No se mostrarán esos totales hasta añadir proyectos que los sustenten.
+Los 15 proyectos SurTec incluyen 12 en ejecución que suman S/ 1 245 000 de
+presupuesto y S/ 768 400 de costo ejecutado. Los tres proyectos especificados
+originalmente conservan sus cifras; los demás completan el portafolio mock.
 
 PR-2027-001 conserva S/ 185 000 de presupuesto y S/ 112 450 ejecutados.
 Las fuentes suman exactamente ese costo: Compras S/ 47 230, Personal
@@ -73,9 +71,8 @@ demostrativas. Tema y barra lateral también conservan su estado por variante.
 `src-modern/index.html` es un Panel General preliminar con cifras derivadas de
 los registros. `src-modern/module-preview.html` da una entrada navegable a los
 módulos que se desarrollarán después. Ambas páginas indican que usan datos de
-demostración. Los ejemplos antiguos de Metis permanecen en `src-modern/` como
-material de referencia, pero se excluyen del build publicable hasta adaptar su
-contenido.
+demostración. En esa etapa los ejemplos antiguos de Metis aún permanecían en
+`src-modern/`; se retiraron en la Mejora 7.
 
 ## Entrega 3: primer recorrido completo
 
@@ -231,12 +228,12 @@ aprobación → Costos; (3) OC → recepción → entrada → Kardex → salida 
 Las acciones de foto, OCR, huellero, aprobación y recepción representan un
 recorrido visual, no dispositivos ni operaciones reales.
 
-La auditoría abre las 22 vistas de cada build en escritorio y móvil, comprueba
+La auditoría abre las 25 vistas de cada build en escritorio y móvil, comprueba
 enlaces visibles, assets, búsqueda, logos, alcance, tema claro/oscuro,
 etiquetas básicas de accesibilidad y consola. El build separa los datos
 operativos y los logos de SurTec y J&Y; los manifiestos tienen nombre, iconos
-y rutas relativas por variante. La raíz de Pages redirige a J&Y Demo sin un
-selector público. Una URL directa a una vista no habilitada muestra un
+y rutas relativas por variante. La raíz de Pages recuerda la última presentación
+abierta y, en una primera visita, redirige a J&Y Demo. Una URL directa a una vista no habilitada muestra un
 estado de indisponibilidad.
 
 El workflow `.github/workflows/pages.yml` usa las acciones oficiales
@@ -263,7 +260,8 @@ Con ese ejemplo local, las direcciones son
 `http://127.0.0.1:4174/Mockup-ERP/jy-demo/`.
 Tras una publicación real en un repositorio de proyecto, el patrón esperado
 es `https://<usuario-o-organización>.github.io/<repositorio>/<variante>/`.
-No se fija aquí una URL pública porque el remoto todavía no está definido.
+El remoto `origin` está definido; la URL pública y el estado del despliegue
+deben comprobarse en GitHub después de hacer `git push`.
 
 ## Comandos
 
@@ -287,7 +285,7 @@ npm run preview:pages
 
 En este equipo Windows, para la instalación se usó
 `$env:NODE_OPTIONS='--use-system-ca'; npm ci`. Esto mantiene activa la
-verificación TLS. `npm run build` genera `dist-modern/` con las 22 vistas
+verificación TLS. `npm run build` genera `dist-modern/` con las 25 vistas
 adaptadas. `npm run build:variants` genera las tres salidas en `dist-pages/`.
 Para GitHub Pages, el workflow calcula `PAGES_BASE` y publica
 `dist-pages/`. El comando local permite probar la misma subruta antes
@@ -333,16 +331,8 @@ persistente ni respaldos. Las ediciones locales de Rendiciones y Documentos
 no constituyen asientos contables ni modifican el conjunto base.
 
 El remoto `origin` está configurado; el estado público de Pages no se comprobó
-en esta revisión local. El build muestra una
-advertencia por el tamaño del paquete de ApexCharts; la carga de gráficos ya es
-diferida hasta abrir el Panel General. `npm run format:check` sigue reportando
-archivos originales de Metis; los archivos nuevos de esta entrega sí se
-formatearon. `npm audit --audit-level=high` pasa tras las actualizaciones
-compatibles del lockfile. Quedan cuatro avisos moderados en la cadena de
-desarrollo de ESLint/`minimatch`; su corrección automática exige una
-migración mayor de ESLint que no se hizo en esta entrega. Las comprobaciones
-de accesibilidad cubren estructura, nombres y etiquetas básicas, pero no
-equivalen a una auditoría WCAG completa.
+en esta revisión local. Las comprobaciones de accesibilidad cubren estructura,
+nombres y etiquetas básicas, pero no equivalen a una auditoría WCAG completa.
 
 ## Mejoras — Entrega 1: base del sistema de diseño (10/11/2026)
 
@@ -448,3 +438,18 @@ tres variantes bajo la subruta de Pages.
 - **Seguridad, Integraciones y Administración:** estados simulados creíbles (MFA Activado,
   ZKTeco Conectado, Backup Correcto) coherentes entre módulos, y las seis secciones de
   Administración del Sistema.
+
+## Mejoras — Entrega 7: limpieza, recorridos y auditoría (10/11/2026)
+
+- Se retiraron las páginas de ejemplo y autenticación no enlazadas, sus componentes,
+  estilos y assets genéricos. `analytics.html` conserva la vista BI adaptada.
+- Se eliminó ApexCharts y Prism. Los gráficos operativos usan el kit D3 y el build
+  ya no genera `vendor-charts`.
+- El menú de usuario abre cinco recorridos de demostración en SurTec. En J&Y,
+  Compra y Personal muestran pasos sin Almacén ni Biometría; el recorrido CRM
+  no aparece. Cada paso enlaza a su pantalla dentro de la variante actual.
+- Los importes con céntimos usan espacios para miles (`S/ 1 250.00`). Las decisiones
+  de aprobación de la bandeja se reflejan en las fichas y listas sin alterar el
+  conjunto económico base.
+- Los favicon y manifiestos de cada build usan la marca de la variante. Las
+  capturas de la revisión están en `screenshots/entregas/entrega-7-despues/`.

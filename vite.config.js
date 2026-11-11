@@ -24,8 +24,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 600,
 
     rollupOptions: {
-      // Legacy Metis examples stay in source for later deliveries. Published
-      // builds include only adapted pages.
+      // Only the adapted ERP pages enter the build.
       input: {
         main: resolve(__dirname, 'src-modern/index.html'),
         projects: resolve(__dirname, 'src-modern/projects.html'),
@@ -62,9 +61,6 @@ export default defineConfig(({ mode }) => ({
             id.includes('node_modules/@popperjs/core/')
           ) {
             return 'vendor-bootstrap';
-          }
-          if (id.includes('node_modules/apexcharts/')) {
-            return 'vendor-charts';
           }
           // D3 modules used by the chart kit (src-modern/scripts/charts/).
           if (/node_modules\/(d3-|internmap)/.test(id)) {
@@ -126,7 +122,7 @@ export default defineConfig(({ mode }) => ({
 
   // Optimize dependencies
   optimizeDeps: {
-    include: ['bootstrap', 'alpinejs', 'apexcharts', 'sweetalert2'],
+    include: ['bootstrap', 'alpinejs', 'sweetalert2'],
   },
 
   esbuild: {

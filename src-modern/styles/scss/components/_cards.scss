@@ -2,8 +2,7 @@
 // Card Components
 // ==========================================================================
 //
-// The original Metis dashboard used distinct cards on a pale canvas. Keep a
-// subtle shadow so dense ERP screens retain that visual grouping.
+// Keep a subtle shadow so dense ERP screens retain visual grouping.
 //
 // ==========================================================================
 
@@ -50,7 +49,7 @@
 // --------------------------------------------------------------------------
 // Stats cards
 // --------------------------------------------------------------------------
-// Larger values and icon tiles bring the KPI hierarchy back to Metis.
+// Legacy statistics cards are retained only as a CSS fallback.
 .stats-card {
   .card-body {
     padding: 1.125rem 1.25rem;

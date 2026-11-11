@@ -163,10 +163,8 @@ cambiar tema o ancho (sin repetir la animación) y respeta `prefers-reduced-moti
 | `donut.js` | `[{ label, value, color, href }]`; `options.centerLabel`, `centerValue`, `legend`, `size` |
 | `bars.js` | `{ categories, series: [{label, color, values}], colors? }`; `options.orientation: 'horizontal'` |
 
-Migrados en la Entrega 2: Panel (barras + dona), Costos (barras horizontales) y
-Reportes › BI (barras + dona). Ninguna vista del ERP usa ya ApexCharts; quedan solo las
-páginas de muestra de Metis (fuera del build), `utils/apex.js` y `chart-palette.js`,
-que se retiran en la Entrega 7.
+Desde la Entrega 7, todas las vistas operativas usan el kit D3. Las páginas de
+muestra y ApexCharts se retiraron del repositorio.
 
 Patrones aprobados en la referencia:
 - **Trazabilidad del costo** (`flow.js`): fuentes → ejecutado → presupuesto
@@ -181,7 +179,7 @@ Patrones aprobados en la referencia:
 Reglas: un eje por gráfico; ejes y cuadrícula recesivos; texto en tokens de tinta, nunca en
 el color de la serie; leyenda cuando hay 2 o más series; tooltip al pasar el mouse;
 re-render al cambiar tema o tamaño; alternativa accesible (`aria-label` o tabla).
-ApexCharts queda solo en lo aún no migrado y se elimina en la Entrega 7.
+No se incorporan gráficos de otra biblioteca.
 
 ## Movimiento (emil-design-eng)
 - Gráficos que se dibujan al cargar (barras crecen, líneas se trazan, flujos aparecen

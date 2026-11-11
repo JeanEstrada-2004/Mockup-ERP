@@ -106,6 +106,26 @@ async function openVariant(variant, expectedName, expectedProjects) {
   assert.equal(errors.length, 0, errors.join('\n'));
 }
 
+async function verifyDemoTours(variant, expectedCount) {
+  await page.locator('.shell-user-button').click();
+  await page.getByRole('button', { name: 'Recorridos de demostración' }).click();
+  await page.locator('#demo-tours-modal').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.demo-tour').count(), expectedCount);
+  const hrefs = await page
+    .locator('.demo-tour-steps a')
+    .evaluateAll((links) => links.map((link) => link.href));
+  assert.ok(hrefs.every((href) => href.includes(`${pagesBase}${variant}/`)));
+  for (const href of new Set(hrefs)) {
+    assert.equal((await page.request.get(href)).status(), 200, `Paso sin página: ${href}`);
+  }
+  if (variant !== 'surtec-peti') {
+    assert.ok(!hrefs.some((href) => /warehouse|crm|budget\.html|biometria/.test(href)));
+  }
+  await page.locator('.demo-tour-steps a').first().click();
+  await page.waitForURL(new RegExp(`${pagesBase}${variant}/index\\.html$`));
+  assert.equal(errors.length, 0, errors.join('\n'));
+}
+
 async function verifyProjectFlow(variant, projectId) {
   const data = getDataForVariant(variant);
   const portfolio = getPortfolioFinancials(data);
@@ -286,6 +306,7 @@ async function verifyProjectFlow(variant, projectId) {
 
 try {
   await openVariant('surtec-peti', 'SurTec Ingeniería y Tecnología S.A.C.', 15);
+  await verifyDemoTours('surtec-peti', 5);
   assert.equal(await page.locator('.sidebar-nav [data-module="crm"]').count(), 1);
   assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 1);
   assert.equal(await page.locator('.shell-notification-menu .shell-notification').count(), 6);
@@ -370,12 +391,14 @@ try {
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await openVariant('jy-pmi', 'J&Y Ingenieros Consultores S.A.C.', 2);
+  await verifyDemoTours('jy-pmi', 4);
   assert.equal(await page.locator('.sidebar-nav [data-module="crm"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 1);
   assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'light');
 
   await openVariant('jy-demo', 'J&Y Ingenieros Consultores S.A.C.', 2);
+  await verifyDemoTours('jy-demo', 4);
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="security"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="expenses"]').count(), 1);
@@ -383,8 +406,7 @@ try {
   assert.ok(await page.locator('[data-shell-action="profile"]').isVisible());
   await page.locator('[data-shell-action="profile"]').click();
   assert.ok(await page.locator('.toast').first().isVisible());
-  // Legacy Metis pages stay out of the build; analytics.html is now the BI page
-  // (Entrega 6) and is unavailable where the BI module is not enabled.
+  // Removed showcase pages return 404; BI remains restricted by variant.
   const legacyResponse = await page.request.get(pageUrl('jy-demo', 'users.html'));
   assert.equal(legacyResponse.status(), 404);
   await page.goto(pageUrl('jy-demo', 'analytics.html'));
@@ -407,7 +429,9 @@ try {
   await page.reload();
   await page.waitForFunction(() => window.AdminApp?.isInitialized);
   assert.equal(await page.locator('.sidebar-nav [data-module="approvals"].active').count(), 1);
-  const headerCount = Number(await page.locator('[data-approvals-link] [data-approvals-count]').innerText());
+  const headerCount = Number(
+    await page.locator('[data-approvals-link] [data-approvals-count]').innerText()
+  );
   assert.ok(headerCount > 0);
   assert.equal(
     Number(await page.locator('.sidebar-nav [data-approvals-count]').innerText()),
@@ -433,13 +457,49 @@ try {
     headerCount - 1
   );
   assert.ok((await page.locator('.approval-resolved').innerText()).includes(expenseId));
-  await page.locator('.approval-resolved').getByRole('button', { name: 'Deshacer' }).first().click();
+  await page.goto(pageUrl('surtec-peti', `expense.html?id=${expenseId}`));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.equal(await page.locator('.expense-detail-heading .badge').innerText(), 'Aprobada');
+  assert.match(await page.locator('.expense-history').innerText(), /Decisión visual registrada/);
+  await page.goto(pageUrl('surtec-peti', 'approvals.html?tab=expenses'));
+  await page
+    .locator('.approval-resolved')
+    .getByRole('button', { name: 'Deshacer' })
+    .first()
+    .click();
   await page.waitForFunction(
     (expected) =>
       document.querySelector('[data-approvals-link] [data-approvals-count]')?.textContent ===
       String(expected),
     headerCount
   );
+  for (const [tab, detailPage, expectedStatus] of [
+    ['Presupuestos', 'budget', 'Aprobado'],
+    ['Compras', 'purchase', 'Aprobada'],
+  ]) {
+    await page.getByRole('tab', { name: new RegExp(tab) }).click();
+    const row = page.locator('.approvals-workspace tbody tr').first();
+    const id = await row.locator('.data-code').first().innerText();
+    await row.getByRole('button', { name: 'Aprobar' }).click();
+    await page.locator('.swal2-confirm').click();
+    await page.goto(pageUrl('surtec-peti', `${detailPage}.html?id=${id}`));
+    await page.waitForFunction(() => window.AdminApp?.isInitialized);
+    assert.equal(
+      await page.locator('.workspace-detail-heading .badge').first().innerText(),
+      expectedStatus
+    );
+    await page.goto(
+      pageUrl(
+        'surtec-peti',
+        `approvals.html?tab=${detailPage === 'budget' ? 'budgets' : 'purchases'}`
+      )
+    );
+    await page
+      .locator('.approval-resolved li')
+      .filter({ hasText: id })
+      .getByRole('button', { name: 'Deshacer' })
+      .click();
+  }
   await page.goto(pageUrl('surtec-peti'));
   await page.locator('a', { hasText: 'Abrir bandeja' }).click();
   await page.waitForURL(/approvals\.html$/);
@@ -451,7 +511,10 @@ try {
   await page.goto(pageUrl('surtec-peti', 'warehouse.html'));
   await page.waitForFunction(() => window.AdminApp?.isInitialized);
   assert.equal(await page.locator('#presentation-switcher').count(), 0);
-  assert.equal(await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')), 'surtec-peti');
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')),
+    'surtec-peti'
+  );
   await page.keyboard.press('Alt+Shift+KeyP');
   await page.locator('#presentation-switcher').waitFor({ state: 'visible' });
   assert.equal(await page.locator('.presentation-option').count(), 3);
@@ -472,7 +535,10 @@ try {
   await page.locator('a.presentation-option[data-variant="jy-demo"]').click();
   await page.waitForURL(new RegExp(`${pagesBase}jy-demo/costs\\.html$`));
   await page.waitForFunction(() => window.AdminApp?.isInitialized);
-  assert.equal(await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')), 'jy-demo');
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem('mockup-erp:last-variant')),
+    'jy-demo'
+  );
 
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log(

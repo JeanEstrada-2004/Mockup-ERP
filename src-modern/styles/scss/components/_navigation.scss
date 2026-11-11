@@ -458,7 +458,7 @@
   }
 }
 
-// Narrow phones (< sm): drop the brand text "Metis" so the logo, hamburger, and
+// Narrow phones (< sm): drop the long brand text so the logo, hamburger, and
 // 3 right-side icons all comfortably fit on one row, and shrink button padding.
 @media (max-width: 575.98px) {
   .admin-header {

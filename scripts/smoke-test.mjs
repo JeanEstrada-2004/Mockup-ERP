@@ -46,28 +46,7 @@ const MIME = {
 };
 
 // Pages that are expected to render at least one chart.
-const CHART_PAGES = new Set([
-  // ERP pages drawn with the D3 kit (Entrega 2 de mejoras).
-  'index.html',
-  'costs.html',
-  'design-system.html',
-  // Legacy Metis showcase pages (ApexCharts), when they are built.
-  'analytics.html',
-  'users.html',
-  'orders.html',
-  'products.html',
-]);
-
-// Pages that are expected to syntax-highlight code samples.
-const PRISM_PAGES = new Set([
-  'elements-alerts.html',
-  'elements-badges.html',
-  'elements-buttons.html',
-  'elements-cards.html',
-  'elements-forms.html',
-  'elements-modals.html',
-  'elements-tables.html',
-]);
+const CHART_PAGES = new Set(['index.html', 'costs.html', 'design-system.html', 'analytics.html']);
 
 // Console noise that is intentional and not a failure.
 const IGNORED_CONSOLE = [/favicon/i, /Failed to load resource.*manifest\.json/i];
@@ -149,24 +128,20 @@ async function main() {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
-    // Charts and the lazily-imported highlighter settle a tick after load.
+    // D3 charts settle a tick after load.
     await tab.waitForTimeout(1200);
 
-    const charts = await tab.locator('.apexcharts-canvas, .chart-svg, .exec-row').count();
-    const highlighted = await tab.locator('code.language-html .token').count();
+    const charts = await tab.locator('.chart-svg, .exec-row').count();
     const alpineErrors = errors.filter((e) => /alpine/i.test(e)).length;
 
     if (CHART_PAGES.has(page) && charts === 0) {
       errors.push('expected at least one rendered chart, found none');
     }
-    if (PRISM_PAGES.has(page) && highlighted === 0) {
-      errors.push('expected syntax-highlighted code, found none');
-    }
     if (external.length) {
       errors.push(`external request(s): ${[...new Set(external)].join(', ')}`);
     }
 
-    results.push({ page, charts, highlighted, errors, alpineErrors });
+    results.push({ page, charts, errors, alpineErrors });
     await ctx.close();
   }
 
@@ -177,13 +152,11 @@ async function main() {
   const failed = results.filter((r) => r.errors.length);
   const pad = Math.max(...results.map((r) => r.page.length));
 
-  console.log('\nPage                            charts  highlighted  status');
-  console.log('─'.repeat(66));
+  console.log('\nPage                            charts  status');
+  console.log('─'.repeat(52));
   for (const r of results) {
     const status = r.errors.length ? '✗ FAIL' : '✓ ok';
-    console.log(
-      `${r.page.padEnd(pad)}  ${String(r.charts).padStart(6)}  ${String(r.highlighted).padStart(11)}  ${status}`
-    );
+    console.log(`${r.page.padEnd(pad)}  ${String(r.charts).padStart(6)}  ${status}`);
   }
 
   if (failed.length) {

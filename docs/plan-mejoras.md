@@ -21,7 +21,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 | 4. Aprobaciones, Rendiciones, Presupuestos, Compras | **Terminada** (10/11/2026) | `Entrega 4: aprobaciones, rendiciones, presupuestos y compras` | Ver "Notas de la Entrega 4" |
 | 5. Personal, Almacén y Costos | **Terminada** (10/11/2026) | `Entrega 5: personal, almacén y costos` | Ver "Notas de la Entrega 5" |
 | 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | **Terminada** (10/11/2026) | `Entrega 6: documentos, BI, CRM, seguridad, integraciones, reportes y administración` | Ver "Notas de la Entrega 6" |
-| 7. Cierre: quitar ApexCharts y Metis, recorridos, verificación final | Pendiente | — | — |
+| 7. Cierre: quitar ApexCharts y Metis, recorridos, verificación final | **Terminada** (10/11/2026) | `Entrega 7: limpieza, recorridos y auditoría final` | Ver "Notas de la Entrega 7" |
 
 | Entrega | Qué se ve al terminar |
 |---|---|
@@ -221,6 +221,27 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
   kanban, seguridad e integraciones con estados creíbles, 6 pestañas de administración),
   `shell` (analytics.html deja de ser página legada), `cost` (BI en `analytics.html`),
   `final-audit` (25 páginas), `validate-mock-data` (oportunidades sin proyecto).
+
+### Notas de la Entrega 7 (cierre)
+
+- Se retiraron las páginas, componentes, estilos, documentación de uso y assets de
+  muestra que no intervenían en el ERP. La vista BI en `analytics.html` se conserva.
+  ApexCharts y Prism salieron de `package.json`, del lockfile y de la configuración
+  de Vite. Los favicon y manifiestos apuntan al isotipo de cada presentación.
+- El menú de usuario abre los recorridos guiados. SurTec muestra los cinco escenarios;
+  J&Y adapta compra y tareo a su alcance y omite el escenario comercial. Los enlaces
+  permanecen dentro de la presentación actual.
+- Rendiciones, compras y presupuestos muestran en la ficha y lista las decisiones
+  locales de la bandeja. El estado original, los compromisos y los costos compartidos
+  no se modifican. Rendiciones y otros importes con céntimos usan espacios en los miles.
+- `shell-interaction-test.mjs` comprueba los recorridos por variante y el estado de
+  la rendición tras aprobar. El capturador toma las 25 vistas con identificadores de
+  ejemplo para las fichas. Capturas antes y después: `screenshots/entregas/entrega-7-*`
+  (archivos locales ignorados por Git).
+- La batería vigente pasa en las tres variantes y los cinco escenarios. El build
+  final y las 25 páginas de humo se verifican tras la limpieza. La publicación
+  pública sigue pendiente de `git push` y de comprobar GitHub Actions; ningún
+  archivo se subió en esta entrega.
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

@@ -31,6 +31,17 @@ export function loadDecisions() {
   }
 }
 
+/** Local presentation state only; never mutates the source operation or its costs. */
+export function approvalDecision(id) {
+  return loadDecisions()[id] || null;
+}
+
+export function approvalStatus(id, original, approvedLabel = 'Aprobada') {
+  const decision = approvalDecision(id);
+  if (!decision) return original;
+  return decision.status === 'Aprobada' ? approvedLabel : 'Observada';
+}
+
 export function saveDecision(id, decision) {
   const current = loadDecisions();
   current[id] = { ...decision, at: new Date().toISOString() };

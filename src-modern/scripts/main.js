@@ -1,5 +1,5 @@
 // ==========================================================================
-// Bootstrap Admin Template - Modern JavaScript Entry Point
+// Mockup ERP - JavaScript Entry Point
 // ES6+ Modules with Bootstrap 5
 // ==========================================================================
 
@@ -10,8 +10,7 @@ import { Collapse, Dropdown, Modal, Tab, Toast, Tooltip } from 'bootstrap';
 import { ThemeManager } from './utils/theme-manager.js';
 import { NotificationManager } from './utils/notifications.js';
 import { SidebarManager } from './components/sidebar.js';
-import { iconManager } from './utils/icon-manager.js';
-import { activeVariant, variantStorageKey } from './config/variants.js';
+import { activeVariant } from './config/variants.js';
 import { createDemoState } from './data/mock-data.js';
 import {
   globalSearch,
@@ -60,15 +59,9 @@ import '@fontsource-variable/plus-jakarta-sans';
 
 import '../styles/scss/main.scss';
 
-// Import user components
-// import { UsersComponent } from './components/users.js';
-// import { AnalyticsComponent } from './components/analytics.js';
-// import { FormsComponent } from './components/forms.js';
-
 // Application Class
 class AdminApp {
   constructor() {
-    this.components = new Map();
     this.isInitialized = false;
     this.variant = activeVariant;
     this.data = createDemoState(activeVariant);
@@ -90,22 +83,15 @@ class AdminApp {
       this.themeManager = new ThemeManager();
       this.notificationManager = new NotificationManager();
       this.sidebarManager = new SidebarManager();
-      this.iconManager = iconManager;
 
       // Initialize Bootstrap components
       this.initBootstrapComponents();
-
-      // Initialize page-specific components and wait for them to complete
-      await this.initPageComponents();
 
       // Setup global event listeners
       this.setupEventListeners();
 
       // Localize shortcut hints in search placeholders (⌘K on Mac, Ctrl+K elsewhere)
       this.localizeShortcutHints();
-
-      // Initialize navigation
-      this.initNavigation();
 
       // Initialize tooltips and popovers globally
       this.initTooltipsAndPopovers();
@@ -170,181 +156,6 @@ class AdminApp {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
       new Tooltip(element);
     });
-  }
-
-  // Initialize page-specific components
-  async initPageComponents() {
-    const currentPage = document.body.dataset.page;
-
-    switch (currentPage) {
-      case 'dashboard':
-        this.components.set(
-          'dashboard',
-          new (await import('./components/dashboard.js')).DashboardManager()
-        );
-        break;
-      case 'users':
-        await this.initUsersPage();
-        break;
-      case 'analytics':
-        await this.initAnalyticsPage();
-        break;
-      case 'forms':
-        await this.initFormsPage();
-        break;
-      case 'products':
-        await this.initProductsPage();
-        break;
-      case 'orders':
-        await this.initOrdersPage();
-        break;
-      case 'reports':
-        await this.initReportsPage();
-        break;
-      case 'messages':
-        await this.initMessagesPage();
-        break;
-      case 'calendar':
-        await this.initCalendarPage();
-        break;
-      case 'settings':
-        await this.initSettingsPage();
-        break;
-      case 'security':
-        await this.initSecurityPage();
-        break;
-      case 'files':
-        await this.initFilesPage();
-        break;
-      case 'help':
-        await this.initHelpPage();
-        break;
-      case 'elements':
-        await this.initElementsPage();
-        break;
-      // Add more page-specific initializations here
-      default:
-        console.log('Page-specific components loading complete');
-    }
-  }
-
-  // Initialize forms page
-  async initFormsPage() {
-    try {
-      // Dynamically load the forms component script (it self-registers with Alpine)
-      await import('./components/forms.js');
-      console.log('📝 Forms page script loaded successfully');
-    } catch (error) {
-      console.warn('Forms components not available:', error);
-    }
-  }
-
-  async initUsersPage() {
-    try {
-      await import('./components/users.js');
-      console.log('👥 Users page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load users page script:', error);
-    }
-  }
-
-  async initAnalyticsPage() {
-    try {
-      await import('./components/analytics.js');
-      console.log('📊 Analytics page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load analytics page script:', error);
-    }
-  }
-
-  async initProductsPage() {
-    try {
-      await import('./components/products.js');
-      console.log('📦 Products page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load products page script:', error);
-    }
-  }
-
-  async initOrdersPage() {
-    try {
-      await import('./components/orders.js');
-      console.log('🛒 Orders page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load orders page script:', error);
-    }
-  }
-
-  async initReportsPage() {
-    try {
-      await import('./components/reports.js');
-      console.log('📊 Reports page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load reports page script:', error);
-    }
-  }
-
-  async initMessagesPage() {
-    try {
-      await import('./components/messages.js');
-      console.log('💬 Messages page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load messages page script:', error);
-    }
-  }
-
-  async initCalendarPage() {
-    try {
-      await import('./components/calendar.js');
-      console.log('📅 Calendar page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load calendar page script:', error);
-    }
-  }
-
-  async initSettingsPage() {
-    try {
-      await import('./components/settings.js');
-      console.log('⚙️ Settings page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load settings page script:', error);
-    }
-  }
-
-  async initSecurityPage() {
-    try {
-      await import('./components/security.js');
-      console.log('🔒 Security page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load security page script:', error);
-    }
-  }
-
-  async initFilesPage() {
-    try {
-      await import('./components/files.js');
-      console.log('📁 Files page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load files page script:', error);
-    }
-  }
-
-  async initHelpPage() {
-    try {
-      await import('./components/help.js');
-      console.log('❓ Help page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load help page script:', error);
-    }
-  }
-
-  async initElementsPage() {
-    try {
-      await import('./components/elements.js');
-      console.log('🧩 Elements page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load elements page script:', error);
-    }
   }
 
   // Setup global event listeners
@@ -416,76 +227,6 @@ class AdminApp {
     }
   }
 
-  // Get component instance
-  getComponent(name) {
-    return this.components.get(name);
-  }
-
-  // Initialize navigation functionality
-  initNavigation() {
-    // Handle submenu state persistence
-    const currentPage = window.location.pathname;
-    const elementsPages = [
-      '/elements',
-      '/elements-buttons.html',
-      '/elements-alerts.html',
-      '/elements-badges.html',
-      '/elements-cards.html',
-      '/elements-modals.html',
-      '/elements-forms.html',
-      '/elements-tables.html',
-    ];
-
-    // Check if current page is an Elements page
-    const isElementsPage = elementsPages.some((page) =>
-      currentPage.includes(page.replace('.html', ''))
-    );
-
-    if (isElementsPage) {
-      // Expand Elements submenu on Elements pages
-      const elementsSubmenu = document.getElementById('elementsSubmenu');
-      const elementsToggle = document.querySelector('[data-bs-target="#elementsSubmenu"]');
-
-      if (elementsSubmenu && elementsToggle) {
-        elementsSubmenu.classList.add('show');
-        elementsToggle.setAttribute('aria-expanded', 'true');
-
-        // Mark current page as active in submenu
-        const activeSubmenuLink = document.querySelector(`.nav-submenu a[href="${currentPage}"]`);
-        if (activeSubmenuLink) {
-          activeSubmenuLink.classList.add('active');
-        }
-      }
-    }
-
-    // Handle submenu toggle persistence
-    document.addEventListener('click', (e) => {
-      const toggleButton = e.target.closest('[data-bs-toggle="collapse"]');
-      if (toggleButton) {
-        const targetId = toggleButton.getAttribute('data-bs-target');
-        const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
-
-        // Store submenu state
-        localStorage.setItem(variantStorageKey(`submenu-${targetId}`), (!isExpanded).toString());
-      }
-    });
-
-    // Restore submenu states from localStorage
-    const submenuToggles = document.querySelectorAll('[data-bs-toggle="collapse"]');
-    submenuToggles.forEach((toggle) => {
-      const targetId = toggle.getAttribute('data-bs-target');
-      const savedState = localStorage.getItem(variantStorageKey(`submenu-${targetId}`));
-
-      if (savedState === 'true' && !isElementsPage) {
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          targetElement.classList.add('show');
-          toggle.setAttribute('aria-expanded', 'true');
-        }
-      }
-    });
-  }
-
   // Initialize Alpine.js
   initAlpine() {
     // Shared helpers available in every template: `$statusClass(status)`.
@@ -524,43 +265,6 @@ class AdminApp {
     Alpine.data('securityWorkspace', securityWorkspace);
     Alpine.data('administrationWorkspace', administrationWorkspace);
 
-    Alpine.data('searchComponent', () => ({
-      query: '',
-      results: [],
-      isLoading: false,
-
-      async search() {
-        if (this.query.length < 2) {
-          this.results = [];
-          return;
-        }
-
-        this.isLoading = true;
-        // Simulate API search
-        await new Promise((resolve) => setTimeout(resolve, 300));
-
-        this.results = [
-          { title: 'Dashboard', url: '/', type: 'page' },
-          { title: 'Users', url: '/users', type: 'page' },
-          { title: 'Settings', url: '/settings', type: 'page' },
-          { title: 'Analytics', url: '/analytics', type: 'page' },
-        ].filter((item) => item.title.toLowerCase().includes(this.query.toLowerCase()));
-
-        this.isLoading = false;
-      },
-    }));
-
-    Alpine.data('statsCounter', (initialValue = 0, increment = 1) => ({
-      value: initialValue,
-
-      init() {
-        // Auto-increment every 5 seconds
-        setInterval(() => {
-          this.value += Math.floor(Math.random() * increment) + 1;
-        }, 5000);
-      },
-    }));
-
     Alpine.data('themeSwitch', () => ({
       currentTheme: 'light',
 
@@ -574,110 +278,15 @@ class AdminApp {
       },
     }));
 
-    Alpine.data('iconDemo', () => ({
-      getIcon(iconName) {
-        return iconManager.get(iconName);
-      },
-    }));
-
-    // Quick Add Form for Dashboard
-    Alpine.data('quickAddForm', () => ({
-      itemType: 'task',
-      title: '',
-      description: '',
-      priority: 'medium',
-      dateTime: '',
-      assignee: '',
-
-      init() {
-        // Set default date to now
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        this.dateTime = now.toISOString().slice(0, 16);
-      },
-
-      resetForm() {
-        this.itemType = 'task';
-        this.title = '';
-        this.description = '';
-        this.priority = 'medium';
-        this.assignee = '';
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        this.dateTime = now.toISOString().slice(0, 16);
-      },
-
-      saveItem() {
-        if (!this.title.trim()) {
-          window.AdminApp.notificationManager.warning('Please enter a title');
-          return;
-        }
-
-        const item = {
-          type: this.itemType,
-          title: this.title,
-          description: this.description,
-          priority: this.itemType === 'task' ? this.priority : null,
-          dateTime: ['event', 'reminder'].includes(this.itemType) ? this.dateTime : null,
-          assignee: this.itemType === 'task' ? this.assignee : null,
-          createdAt: new Date().toISOString(),
-        };
-
-        // In a real app, this would send to an API
-        console.log('New item created:', item);
-
-        // Show success notification with item type
-        const typeLabels = {
-          task: 'Task',
-          note: 'Note',
-          event: 'Event',
-          reminder: 'Reminder',
-        };
-
-        window.AdminApp.notificationManager.success(
-          `${typeLabels[this.itemType]} "${this.title}" created successfully!`
-        );
-
-        // Reset form for next use
-        this.resetForm();
-      },
-    }));
-
     // Start Alpine.js
     Alpine.start();
     window.Alpine = Alpine;
-  }
-
-  // Show demo notifications
-  showDemoNotifications() {
-    setTimeout(() => {
-      this.notificationManager.info('New user registered', {
-        action: {
-          text: 'View',
-          handler: 'window.location.href="/users"',
-        },
-      });
-    }, 3000);
-
-    setTimeout(() => {
-      this.notificationManager.warning('Server maintenance in 10 minutes');
-    }, 6000);
-
-    setTimeout(() => {
-      this.notificationManager.success('Backup completed successfully');
-    }, 9000);
   }
 
   // Cleanup method
   destroy() {
     this.stopHeroNetworks?.();
     this.stopPresentationSwitcher?.();
-    this.components.forEach((component) => {
-      if (component.destroy) {
-        component.destroy();
-      }
-    });
-    this.components.clear();
     this.isInitialized = false;
   }
 }
@@ -685,15 +294,14 @@ class AdminApp {
 // Create global app instance
 const app = new AdminApp();
 
+// Alpine's theme scope reads the app during start-up.
+window.AdminApp = app;
+
 // Initialize app when module loads
 app.init();
 
 // Tear down on page hide so listeners/intervals don't leak across SPA-style nav
 window.addEventListener('pagehide', () => app.destroy(), { once: true });
-
-// Export for global access
-window.AdminApp = app;
-window.IconManager = iconManager;
 
 // Export the app instance for module imports
 export default app;

@@ -350,30 +350,4 @@ export class NotificationManager {
       items[items.length - 1].remove();
     }
   }
-
-  // Browser notification API
-  async requestNotificationPermission() {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
-    }
-    return false;
-  }
-
-  showBrowserNotification(title, options = {}) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      const notification = new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        ...options
-      });
-
-      // Auto close after 5 seconds
-      setTimeout(() => {
-        notification.close();
-      }, 5000);
-
-      return notification;
-    }
-  }
-} 
+}

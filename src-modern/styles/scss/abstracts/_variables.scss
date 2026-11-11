@@ -2,7 +2,7 @@
 // Design Tokens — Bootstrap 5 Overrides
 // ==========================================================================
 //
-// Metis-inspired ERP direction: readable type, quiet blue accents, generous
+// ERP direction: readable type, quiet blue accents, generous
 // spacing and distinct white panels on a soft app canvas.
 //
 // ==========================================================================
@@ -117,7 +117,7 @@ $spacers: (
 // --------------------------------------------------------------------------
 // Border radius
 // --------------------------------------------------------------------------
-// Soft corners match the original Metis cards and controls.
+// Soft corners keep cards and controls consistent.
 $border-radius: 0.625rem; // 10px controls
 $border-radius-sm: 0.5rem;
 $border-radius-lg: 0.75rem;

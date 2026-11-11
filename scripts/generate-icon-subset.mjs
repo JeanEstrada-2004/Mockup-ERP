@@ -31,25 +31,6 @@ const ICON_RE = /\bbi-([a-z0-9]+(?:-[a-z0-9]+)*)\b/g;
 
 // Tokens that match the pattern but are not icons.
 const NOT_ICONS = new Set(['bi-font-path']);
-// Metis pages also resolve these names dynamically; keep their glyphs in the subset.
-const DYNAMIC_ICONS = [
-  'arrows-fullscreen',
-  'cart',
-  'check2-square',
-  'chevron-down',
-  'cloud-arrow-up',
-  'dash',
-  'file-code',
-  'file-pdf',
-  'file-spreadsheet',
-  'flag-fill',
-  'power',
-  'rocket-takeoff',
-  'shield-exclamation',
-  'sticky',
-  'ui-checks',
-  'wifi',
-];
 
 async function* walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -78,7 +59,6 @@ for await (const file of sources()) {
     if (!NOT_ICONS.has(`bi-${match[1]}`)) icons.add(match[1]);
   }
 }
-for (const name of DYNAMIC_ICONS) icons.add(name);
 
 const codepoints = JSON.parse(await readFile(MAP, 'utf8'));
 const missing = [...icons].filter((name) => !(name in codepoints)).sort();

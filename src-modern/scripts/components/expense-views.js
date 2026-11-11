@@ -16,6 +16,7 @@ import {
 import { formatDate } from './project-views.js';
 import { writeProjectId } from './shell.js';
 import { tableControls } from '../utils/data-table.js';
+import { approvalDecision, approvalStatus } from '../data/approval-demo.js';
 
 const data = getDataForVariant(activeVariant);
 const sourceExpenses = data.operations.filter((item) => item.type === 'expense');
@@ -49,7 +50,7 @@ function sourceRecord(operation) {
     id: operation.id,
     projectId: operation.projectId,
     workerId: operation.workerId,
-    status: operation.status,
+    status: approvalStatus(operation.id, operation.status),
     base: true,
     items: [{ ...evidence, evidence }],
     undocumentedAmount,
@@ -61,13 +62,27 @@ function sourceRecord(operation) {
         at: `${operation.date}T12:00:00`,
         simulated: true,
       },
+      ...(approvalDecision(operation.id)
+        ? [
+            {
+              label: approvalStatus(operation.id, operation.status),
+              note: 'Decisión visual registrada en la bandeja de aprobaciones; no cambia el costo base.',
+              at: approvalDecision(operation.id).at,
+              simulated: true,
+            },
+          ]
+        : []),
     ],
   };
 }
 
 function allExpenses() {
   return [
-    ...sourceExpenses.map((item) => ({ ...item, base: true })),
+    ...sourceExpenses.map((item) => ({
+      ...item,
+      status: approvalStatus(item.id, item.status),
+      base: true,
+    })),
     ...loadExpenseDemos().map((item) => ({
       id: item.id,
       projectId: item.projectId,

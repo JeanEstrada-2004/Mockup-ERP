@@ -17,9 +17,35 @@ const themes = list('THEMES', 'light');
 const widths = list('WIDTHS', '1440,390').map(Number);
 const views = list(
   'VIEWS',
-  'index,projects,project,budgets,purchases,expenses,expense,personnel,warehouse,costs,documents,reports,crm,integrations,security,settings'
+  'index,projects,project,approvals,budgets,budget,purchases,purchase,expenses,expense,personnel,worker,warehouse,material,costs,documents,document,reports,analytics,crm,integrations,security,settings,module-preview,design-system'
 );
 const heights = { 1440: 900, 390: 844 };
+const sampleIds = {
+  'surtec-peti': {
+    project: 'PR-2027-001',
+    budget: 'PRE-001',
+    purchase: 'OC-025',
+    expense: 'R-045',
+    worker: 'PER-001',
+    material: 'MAT-001',
+    document: 'DOC-OC-025',
+  },
+  'jy-pmi': {
+    project: 'PR-JY-001',
+    budget: 'PRE-JY-001',
+    purchase: 'OC-JY-001',
+    expense: 'R-JY-001',
+    worker: 'PER-JY-001',
+    document: 'DOC-OC-JY-001',
+  },
+  'jy-demo': {
+    project: 'PR-JY-001',
+    purchase: 'OC-JY-001',
+    expense: 'R-JY-001',
+    worker: 'PER-JY-001',
+    document: 'DOC-OC-JY-001',
+  },
+};
 
 const outDir = resolve('screenshots', 'entregas', label);
 await mkdir(outDir, { recursive: true });
@@ -54,18 +80,39 @@ try {
         );
         const page = await context.newPage();
         for (const view of views) {
+          const sampleId = sampleIds[variant]?.[view];
+          const query = sampleId ? `?id=${encodeURIComponent(sampleId)}` : '';
           const response = await page.goto(
-            `http://127.0.0.1:${port}${base}${variant}/${view}.html`,
-            { waitUntil: 'networkidle' }
+            `http://127.0.0.1:${port}${base}${variant}/${view}.html${query}`,
+            { waitUntil: 'load', timeout: 60000 }
           );
           if (!response || response.status() !== 200) continue;
+          await page.waitForFunction(() => window.AdminApp?.isInitialized, null, {
+            timeout: 60000,
+          });
           await page.waitForTimeout(1200); // let entrance motion settle
           await page.screenshot({
             path: resolve(outDir, `${variant}-${view}-${width}-${theme}.png`),
             fullPage: process.env.FULL === '1' || width !== 1440,
           });
           count += 1;
+          if (view === 'index') {
+            await page.locator('.shell-user-button').click();
+            await page.locator('[data-bs-target="#demo-tours-modal"]').click();
+            await page.locator('#demo-tours-modal').waitFor({ state: 'visible' });
+            await page.waitForFunction(() =>
+              document.querySelector('#demo-tours-modal')?.classList.contains('show')
+            );
+            await page.waitForTimeout(400); // finish Bootstrap's fade before capturing
+            await page.screenshot({
+              path: resolve(outDir, `${variant}-recorridos-${width}-${theme}.png`),
+            });
+            count += 1;
+            await page.locator('#demo-tours-modal .btn-close').click();
+            await page.locator('#demo-tours-modal').waitFor({ state: 'hidden' });
+          }
         }
+        console.log(`${variant} · ${theme} · ${width}px: ${count} capturas acumuladas`);
         await context.close();
       }
     }

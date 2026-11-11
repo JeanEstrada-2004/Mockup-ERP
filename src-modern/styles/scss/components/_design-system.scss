@@ -1,7 +1,7 @@
 // ==========================================================================
 // Sistema visual "Red de Integración" (Entrega 2) — see DESIGN.md
 // ==========================================================================
-// Imported last so these shared rules win over the legacy Metis partials and
+// Imported last so these shared rules win over the component partials and
 // the per-module workspace partials. Tokens live in abstracts/_variables.scss;
 // variant colours are injected by scripts/app-shell-template.mjs.
 //
@@ -214,7 +214,113 @@ button.kpi {
   }
 }
 
+.demo-tours-modal {
+  .modal-header {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .modal-title {
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 800;
+  }
+
+  .modal-header p,
+  .demo-tour-heading p {
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+  }
+}
+
+.demo-tours-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.demo-tour {
+  min-width: 0;
+  padding: 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.demo-tour-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  h3 {
+    margin: 0 0 0.2rem;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.demo-tour-icon {
+  display: grid;
+  flex: 0 0 2.2rem;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.65rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.demo-tour-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2.2rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    color: var(--ink);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+    transition:
+      background-color 160ms ease-out,
+      border-color 160ms ease-out;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .bi {
+      color: var(--accent);
+      font-size: var(--fs-xs);
+    }
+  }
+}
+
 @media (max-width: 767.98px) {
+  .demo-tours-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .demo-tour {
+    padding: 1rem;
+  }
   .dashboard-workspace {
     .dashboard-greeting .workspace-heading-actions {
       display: flex;

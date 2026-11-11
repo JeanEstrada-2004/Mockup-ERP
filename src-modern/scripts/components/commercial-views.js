@@ -15,6 +15,7 @@ import {
 } from '../data/mock-data.js';
 import { formatMoney, writeProjectId } from './shell.js';
 import { formatDate } from './project-views.js';
+import { approvalDecision, approvalStatus } from '../data/approval-demo.js';
 import {
   DEMO_BUDGETS_KEY,
   DEMO_PURCHASES_KEY,
@@ -24,7 +25,7 @@ import {
 
 const data = getDataForVariant(activeVariant);
 const versionKey = variantStorageKey('budget-versions');
-const reviewStatuses = ['Borrador', 'En revisión', 'Aprobado'];
+const reviewStatuses = ['Borrador', 'En revisión', 'Observada', 'Aprobado'];
 
 function normalize(value) {
   return String(value)
@@ -43,7 +44,9 @@ function projectName(id) {
   return getProject(data, id)?.name || '—';
 }
 function purchaseRecords() {
-  return data.operations.filter((item) => item.type === 'purchase');
+  return data.operations
+    .filter((item) => item.type === 'purchase')
+    .map((item) => ({ ...item, status: approvalStatus(item.id, item.status) }));
 }
 
 function storedVersions() {
@@ -86,7 +89,7 @@ function versionHistory(base, extra) {
     {
       budgetId: base.id,
       version: base.version,
-      status: base.status,
+      status: approvalStatus(base.id, base.status, 'Aprobado'),
       note: 'Versión base del conjunto mock.',
       simulated: false,
     },
@@ -223,6 +226,9 @@ export function budgetDetail() {
     get documentHref() {
       return this.mockDocument ? moduleHref('documents', this.mockDocument.id) : null;
     },
+    get localDecision() {
+      return base ? approvalDecision(base.id) : null;
+    },
     get projectHref() {
       return this.project ? moduleHref('projects', this.project.id) : null;
     },
@@ -324,7 +330,9 @@ export function purchasesList() {
       this.supplierFilter = data.suppliers.some((item) => item.id === params.get('supplier'))
         ? params.get('supplier')
         : '';
-      this.statusFilter = ['Pendiente', 'Aprobada', 'Atendida'].includes(params.get('status'))
+      this.statusFilter = ['Pendiente', 'Observada', 'Aprobada', 'Atendida'].includes(
+        params.get('status')
+      )
         ? params.get('status')
         : '';
     },
@@ -388,7 +396,7 @@ export function purchaseDetail() {
     supplier: data.suppliers.some((item) => item.id === params.get('supplier'))
       ? params.get('supplier')
       : '',
-    status: ['Pendiente', 'Aprobada', 'Atendida'].includes(params.get('status'))
+    status: ['Pendiente', 'Observada', 'Aprobada', 'Atendida'].includes(params.get('status'))
       ? params.get('status')
       : '',
   };
@@ -416,6 +424,9 @@ export function purchaseDetail() {
     statusClass,
     get displayStatus() {
       return this.demoStatus || this.purchase?.status;
+    },
+    get localDecision() {
+      return purchase ? approvalDecision(purchase.id) : null;
     },
     get canApprove() {
       return this.purchase?.status === 'Pendiente' && !this.demoStatus;

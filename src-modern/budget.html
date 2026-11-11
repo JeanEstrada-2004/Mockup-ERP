@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Ficha de presupuesto y cotización" />
     <meta name="theme-color" content="#1A365D" />
-    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <!-- APP_FAVICON -->
     <title>Ficha de presupuesto</title>
   </head>
   <body data-page="budget-detail" class="admin-layout">
@@ -52,7 +52,7 @@
                         :class="statusClass(currentVersion.status)"
                         x-text="currentVersion.status"
                       ></span
-                      ><span class="commercial-version-tag" x-text="`V${selectedVersion}`"></span>
+                      ><span class="commercial-version-tag" x-text="`V${selectedVersion}`"></span><span class="commercial-version-tag" x-show="localDecision && selectedVersion === base.version">Decisi?n local</span>
                     </p>
                   </div>
                   <a class="btn btn-outline-primary btn-sm" :href="backHref"

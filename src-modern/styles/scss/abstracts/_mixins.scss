@@ -226,33 +226,6 @@
   }
 }
 
-// Chart container mixin
-@mixin chart-container($height: 300px, $height-lg: 350px) {
-  position: relative;
-  height: $height;
-  overflow: hidden;
-
-  @include media-breakpoint-up(lg) {
-    height: $height-lg;
-  }
-
-  .apexcharts-canvas {
-    max-width: 100% !important;
-    overflow: hidden;
-  }
-
-  .apexcharts-svg {
-    max-width: 100% !important;
-    overflow: hidden;
-  }
-
-  // Prevent chart overflow on all screen sizes
-  > div {
-    max-width: 100%;
-    overflow: hidden;
-  }
-}
-
 // Progress ring mixin
 @mixin progress-ring($size: 60px) {
   width: $size;

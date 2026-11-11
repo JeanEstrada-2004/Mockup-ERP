@@ -18,7 +18,7 @@
 @import '~bootstrap/scss/mixins';
 @import '~bootstrap/scss/utilities';
 
-// 4. Include Bootstrap Icons (subset — only the 158 icons used in this project)
+// 4. Include only the Bootstrap Icons used by this project.
 @import 'components/bootstrap-icons-subset';
 
 // 5. Include Bootstrap components (selective import for better performance)
@@ -66,27 +66,10 @@
 @import 'components/tables';
 @import 'components/navigation';
 @import 'components/modals';
-@import 'components/charts';
 @import 'components/icons';
 @import 'components/hamburger';
 @import 'components/header-buttons';
 @import 'components/toggle-switches';
-
-@import 'pages/dashboard';
-@import 'pages/login';
-@import 'pages/errors';
-@import 'pages/users';
-@import 'pages/products';
-@import 'pages/orders';
-@import 'pages/reports';
-@import 'pages/messages';
-@import 'pages/calendar';
-@import 'pages/files';
-@import 'pages/analytics';
-@import 'pages/settings';
-@import 'pages/security';
-@import 'pages/help';
-@import 'pages/elements';
 
 // 8. Include theme variants
 @import 'themes/dark';

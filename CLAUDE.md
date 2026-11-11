@@ -1,114 +1,48 @@
-# CLAUDE.md
+# Convenciones de Mockup-ERP
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Prototipo frontend sin backend. Vite compila 25 páginas en `src-modern/` y tres variantes fijas definidas en `src-modern/scripts/config/variants.js`. `src-modern/analytics.html` es la vista de BI de SurTec. No existen páginas de autenticación ni ejemplos operativos de la plantilla original.
 
-## Project Overview
+## Antes de editar
 
-Modern Bootstrap 5 Admin Dashboard Template (v3.4.0) using Vite, Alpine.js, and SCSS.
+Lee [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md), [docs/plan-mejoras.md](docs/plan-mejoras.md) y [docs/mockup-master.md](docs/mockup-master.md). La referencia visual aprobada está en `docs/referencia/red-de-integracion.html`; la especificación en `docs/especificacion/`. Respeta el alcance de `surtec-peti`, `jy-pmi` y `jy-demo`, y mantén los datos de las empresas separados.
 
-| Directory | Purpose |
-|-----------|---------|
-| `src-modern/` | Source files (Bootstrap 5.3.8, ES6+ modules) |
-| `dist-modern/` | Production build output |
-| `src/`, `dist/` | Legacy Bootstrap 3 code - **do not use** |
+## Comandos
 
-## Commands
-
-```bash
-npm run dev        # Dev server at http://localhost:3000
-npm run build      # Production build
-npm run lint       # ESLint check
-npm run format     # Prettier format
-npm run test:build # Build, smoke-test all 30 pages, then run the auth interaction suite
-npm run verify     # lint + audit + test:build — run before shipping
+```powershell
+npm ci
+npm run dev:all                  # puertos 3000, 3001, 3002
+npm run icons                    # tras agregar un icono bi-*
+npm run lint
+npm run check:mock-data
+$env:PAGES_BASE='/Mockup-ERP/'
+npm run build:variants           # dist-pages/
+npm run test:delivery10
+npm run build                    # dist-modern/
+npm test                         # smoke test de 25 páginas
 ```
 
-The smoke test needs Playwright, which is deliberately not a dependency:
-`npx playwright install chromium && PLAYWRIGHT_PATH=playwright npm run test:build`.
+Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
 
-## Key Files
+## Arquitectura
 
-| File | Purpose |
-|------|---------|
-| `src-modern/scripts/main.js` | App entry point, initializes AdminApp class |
-| `src-modern/styles/scss/main.scss` | SCSS entry point |
-| `vite.config.js` | Build config with multi-page entries |
-| `eslint.config.js` | ESLint v10 flat config |
-| `src-modern/scripts/utils/search-component.js` | Factory for the navbar search Alpine component |
-| `src-modern/scripts/utils/constants.js` | Shared timing/breakpoint constants |
-| `src-modern/scripts/utils/apex.js` | Modular ApexCharts entry — core + only the chart types used |
-| `src-modern/scripts/utils/prism.js` | Bundled syntax highlighting for the element showcase pages |
-| `scripts/smoke-test.mjs` | Loads all 30 built pages in a browser; fails on errors or external requests |
-| `src-modern/styles/scss/components/_a11y.scss` | Skip-link, reduced-motion, sr-only helpers |
-| `src-modern/styles/scss/components/_bootstrap-icons-subset.scss` | **Generated** icon CSS — run `npm run icons`, never hand-edit |
-| `scripts/generate-icon-subset.mjs` | Regenerates the icon subset by scanning source for `bi-*` |
-| `src-modern/scripts/auth.js` | Entry point for the 9 standalone pages (auth + errors) |
-| `src-modern/scripts/components/auth.js` | Alpine scopes for the auth forms |
-| `src-modern/scripts/utils/chart-palette.js` | Single source for every chart colour — validated, theme-aware |
-| `src-modern/scripts/utils/password-strength.js` | Shared password scorer (auth pages + forms showcase) |
-| `scripts/auth-interaction-test.mjs` | Drives the auth flows in a browser; the smoke test can't see stuck widgets |
-| `src-modern/scripts/charts/` | D3 chart kit: `render(el, data, options)` → `{ update, destroy }` (API in `DESIGN.md`) |
-| `src-modern/scripts/utils/motion.js` | `x-count` Alpine directive (count-up figures) and the hero network texture |
-| `src-modern/styles/scss/components/_design-system.scss` | "Red de Integración" layer: shell, panels, KPI strip, hero, tables, tabs — imported last |
-| `src-modern/design-system.html` | "Sistema visual": every shared component and chart with real data (not in the menu) |
-| `scripts/capture-views.mjs` | Before/after screenshots of the built variants (`VIEWS`, `VARIANTS`, `THEMES`, `WIDTHS`, `COLLAPSED`, `FULL`) |
+- `src-modern/scripts/main.js`: entrada de las páginas con shell y registro de componentes Alpine.
+- `scripts/app-shell-template.mjs`: inserta header, navegación, marca, manifiesto y recorridos de demostración según la variante.
+- `src-modern/scripts/config/modules.js`: orden fijo del menú y rutas por módulo.
+- `src-modern/scripts/data/`: datos mock compartidos, decisiones y registros locales separados por variante.
+- `src-modern/scripts/charts/`: único kit de gráficos, basado en D3; API en `DESIGN.md`.
+- `src-modern/styles/scss/components/_design-system.scss`: última capa visual; usa tokens de `DESIGN.md`.
 
-## Architecture Quick Reference
+Cada página con shell declara `data-page`, `<!-- APP_HEADER -->`, `<!-- APP_SIDEBAR -->` y `<!-- APP_FOOTER -->`. Los componentes Alpine se registran en `main.js` bajo el mismo nombre que usa su `x-data`. Las páginas adaptadas son entradas de `vite.config.js`; no agregues una pantalla a `input` sin revisar su alcance y su prueba de humo.
 
-**Page Detection**: Each HTML page needs `data-page="pagename"` on `<body>` to load correct component.
+## Reglas
 
-**Component Loading**: Dynamic imports in `main.js` based on page:
+- Datos y cifras desde `src-modern/scripts/data/`, nunca montos ilustrativos copiados en HTML. Las acciones locales no deben alterar costos base ni compromisos. Usa `variantStorageKey` para `localStorage`.
+- Solo gráficos del kit D3, colores por tokens. No añadas CDN ni peticiones externas en runtime.
+- Sin `<script>` inline ni `onclick`; usa listeners o Alpine. No interpolar datos en `innerHTML`.
+- Movimiento breve, `prefers-reduced-motion`, estados con texto y color, foco visible y controles cómodos en móvil.
+- Nombres en español, fechas DD/MM/AAAA, montos `S/ 1 250.00` cuando llevan céntimos.
+- Los logos oficiales están en `public-assets/assets/brands/`; no alteres sus proporciones ni los archivos.
+- El subconjunto de Bootstrap Icons se genera con `npm run icons`; no edites `_bootstrap-icons-subset.scss` a mano. Evita ids o clases que empiecen por `bi-`, pues el generador los interpretaría como iconos.
+- Si cambias una estructura que prueban los scripts de interacción, actualiza la aserción sin rebajar la comprobación funcional.
 
-```javascript
-case 'users':
-  await import('./components/users.js');
-  break;
-```
-
-**Alpine.js Pattern**: Components register via `Alpine.data()`:
-
-```javascript
-Alpine.data('componentName', () => ({
-  init() { /* setup */ },
-  // methods and state
-}));
-```
-
-## Adding a New Page
-
-1. Create `src-modern/newpage.html` with `data-page="newpage"` on body
-2. Add entry to `vite.config.js` → `rollupOptions.input`
-3. Create `src-modern/scripts/components/newpage.js`
-4. Add case to `initPageComponents()` in `main.js`
-5. Optional: Create `src-modern/styles/scss/pages/_newpage.scss` and import in `main.scss`
-
-## Dependencies
-
-- **UI**: Bootstrap 5.3.8, Bootstrap Icons 1.13.1 (subset, see below)
-- **Reactive**: Alpine.js 3.17
-- **Charts**: D3 (modular imports) through the in-house kit in `src-modern/scripts/charts/` (from Entrega 2). ApexCharts 7.1 remains only in charts not yet migrated and is removed in Entrega 7 — see `docs/plan-mejoras.md`
-- **Notifications**: SweetAlert2 11.26.25
-- **Highlighting**: Prism 1.30 (bundled, showcase pages only)
-- **Fonts**: Inter via `@fontsource-variable/inter` (self-hosted)
-- **Build**: Vite 8.2 (rolldown), Sass 1.104
-
-## Conventions
-
-- **New charts use the D3 kit only** (`src-modern/scripts/charts/`). Do not add ApexCharts charts. Visual direction: `DESIGN.md` and `docs/referencia/red-de-integracion.html` (approved by the user).
-- **While legacy ApexCharts charts remain, import them from `utils/apex.js`, never from `'apexcharts'`.** That module registers only the chart types this template renders. Using a new chart type means adding its module there, or the chart silently fails to render.
-- **No third-party runtime requests.** No CDN `<script>`/`<link>`, no remote fonts or images. `npm run test:build` fails the build if a page requests anything off-origin.
-- **No inline `<script>` or `onclick`.** Use a delegated listener in the page's component keyed off a `data-*` attribute. This keeps the template CSP-compatible and the code lintable — six pages once shipped a silent SyntaxError precisely because the logic sat in inline scripts nobody linted.
-- **Nothing is a global.** Alpine, ApexCharts, Swal and Bootstrap are all ES module imports. ESLint declares no library globals, so a missing import fails `npm run lint`.
-- **Register Alpine components under the name the markup calls.** `x-data="contactForm()"` needs `Alpine.data('contactForm', …)`. A mismatch throws on every binding in that scope and is invisible until the page is opened.
-- **Guard `DOMContentLoaded` in page components.** They are dynamically imported and usually resolve after the event has fired — check `document.readyState` first.
-- **No `innerHTML` with interpolation.** Use `createElement` + `textContent`. Toast `action` callbacks must be functions, not strings.
-- **Search inputs** use the shared factory: `Alpine.data('searchComponent', createSearchComponent({ getResults }))`. Don't paste fresh definitions per page.
-- **Component cleanup.** Anything that calls `setInterval` / `setTimeout` / `addEventListener` should track the IDs and clean up in `destroy()` (called via `pagehide`).
-- **Chart colours come from the CSS tokens `--s1..--s4`, `--s-other` and the status tokens** (read by the D3 kit; legacy charts use `utils/chart-palette.js`). Never inline a hex in a chart. The categorical sequences are validated for colour-blind separation and contrast in both themes; a hand-picked substitute silently breaks that. Status colours (`STATUS.*`) are reserved for actual states and are never "series 4".
-- **Standalone pages use `scripts/auth.js`, not `main.js`.** Login, register, forgot/reset password, two-factor, lock screen and the three error pages render outside the admin shell, so they must not pull in the sidebar, notification or dashboard managers.
-- **Don't spread a mixin that exposes a getter.** `{...mixin()}` copies the getter's *value*, evaluated immediately. Use the `compose()` helper in `components/auth.js`, which merges property descriptors.
-- **Bootstrap Icons subset.** After adding any `bi-*` icon to markup, run `npm run icons`. The subset partial is generated; if you skip this the class exists, the markup looks right, and the glyph renders as nothing. The script exits non-zero on a typo'd icon name, so it is safe in CI.
-
-## Documentation
-
-See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed architecture, patterns, and styling guide.
+El workflow de Pages publica solo `dist-pages/`. No hagas `git push` ni afirmes que una versión local está publicada sin comprobarlo.
