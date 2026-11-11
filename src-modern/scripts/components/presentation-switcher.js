@@ -11,7 +11,7 @@
 // remembered so the site root (/Mockup-ERP/) reopens it.
 
 import { Modal } from 'bootstrap';
-import { VARIANT_IDS, activeVariant, getVariantConfig } from '../config/variants.js';
+import { DEV_PORTS, VARIANT_IDS, activeVariant, getVariantConfig } from '../config/variants.js';
 
 export const LAST_VARIANT_KEY = 'mockup-erp:last-variant';
 
@@ -61,9 +61,16 @@ export function targetPage(variantId, file = currentFile()) {
   return enabled ? page : 'index.html';
 }
 
-/** Built variants are sibling folders: …/surtec-peti/, …/jy-pmi/, …/jy-demo/. */
+/**
+ * Built variants are sibling folders (…/surtec-peti/, …/jy-pmi/, …/jy-demo/).
+ * In development each one runs on its own port (`npm run dev:all`).
+ */
 function targetHref(variantId) {
-  return new URL(`../${variantId}/${targetPage(variantId)}`, window.location.href).href;
+  const page = targetPage(variantId);
+  if (import.meta.env?.DEV) {
+    return `${location.protocol}//${location.hostname}:${DEV_PORTS[variantId]}/${page}`;
+  }
+  return new URL(`../${variantId}/${page}`, window.location.href).href;
 }
 
 function rememberVariant() {
@@ -113,9 +120,9 @@ function buildDialog() {
   VARIANT_IDS.forEach((id) => {
     const variant = getVariantConfig(id);
     const current = id === activeVariant.id;
-    const option = el(current || isDev ? 'div' : 'a', 'presentation-option');
+    const option = el(current ? 'div' : 'a', 'presentation-option');
     if (current) option.classList.add('is-current');
-    if (!current && !isDev) option.href = targetHref(id);
+    if (!current) option.href = targetHref(id);
     option.dataset.variant = id;
 
     const code = el('span', 'presentation-option-code', variant.presentation.code);
@@ -128,7 +135,7 @@ function buildDialog() {
         current
           ? 'Presentación actual'
           : isDev
-            ? `En desarrollo: npm run dev:${id === 'surtec-peti' ? 'surtec' : id}`
+            ? `Puerto ${DEV_PORTS[id]} · requiere npm run dev:all`
             : variant.company.name
       )
     );

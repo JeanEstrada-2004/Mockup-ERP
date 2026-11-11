@@ -157,6 +157,9 @@ export const VARIANTS = {
   },
 };
 
+// Development ports, one per presentation (`npm run dev:all` starts all three).
+export const DEV_PORTS = { 'surtec-peti': 3000, 'jy-pmi': 3001, 'jy-demo': 3002 };
+
 export function getVariantConfig(id) {
   if (!VARIANT_IDS.includes(id)) throw new Error(`Variante desconocida: ${id}`);
   return VARIANTS[id];

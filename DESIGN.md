@@ -104,6 +104,8 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
   misma pantalla en otra presentación (o su Panel si no tiene el módulo). No hay selector
   visible. La raíz `/Mockup-ERP/` reabre la última presentación usada
   (`mockup-erp:last-variant`); sin ella, J&Y Demo.
+  En desarrollo, `npm run dev:all` levanta las tres presentaciones (SurTec 3000, PMI 3001,
+  Demo 3002) y el selector enlaza entre esos puertos.
 - **Header** claro (70 px): menú, búsqueda, proyecto actual, distintivo
   "Datos de demostración", aprobaciones, notificaciones y usuario.
 - **Saludo** ("Buenos días, Jean") + contexto + acción principal a la derecha.
