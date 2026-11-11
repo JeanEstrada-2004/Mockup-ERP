@@ -145,8 +145,10 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 - **Pruebas cambiadas (intencional):** `shell` (bandeja, contadores, atajo oculto),
   `commercial` (altas, Generar PDF, "Ver proyecto"), `expenses` (Mis Rendiciones,
   captura, filtros), `delivery-nine` ("Ver proyecto"), `final-audit` (24 páginas).
-  Una corrida de `test:delivery10` falló una vez en una comparación `deepEqual` que no se
-  pudo reproducir en dos corridas completas posteriores; vigilar si reaparece.
+  Fallo intermitente encontrado y corregido: `shell-interaction-test.mjs` hacía clic en la
+  tabla de Proyectos antes de que terminara de cerrarse el modal de alta (el fondo tapaba
+  la tabla); ahora espera el cierre. Dos corridas completas seguidas pasan. Si reaparece el
+  `deepEqual` intermitente de la auditoría, revisar esperas similares.
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

@@ -173,6 +173,9 @@ async function verifyProjectFlow(variant, projectId) {
   await page.waitForURL(/projects\.html\?new=1$/);
   await page.locator('#project-create-modal').waitFor({ state: 'visible' });
   await page.locator('#project-create-modal [data-bs-dismiss="modal"]').last().click();
+  // Wait for Bootstrap's fade-out: the backdrop must be gone before the table is clicked.
+  await page.locator('#project-create-modal').waitFor({ state: 'hidden' });
+  await page.locator('.modal-backdrop').waitFor({ state: 'detached' });
   if (process.env.VISUAL === '1' && variant === 'surtec-peti') {
     await page.screenshot({
       path: path.join(root, 'tmp', 'shell-review', 'projects-desktop.png'),
