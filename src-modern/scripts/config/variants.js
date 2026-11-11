@@ -57,8 +57,13 @@ const jyDemoModules = [
   'expenses',
   'personnel',
   'timeTracking',
+  'warehouse',
+  'payments',
   'costs',
   'documents',
+  'reports',
+  'security',
+  'administration',
 ];
 
 // The supplied logo files carry wide empty margins. The header shows each file
@@ -99,6 +104,10 @@ export const DEFAULT_RULES = {
   // 'credible': simulated connections shown as working (SurTec); 'honest':
   // states say what exists today and what is a proposal (J&Y Demo).
   integrationStates: 'credible',
+  warehouseMode: 'multi',
+  reportsCatalog: 'standard',
+  securityProfile: 'standard',
+  administrationProfile: 'standard',
 };
 
 // Fictitious signed-in user shown in the header (punto 3).
@@ -204,6 +213,10 @@ export const VARIANTS = {
       budgetFlow: 'technical',
       laborCost: 'payroll',
       integrationStates: 'honest',
+      warehouseMode: 'single',
+      reportsCatalog: 'operational',
+      securityProfile: 'jy',
+      administrationProfile: 'jy',
     },
     labels: {
       approvals: 'Pendientes',

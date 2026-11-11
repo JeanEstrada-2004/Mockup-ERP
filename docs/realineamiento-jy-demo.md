@@ -1,6 +1,6 @@
 # Realineamiento funcional de J&Y Demo — auditoría y propuesta
 
-> Estado: **R1–R5 terminadas** (11/11/2026); siguiente: R6 (Almacén, Pagos, Reportes, Seguridad, Administración, cierre). Análisis sobre `6b7dc4e`.
+> Estado: **R1–R6 terminadas** (11/11/2026); sigue la validación de procesos con J&Y. Análisis original sobre `6b7dc4e`.
 > Fuente de requisitos: prompt "Revisión funcional integral" del usuario (secciones 1–40),
 > resumido aquí. Este documento es la referencia para las fases R1–R6 (sección 9).
 
@@ -478,6 +478,10 @@ rules: {
 | 15 | Moneda | ¿Hay operaciones en USD (cotizaciones de equipos)? |
 | 16 | Roles | Personas y responsabilidades reales (Gerencia/Ingeniero, Administración, Contabilidad, encargado de proyecto) |
 | 17 | Contabilidad | ¿Qué sistema o formato usan para intercambiar información? |
+| 18 | Almacén | ¿Cuál es el formato y responsable del ajuste de inventario? ¿Cómo se valoriza una devolución? |
+| 19 | Pagos | ¿Cómo se priorizan las obligaciones y qué relación formal tienen OC, factura y constancia? ¿Dónde se conserva el documento físico? |
+| 20 | Seguridad | ¿Qué acciones permite cada uno de los siete perfiles propuestos? ¿Se requiere MFA y con qué alcance? |
+| 21 | Administración | ¿Qué unidades, monedas, estados de OC y porcentajes de GG/utilidad se configuran por defecto? |
 
 ---
 
@@ -693,3 +697,12 @@ Preguntas originales:
   antiguas cubren PETI y PMI.
 - **Para R6:** Almacén simplificado con Kardex TO-BE, Pagos en levantamiento, Reportes
   operativos, Seguridad y Administración con catálogos de J&Y, recorridos y auditoría final.
+
+## 15. Notas de R6 (11/11/2026) — Almacén, Pagos, Reportes y cierre
+
+- **Almacén TO-BE:** un almacén conceptual y materiales derivados de Productos. La OC ficticia `OC-26-005` recibe 100 m de `MAT-01` (S/ 265.50 con IGV) sin sumar costo ejecutado. El Kardex parte de 50 m, registra entrada +100, salida −70, devolución +10 y ajuste −5; termina en **85 m**. La salida imputa **S/ 135.00** netos (60 m × S/ 2.25) a `PY-26-002`, sin duplicar la compra. Cada movimiento conserva fecha, responsable, motivo, operación, documento y proyecto. La cartera pasa de S/ 133 508 a **S/ 133 643** de costo ejecutado; el presupuesto sigue en S/ 407 865.31. Cifras y personas son ficticias.
+- **Pagos:** página propia solo en el Demo, marcada «Proceso en levantamiento». Expone lo conocido (proceso separado, banco principalmente BCP, constancias, facturas y archivo físico), las preguntas abiertas y un enlace conceptual entre OC y evidencia. No registra, autoriza ni procesa pagos.
+- **Reportes:** catálogo de 13 reportes operativos, calculados desde costos, rendiciones, compras, planilla, tareo y Kardex. `analytics.html` sigue sin BI para el Demo. Exportar presenta una simulación visual.
+- **Seguridad y Administración:** siete roles y permisos en borrador; auditoría transversal desde historiales base y cambios locales; MFA y backups como propuestas. Administración reúne categorías, evidencias, unidades, monedas y estados; datos legales por completar y GG/utilidad por validar. No hay alerta fija del 80 % ni reparto referencial.
+- **Recorridos:** seis secuencias enlazadas para cliente y presupuesto, compra, almacén, rendición, planilla y trazabilidad del costo. PETI y PMI conservan los suyos.
+- **Límites:** las marcas AS-IS, TO-BE y por validar distinguen lo observado de lo propuesto. El inventario, sus documentos y costos son ejemplos de demostración sin persistencia de servidor. Las decisiones abiertas se enumeran en la §8.

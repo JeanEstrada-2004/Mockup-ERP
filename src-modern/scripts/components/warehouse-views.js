@@ -79,7 +79,7 @@ function stockClass(material) {
   return material.stock < material.minimum ? 'text-bg-warning' : 'text-bg-success';
 }
 function movementClass(type) {
-  return { entry: 'text-bg-success', issue: 'text-bg-primary', return: 'text-bg-info' }[type];
+  return { entry: 'text-bg-success', issue: 'text-bg-primary', return: 'text-bg-info', adjustment: 'text-bg-secondary' }[type];
 }
 function movementHref(movementId) {
   return moduleHref('warehouse', movementId);
@@ -263,7 +263,7 @@ export function materialDetail() {
     allowed,
     material,
     movements,
-    openingStock: material ? warehouseOpening(material.id) : 0,
+    openingStock: material ? warehouseOpening(material.id, data) : 0,
     latestEntry: movements.filter((item) => item.type === 'entry').at(-1) || null,
     formatDate,
     formatAmount,
@@ -277,7 +277,7 @@ export function materialDetail() {
     documentHref: (id) => moduleHref('documents', id),
     costHref: (id) => moduleHref('costs', `COST-${id}`),
     get lowStock() {
-      return material && material.stock < material.minimum;
+      return material && warehouseStock(data, material.id) < material.minimum;
     },
     get calculatedStock() {
       return material ? warehouseStock(data, material.id) : 0;

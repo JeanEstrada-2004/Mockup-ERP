@@ -68,6 +68,7 @@
     "test:jy-control": "node scripts/jy-control-interaction-test.mjs",
     "test:jy-budgets": "node scripts/jy-budgets-interaction-test.mjs",
     "test:jy-personnel": "node scripts/jy-personnel-interaction-test.mjs",
+    "test:jy-closing": "node scripts/jy-closing-interaction-test.mjs",
     "preview:pages": "node scripts/preview-pages.mjs",
     "preview": "vite preview",
     "serve": "vite build && vite preview",

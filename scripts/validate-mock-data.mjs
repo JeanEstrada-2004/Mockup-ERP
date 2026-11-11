@@ -130,7 +130,7 @@ for (const variantId of VARIANT_IDS) {
         material.stock,
         `${material.id}: stock inconsistente`
       );
-      assert.ok(warehouseOpening(material.id) >= 0);
+      assert.ok(warehouseOpening(material.id, data) >= 0);
     }
     for (const movement of stockMovements) {
       const operation = data.operations.find((item) => item.id === movement.operationId);
@@ -140,11 +140,14 @@ for (const variantId of VARIANT_IDS) {
       assert.ok(
         documentIds.has(movement.documentId) && documentIds.has(movement.purchaseDocumentId)
       );
-      assert.ok(movement.quantity > 0 && movement.balance >= 0);
+      assert.ok(movement.quantity !== 0 && movement.balance >= 0);
+      if (movement.type !== 'adjustment') assert.ok(movement.quantity > 0);
+      assert.ok(movement.date && movement.responsibleId && movement.reason);
+      assert.ok(workers.has(movement.responsibleId));
       assert.equal(purchase.inventoryLine.materialId, movement.materialId);
       assert.equal(
         movement.balance,
-        movement.balanceBefore + (movement.type === 'issue' ? -1 : 1) * movement.quantity
+        movement.balanceBefore + (movement.type === 'issue' ? -movement.quantity : movement.quantity)
       );
       if (movement.type === 'entry') {
         assert.equal(operation.id, purchase.id);
@@ -168,6 +171,11 @@ for (const variantId of VARIANT_IDS) {
             (item) => item.id === movement.relatedIssueId && item.type === 'issue'
           )
         );
+      }
+      if (movement.type === 'adjustment') {
+        assert.equal(operation.type, 'inventory_adjustment');
+        assert.equal(operation.amount, 0);
+        assert.equal(operation.costSource, null);
       }
     }
     for (const project of data.projects) {
@@ -377,7 +385,8 @@ assert.deepEqual(getPortfolioFinancials(demo), {
   budgetAmount: 407865.31,
   // R2: rendiciones derive from their expenses; R5: personnel from imputed
   // payroll and RxH.
-  executedCost: 133508,
+  // R6: 60 m netos de MAT-01 × S/ 2.25 = S/ 135.00 de Materiales.
+  executedCost: 133643,
 });
 
 // R2 — rendiciones of J&Y Demo.

@@ -22,7 +22,7 @@
             <nav aria-label="Ubicación">
               <ol class="breadcrumb shell-breadcrumb">
                 <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Reportes y BI</li>
+                <li class="breadcrumb-item active" aria-current="page">Reportes</li>
               </ol>
             </nav>
             <template x-if="!allowed"
@@ -38,9 +38,9 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-<h1>Reportes</h1>
+                    <div class="master-title-row" data-maturity="to-be" data-maturity-note="Catálogo operativo propuesto, calculado desde los registros ficticios del Demo."><h1>Reportes</h1></div>
                     <p class="shell-page-subtitle">
-                      Indicadores calculados desde las operaciones de cada proyecto.
+                      Indicadores operativos calculados desde las operaciones de cada proyecto.
                     </p>
                   </div>
                 </div>
@@ -191,7 +191,7 @@
                                 <td>
                                   <a
                                     :href="moduleHref('projects', row.projectId)"
-                                    x-text="row.projectId"
+                                    x-text="row.projectId || '—'"
                                   ></a>
                                 </td>
                                 <td x-text="formatDate(row.date)"></td>
@@ -216,7 +216,7 @@
                             <small x-text="`${row.label} · ${formatDate(row.date)}`"></small
                             ><a
                               :href="moduleHref('projects', row.projectId)"
-                              x-text="row.projectId"
+                              x-text="row.projectId || '—'"
                             ></a
                             ><a class="btn btn-outline-primary" :href="row.href">Abrir registro</a>
                           </article></template

@@ -17,7 +17,7 @@ const themes = list('THEMES', 'light');
 const widths = list('WIDTHS', '1440,390').map(Number);
 const views = list(
   'VIEWS',
-  'index,projects,project,approvals,budgets,budget,purchases,purchase,expenses,expense,personnel,worker,warehouse,material,costs,documents,document,reports,analytics,crm,integrations,security,settings,module-preview,design-system'
+  'index,projects,project,approvals,budgets,budget,purchases,purchase,expenses,expense,personnel,worker,warehouse,material,payments,costs,documents,document,reports,analytics,crm,integrations,security,settings,module-preview,design-system'
 );
 const heights = { 1440: 900, 390: 844 };
 const sampleIds = {
@@ -39,11 +39,13 @@ const sampleIds = {
     document: 'DOC-OC-JY-001',
   },
   'jy-demo': {
-    project: 'PR-JY-001',
-    purchase: 'OC-JY-001',
-    expense: 'R-JY-001',
+    project: 'PY-26-001',
+    budget: 'PR2602-0008',
+    purchase: 'OC-26-005',
+    expense: 'R-26-001',
     worker: 'PER-JY-001',
-    document: 'DOC-OC-JY-001',
+    material: 'MAT-01',
+    document: 'DOC-OC-26-005',
   },
 };
 

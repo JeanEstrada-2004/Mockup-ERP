@@ -282,7 +282,7 @@ async function testCostsAndIntegrations() {
   await page.locator('#demo-tours-modal').waitFor({ state: 'visible' });
   assert.match(
     await page.locator('#demo-tours-modal').innerText(),
-    /Asistencia, planilla y costo[\s\S]*Planilla e imputación/
+    /Asistencia e imputación[\s\S]*SF100[\s\S]*Planilla[\s\S]*Imputación[\s\S]*Costo laboral/
   );
 }
 

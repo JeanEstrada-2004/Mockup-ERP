@@ -123,6 +123,7 @@ function searchItems() {
       rxh: 'personnel',
       material_issue: 'warehouse',
       material_return: 'warehouse',
+      inventory_adjustment: 'warehouse',
       other: 'costs',
     }[operation.type];
     if (moduleId)
@@ -485,6 +486,8 @@ export function initShellActions(app) {
                 ? 'personnel'
                 : ['warehouse-list', 'material-detail'].includes(document.body.dataset.page)
                   ? 'warehouse'
+                  : document.body.dataset.page === 'payments-workspace'
+                    ? 'payments'
                   : document.body.dataset.page === 'costs-list'
                     ? 'costs'
                     : ['documents-list', 'document-detail'].includes(document.body.dataset.page)

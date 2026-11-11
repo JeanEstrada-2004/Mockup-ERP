@@ -56,6 +56,7 @@ const operationNames = {
   rxh: 'Recibo por honorarios',
   material_issue: 'Salida de material',
   material_return: 'Devolución de material',
+  inventory_adjustment: 'Ajuste de inventario',
   other: 'Ajuste',
 };
 
@@ -78,6 +79,7 @@ function operationModule(operation) {
     rxh: 'personnel',
     material_issue: 'warehouse',
     material_return: 'warehouse',
+    inventory_adjustment: 'warehouse',
     other: 'costs',
   }[operation.type];
 }

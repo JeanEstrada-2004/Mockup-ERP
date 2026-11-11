@@ -89,7 +89,7 @@ async function openVariant(variant, expectedName, expectedProjects) {
       .locator('.sidebar-nav a')
       .evaluateAll((links) =>
         links.every((link) =>
-          /\/(index|projects|approvals|clients|suppliers|products|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
+          /\/(index|projects|approvals|clients|suppliers|products|crm|budgets|purchases|expenses|personnel|warehouse|payments|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
             link.href
           )
         )
@@ -119,11 +119,11 @@ async function verifyDemoTours(variant, expectedCount) {
   for (const href of new Set(hrefs)) {
     assert.equal((await page.request.get(href)).status(), 200, `Paso sin página: ${href}`);
   }
-  if (variant !== 'surtec-peti') {
+  if (variant === 'jy-pmi') {
     assert.ok(!hrefs.some((href) => /warehouse|crm|budget\.html|biometria/.test(href)));
   }
   await page.locator('.demo-tour-steps a').first().click();
-  await page.waitForURL(new RegExp(`${pagesBase}${variant}/index\\.html$`));
+  await page.waitForURL(new RegExp(`${pagesBase}${variant}/${variant === 'jy-demo' ? 'client' : 'index'}\\.html`));
   assert.equal(errors.length, 0, errors.join('\n'));
 }
 
@@ -259,6 +259,9 @@ async function verifyProjectFlow(variant, projectId) {
   await page.locator('#panel-materials').waitFor({ state: 'visible' });
   if (variant === 'surtec-peti') {
     assert.ok((await page.locator('#panel-materials .workspace-record-list a').count()) > 0);
+  } else if (variant === 'jy-demo') {
+    assert.match(await page.locator('#panel-materials').innerText(), /No hay registros de esta sección para el proyecto/);
+    assert.equal(await page.locator('#panel-materials a[href*="warehouse.html"]').count(), 1);
   } else {
     assert.match(await page.locator('#panel-materials').innerText(), /no está habilitado/);
   }
@@ -421,9 +424,12 @@ try {
 
   // R1: own data set with four projects (PY-26-001…004).
   await openVariant('jy-demo', 'J&Y Ingenieros Consultores S.A.C.', 4);
-  await verifyDemoTours('jy-demo', 4);
-  assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 0);
-  assert.equal(await page.locator('.sidebar-nav [data-module="security"]').count(), 0);
+  await verifyDemoTours('jy-demo', 6);
+  assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 1);
+  assert.equal(await page.locator('.sidebar-nav [data-module="security"]').count(), 1);
+  assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 1);
+  assert.equal(await page.locator('.sidebar-nav [data-module="payments"]').count(), 1);
+  assert.equal(await page.locator('.sidebar-nav [data-module="administration"]').count(), 1);
   assert.equal(await page.locator('.sidebar-nav [data-module="expenses"]').count(), 1);
   await page.locator('[aria-label="Menú de usuario: Jean Estrada, Administrador"]').click();
   assert.ok(await page.locator('[data-shell-action="profile"]').isVisible());

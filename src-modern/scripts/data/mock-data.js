@@ -179,6 +179,7 @@ export function getDocuments(data) {
         rxh: 'personnel',
         material_issue: 'warehouse',
         material_return: 'warehouse',
+        inventory_adjustment: 'warehouse',
         other: 'costs',
       }[operation.type];
       const type = {
@@ -189,6 +190,7 @@ export function getDocuments(data) {
         rxh: 'Recibo por honorarios',
         material_issue: 'Salida de material',
         material_return: 'Devolución',
+        inventory_adjustment: 'Ajuste de inventario',
         other: 'Ajuste de costo',
       }[operation.type];
       return {

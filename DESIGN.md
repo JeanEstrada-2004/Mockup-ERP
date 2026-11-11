@@ -147,6 +147,10 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.tech-*` | Presupuesto técnico: partidas, APU, insumos, productos, comparador (J&Y Demo) |
 | `.price-*`, `.quote-card`, `.compare-table`, `.attachment-chip` | Productos y precios (J&Y Demo) |
 | `.jy-imputation`, `.jy-payroll`, `.jy-integration` | Planilla e imputación, Integraciones honestas (J&Y Demo) |
+| `.warehouse-workspace` + `.d9-tabs`, `.warehouse-facts` | Inventario de un almacén, movimientos y Kardex del Demo; reutiliza tablas y tarjetas |
+| `.reports-workspace`, `.reports-catalog-card` | Catálogo de 13 reportes operativos del Demo, sin enlace a BI |
+| `.security-workspace`, `.administration-workspace` | Roles y auditoría transversal; empresa, catálogos y parámetros por validar en el Demo |
+| `.master-title-row[data-maturity]` | Encabezados de Pagos y vistas nuevas con marca AS-IS, TO-BE o por validar |
 | `.maturity`, `.maturity--as-is/--to-be/--validate` | Marca de madurez (solo J&Y Demo; texto + color, oculta hasta que el presentador la activa) |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema

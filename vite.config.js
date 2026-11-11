@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => ({
         personnel: resolve(__dirname, 'src-modern/personnel.html'),
         worker: resolve(__dirname, 'src-modern/worker.html'),
         warehouse: resolve(__dirname, 'src-modern/warehouse.html'),
+        payments: resolve(__dirname, 'src-modern/payments.html'),
         material: resolve(__dirname, 'src-modern/material.html'),
         costs: resolve(__dirname, 'src-modern/costs.html'),
         documents: resolve(__dirname, 'src-modern/documents.html'),

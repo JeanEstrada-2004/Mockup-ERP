@@ -322,7 +322,7 @@ function renderDemoTours(variant, data) {
     (item) => item.type === 'expense' && ['Presentada', 'Corregida'].includes(item.status)
   );
   const step = (label, href) => ({ label, href });
-  const scenarios = [
+  let scenarios = [
     {
       title: 'Trazabilidad gerencial',
       description: 'Del indicador al documento de la compra.',
@@ -407,6 +407,49 @@ function renderDemoTours(variant, data) {
       ],
     },
   ];
+  if (variant.id === 'jy-demo') {
+    scenarios = [
+      { title: 'De cliente a cotización', description: 'Presupuesto técnico y precios del proveedor.', icon: 'bi-file-earmark-text', steps: [
+        step('Cliente', './client.html?id=CLI-JY-001'),
+        step('Presupuesto', './budget.html?id=PR2602-0008'),
+        step('Partidas', './budget.html?id=PR2602-0008&tab=partidas'),
+        step('APU', './budget.html?id=PR2602-0008&tab=apu'),
+        step('Insumos', './budget.html?id=PR2602-0008&tab=insumos'),
+        step('Cotización', './products.html?tab=cotizaciones'),
+      ] },
+      { title: 'Del presupuesto a la compra', description: 'La OC mantiene su proveedor y proyecto.', icon: 'bi-cart-check', steps: [
+        step('Presupuesto', './budget.html?id=PR2602-0008'),
+        step('Crear orden de compra', './purchases.html'),
+        step('OC de ejemplo', './purchase.html?id=OC-26-005'),
+        step('Proveedor', './supplier.html?id=PROV-JY-001'),
+      ] },
+      { title: 'Compra, almacén y costo', description: 'La recepción genera stock; la salida neta imputa costo.', icon: 'bi-box-seam', steps: [
+        step('OC de material', './purchase.html?id=OC-26-005'),
+        step('Entrada', './warehouse.html?tab=movimientos&record=ENT-26-005'),
+        step('Salida', './warehouse.html?tab=movimientos&record=SAL-26-001'),
+        step('Kardex', './warehouse.html?tab=kardex'),
+        step('Costo de Materiales', './costs.html?project=PY-26-002&source=materials&operation=SAL-26-001'),
+      ] },
+      { title: 'Rendición a costo', description: 'Revisión administrativa y entrega a Contabilidad.', icon: 'bi-receipt', steps: [
+        step('Rendición', './expenses.html'),
+        step('Revisión', './expense.html?id=R-26-001'),
+        step('Contabilidad', './expense.html?id=R-26-001'),
+        step('Costo', './costs.html?project=PY-26-001&source=expenses'),
+      ] },
+      { title: 'Asistencia e imputación', description: 'SF100, planilla y costo laboral.', icon: 'bi-person-badge', steps: [
+        step('SF100', './personnel.html?tab=asistencia'),
+        step('Planilla', './personnel.html?tab=planilla'),
+        step('Imputación', './personnel.html?tab=planilla'),
+        step('Costo laboral', './costs.html?project=PY-26-001&source=personnel'),
+      ] },
+      { title: 'Trazabilidad del costo', description: 'Proyecto, fuente, operación y documento.', icon: 'bi-diagram-3', steps: [
+        step('Proyecto', './project.html?id=PY-26-002'),
+        step('Fuente Materiales', './costs.html?project=PY-26-002&source=materials'),
+        step('Salida SAL-26-001', './warehouse.html?tab=movimientos&record=SAL-26-001'),
+        step('Documento', './document.html?id=DOC-SAL-26-001'),
+      ] },
+    ];
+  }
   if (isSurtec) {
     scenarios.push({
       title: 'Oportunidad a proyecto',

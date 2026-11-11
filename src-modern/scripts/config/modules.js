@@ -5,7 +5,7 @@ export const NAV_GROUPS = [
   { label: 'MAESTROS', modules: ['clients', 'suppliers', 'products'] },
   {
     label: 'GESTIÓN',
-    modules: ['crm', 'budgets', 'purchases', 'expenses', 'personnel', 'warehouse'],
+    modules: ['crm', 'budgets', 'purchases', 'expenses', 'personnel', 'warehouse', 'payments'],
   },
   { label: 'CONTROL', modules: ['costs', 'documents', 'reports'] },
   { label: 'SISTEMA', modules: ['integrations', 'security', 'administration'] },
@@ -71,6 +71,11 @@ export const MODULES = {
     label: 'Almacén',
     icon: 'bi-box',
     description: 'Inventario, movimientos, materiales y Kardex.',
+  },
+  payments: {
+    label: 'Pagos',
+    icon: 'bi-credit-card',
+    description: 'Proceso en levantamiento y vínculos documentales propuestos.',
   },
   costs: {
     label: 'Costos',
@@ -166,6 +171,7 @@ export function moduleHref(id, recordId) {
     return recordId ? `./document.html?id=${encodeURIComponent(recordId)}` : './documents.html';
   }
   if (id === 'reports') return './reports.html';
+  if (id === 'payments') return './payments.html';
   if (id === 'crm') {
     return recordId ? `./crm.html?id=${encodeURIComponent(recordId)}` : './crm.html';
   }

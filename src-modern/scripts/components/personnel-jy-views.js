@@ -62,7 +62,11 @@ export function personnelJyWorkspace() {
     tab: TABS.some(([id]) => id === params.get('tab')) ? params.get('tab') : 'personal',
     record,
     months,
-    month: monthFromRecord ? `20${monthFromRecord[1]}-${monthFromRecord[2]}` : months[0],
+    month: monthFromRecord
+      ? `20${monthFromRecord[1]}-${monthFromRecord[2]}`
+      : months.includes(params.get('month'))
+        ? params.get('month')
+        : months[0],
     sf100: data.sf100,
     attendance: [],
     tareo: [],

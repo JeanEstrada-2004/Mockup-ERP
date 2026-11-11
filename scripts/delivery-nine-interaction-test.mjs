@@ -272,8 +272,9 @@ async function testReports() {
   await screenshot('jy-pmi-reports-mobile');
   await page.goto(url('jy-demo', 'reports.html'));
   await ready();
-  assert.match(await page.locator('#main-content').innerText(), /Reportes no disponibles/);
-  assert.equal(await page.locator('.reports-catalog-card').count(), 0);
+  assert.equal(await page.locator('.reports-catalog-card').count(), 13);
+  assert.equal(await page.locator('.analytics-link:visible').count(), 0);
+  assert.match(await page.locator('#main-content').innerText(), /Costos por proyecto/);
   console.log(
     'Reportes y BI: catálogo, filtros, cifras, gráficos, proyecto → fuente y variantes correctos.'
   );
@@ -466,8 +467,9 @@ async function testSecurity() {
   }
   await page.goto(url('jy-demo', 'security.html'));
   await ready();
-  assert.match(await page.locator('#main-content').innerText(), /Seguridad no disponible/);
-  assert.equal(await page.locator('.security-role-grid article').count(), 0);
+  assert.equal(await page.locator('[aria-label="Matriz de permisos conceptual"] tbody tr').count(), 7);
+  await page.locator('.security-workspace .d9-tabs').getByRole('tab', { name: 'Auditoría' }).click();
+  assert.ok((await page.locator('[aria-label="Auditoría transversal"] tbody tr').count()) > 0);
   console.log(
     'Seguridad: perfiles, roles, permisos, MFA, sesiones, auditoría, respaldos y variantes correctos.'
   );
@@ -517,9 +519,10 @@ async function testAdministration() {
   }
   await page.goto(url('jy-demo', 'settings.html'));
   await ready();
-  assert.match(await page.locator('#main-content').innerText(), /Administración no disponible/);
-  assert.equal(await page.locator('.admin-company-brand img:visible').count(), 0);
-  assert.equal(await page.locator('.sidebar-nav [data-module="administration"]').count(), 0);
+  assert.equal(await page.locator('.sidebar-nav [data-module="administration"]').count(), 1);
+  assert.match(await page.locator('[aria-label="Empresa y datos maestros"]').innerText(), /Por completar con la empresa/);
+  await page.locator('.administration-workspace .d9-tabs').getByRole('tab', { name: 'Catálogos' }).click();
+  assert.match(await page.locator('[aria-label="Catálogos configurables"]').innerText(), /Categorías de gasto[\s\S]*Documentos y evidencias/);
   console.log(
     'Administración: empresa, catálogos, parámetros, filtros, móvil y variantes correctos.'
   );

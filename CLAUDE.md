@@ -1,6 +1,6 @@
 # Convenciones de Mockup-ERP
 
-Prototipo frontend sin backend. Vite compila 30 páginas en `src-modern/` y tres variantes fijas definidas en `src-modern/scripts/config/variants.js`. `src-modern/analytics.html` es la vista de BI de SurTec. No existen páginas de autenticación ni ejemplos operativos de la plantilla original.
+Prototipo frontend sin backend. Vite compila 31 páginas en `src-modern/` y tres variantes fijas definidas en `src-modern/scripts/config/variants.js`. `src-modern/analytics.html` es la vista de BI de SurTec; `src-modern/payments.html` es un levantamiento conceptual solo de J&Y Demo. No existen páginas de autenticación ni ejemplos operativos de la plantilla original.
 
 ## Antes de editar
 
@@ -18,10 +18,10 @@ $env:PAGES_BASE='/Mockup-ERP/'
 npm run build:variants           # dist-pages/
 npm run test:delivery10
 npm run build                    # dist-modern/
-npm test                         # smoke test de 30 páginas
+npm test                         # smoke test de 31 páginas
 ```
 
-Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:jy-expenses`, `test:jy-control`, `test:jy-budgets`, `test:jy-personnel`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
+Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:jy-expenses`, `test:jy-control`, `test:jy-budgets`, `test:jy-personnel`, `test:jy-closing`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
 
 ## Arquitectura
 

@@ -2111,8 +2111,71 @@ function buildJyDemoData() {
     tareo: TAREO,
     sf100: SF100,
     integrations: INTEGRATIONS,
-    // The warehouse module is enabled for the Demo in R6.
-    materials: [],
+    // One conceptual warehouse. Stock and Kardex derive from these opening
+    // balances plus the documented movements below.
+    warehouses: [
+      {
+        id: 'ALM-JY-01',
+        name: 'Almacén principal',
+        location: 'Por validar con J&Y',
+        responsibleId: 'PER-JY-001',
+      },
+    ],
+    materials: PRODUCTS.filter((item) => item.kind === 'Material').map((item) => ({
+      ...item,
+      openingStock: item.id === 'MAT-01' ? 50 : 0,
+      stock: item.id === 'MAT-01' ? 85 : 0,
+      minimum: item.id === 'MAT-01' ? 20 : 0,
+      warehouse: 'Almacén principal',
+      location: item.id === 'MAT-01' ? 'Estante de conductores' : 'Ubicación por definir',
+    })),
+    warehouseMovements: [
+      {
+        id: 'ENT-26-005',
+        type: 'entry',
+        materialId: 'MAT-01',
+        quantity: 100,
+        date: '2026-07-07',
+        operationId: 'OC-26-005',
+        receiptId: 'REC-26-005',
+        responsibleId: 'PER-JY-001',
+        reason: 'Recepción de OC de inventario',
+      },
+      {
+        id: 'SAL-26-001',
+        type: 'issue',
+        materialId: 'MAT-01',
+        quantity: 70,
+        date: '2026-07-08',
+        operationId: 'SAL-26-001',
+        purchaseId: 'OC-26-005',
+        responsibleId: 'PER-JY-001',
+        reason: 'Material entregado al proyecto',
+      },
+      {
+        id: 'DEV-26-001',
+        type: 'return',
+        materialId: 'MAT-01',
+        quantity: 10,
+        date: '2026-07-09',
+        operationId: 'DEV-26-001',
+        purchaseId: 'OC-26-005',
+        relatedIssueId: 'SAL-26-001',
+        responsibleId: 'PER-JY-001',
+        reason: 'Sobrante utilizable devuelto',
+      },
+      {
+        id: 'AJM-26-001',
+        type: 'adjustment',
+        materialId: 'MAT-01',
+        quantity: -5,
+        date: '2026-07-10',
+        operationId: 'AJM-26-001',
+        purchaseId: 'OC-26-005',
+        responsibleId: 'PER-JY-001',
+        reason: 'Corrección de conteo de ejemplo; motivo por validar',
+      },
+    ],
     expenseReports: EXPENSE_REPORTS,
     expenseSamples: EXPENSE_SAMPLES,
     operations: [
@@ -2150,6 +2213,40 @@ function buildJyDemoData() {
         supplierId: 'PROV-JY-003',
         status: 'Atendida',
         date: '2026-05-08',
+      }),
+
+      // Receipt changes stock, not executed cost; the net issued quantity
+      // (70 issued - 10 returned) is the only material cost: 60 × S/ 2.25.
+      operation('OC-26-005', 'PY-26-002', 'purchase', 265.5, null, {
+        quoteId: 'COT-26-006',
+        receptionKind: 'Material',
+        category: 'Suministro',
+        description: 'Cable NH-80 2,5 mm² para inventario',
+        supplierId: 'PROV-JY-001',
+        status: 'Atendida',
+        date: '2026-07-07',
+        inventoryLine: { materialId: 'MAT-01', quantity: 100, unitCost: 2.25 },
+      }),
+      operation('SAL-26-001', 'PY-26-002', 'material_issue', 135, 'materials', {
+        purchaseId: 'OC-26-005',
+        category: 'Conductores',
+        description: 'Cable entregado al proyecto; costo neto tras devolución',
+        status: 'Registrado',
+        date: '2026-07-08',
+      }),
+      operation('DEV-26-001', 'PY-26-002', 'material_return', 0, null, {
+        purchaseId: 'OC-26-005',
+        category: 'Conductores',
+        description: 'Devolución de 10 m',
+        status: 'Registrado',
+        date: '2026-07-09',
+      }),
+      operation('AJM-26-001', 'PY-26-002', 'inventory_adjustment', 0, null, {
+        purchaseId: 'OC-26-005',
+        category: 'Ajuste de stock',
+        description: 'Ajuste de conteo de 5 m; sin costo imputado',
+        status: 'Registrado',
+        date: '2026-07-10',
       }),
 
       operation('OC-26-003', 'PY-26-003', 'purchase', 16900, 'purchases', {

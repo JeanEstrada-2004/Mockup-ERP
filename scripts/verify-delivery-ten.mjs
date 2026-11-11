@@ -17,6 +17,7 @@ const suites = [
   ['Control de J&Y Demo (R3)', 'jy-control-interaction-test.mjs'],
   ['Presupuestos de J&Y Demo (R4)', 'jy-budgets-interaction-test.mjs'],
   ['Personal de J&Y Demo (R5)', 'jy-personnel-interaction-test.mjs'],
+  ['Cierre de J&Y Demo (R6)', 'jy-closing-interaction-test.mjs'],
 ];
 
 for (const [label, script] of suites) {

@@ -1,5 +1,6 @@
-// Fixed, fictitious stock movements for the SurTec presentation. Inventory
-// purchases are not posted as executed cost; the linked SAL operations are.
+// Fixed, fictitious SurTec stock movements live here; J&Y Demo supplies its
+// own movements through its data set. Inventory purchases are not posted as
+// executed cost; linked issue operations are.
 const openingStock = { 'MAT-001': 1230, 'MAT-002': 80 };
 
 const fixtures = [
@@ -83,16 +84,27 @@ const fixtures = [
   },
 ];
 
-export const movementNames = { entry: 'Entrada', issue: 'Salida', return: 'Devolución' };
+export const movementNames = {
+  entry: 'Entrada',
+  issue: 'Salida',
+  return: 'Devolución',
+  adjustment: 'Ajuste',
+};
 
-export function warehouseOpening(materialId) {
+export function warehouseOpening(materialId, data) {
+  if (data?.id === 'jy-demo')
+    return data.materials.find((item) => item.id === materialId)?.openingStock ?? 0;
   return openingStock[materialId] ?? 0;
 }
 
 export function warehouseMovements(data) {
-  if (data.id !== 'surtec') return [];
-  const balance = { ...openingStock };
-  return fixtures
+  if (data.id !== 'surtec' && data.id !== 'jy-demo') return [];
+  const balance =
+    data.id === 'surtec'
+      ? { ...openingStock }
+      : Object.fromEntries(data.materials.map((item) => [item.id, item.openingStock ?? 0]));
+  const source = data.id === 'surtec' ? fixtures : data.warehouseMovements;
+  return source
     .map((fixture) => {
       const operation = data.operations.find((item) => item.id === fixture.operationId);
       const purchase =
@@ -116,7 +128,7 @@ export function warehouseMovements(data) {
     .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id))
     .map((movement) => {
       const before = balance[movement.materialId];
-      const after = before + (movement.type === 'issue' ? -1 : 1) * movement.quantity;
+      const after = before + (movement.type === 'issue' ? -movement.quantity : movement.quantity);
       balance[movement.materialId] = after;
       return { ...movement, balanceBefore: before, balance: after };
     });
@@ -126,7 +138,7 @@ export function warehouseStock(data, materialId) {
   return (
     warehouseMovements(data)
       .filter((item) => item.materialId === materialId)
-      .at(-1)?.balance ?? warehouseOpening(materialId)
+      .at(-1)?.balance ?? warehouseOpening(materialId, data)
   );
 }
 

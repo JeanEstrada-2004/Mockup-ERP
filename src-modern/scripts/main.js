@@ -51,6 +51,10 @@ import { initMaturityTags } from './utils/maturity.js';
 import { budgetTechList, budgetTechDetail } from './components/budget-tech-views.js';
 import { productsWorkspace } from './components/product-views.js';
 import { personnelJyWorkspace, workerJyDetail } from './components/personnel-jy-views.js';
+import { warehouseJyWorkspace } from './components/warehouse-jy-views.js';
+import { paymentsWorkspace } from './components/payments-views.js';
+import { securityJyWorkspace } from './components/security-jy-views.js';
+import { administrationJyWorkspace } from './components/administration-jy-views.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -267,6 +271,10 @@ class AdminApp {
     Alpine.data('personnelWorkspace', personnelWorkspace);
     Alpine.data('workerDetail', workerDetail);
     Alpine.data('warehouseWorkspace', warehouseWorkspace);
+    Alpine.data('warehouseJyWorkspace', warehouseJyWorkspace);
+    Alpine.data('paymentsWorkspace', paymentsWorkspace);
+    Alpine.data('securityJyWorkspace', securityJyWorkspace);
+    Alpine.data('administrationJyWorkspace', administrationJyWorkspace);
     Alpine.data('materialDetail', materialDetail);
     Alpine.data('costWorkspace', costWorkspace);
     Alpine.data('designSystemView', designSystemView);

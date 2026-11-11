@@ -231,7 +231,7 @@ try {
   await page.locator('.warehouse-tabs').getByRole('button', { name: 'Movimientos' }).click();
   assert.match(await page.locator('#warehouse-demo-title').locator('xpath=ancestor::section').innerText(), /SAL-DEMO-001/);
 
-  for (const variant of ['jy-pmi', 'jy-demo']) {
+  for (const variant of ['jy-pmi']) {
     await page.goto(url(variant, 'index.html'));
     await ready();
     assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 0);
@@ -243,6 +243,17 @@ try {
     await ready();
     assert.match(await page.locator('#main-content').innerText(), /Material no disponible/);
   }
+  await page.goto(url('jy-demo', 'warehouse.html'));
+  await ready();
+  assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"]').count(), 1);
+  assert.equal(await page.locator('.warehouse-workspace .d9-tabs [role="tab"]').count(), 3);
+  assert.match(await page.locator('.warehouse-workspace').innerText(), /Almacén principal/);
+  await page.goto(url('jy-demo', 'warehouse.html?tab=movimientos&record=SAL-26-001'));
+  await ready();
+  assert.match(await page.locator('[aria-label="Detalle del movimiento"]').innerText(), /SAL-26-001[\s\S]*OC-26-005[\s\S]*S\/ 135\.00/);
+  await page.goto(url('jy-demo', 'material.html?id=MAT-01'));
+  await ready();
+  assert.match(await page.locator('#main-content').innerText(), /85 m/);
   assert.deepEqual(errors, []);
   console.log(
     'Almacén: OC → recepción → entrada → Kardex → salida → proyecto/costo, alertas y variantes correctos.'

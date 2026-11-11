@@ -1,0 +1,292 @@
+<div
+  class="container-fluid shell-page project-workspace warehouse-workspace"
+  x-data="warehouseJyWorkspace"
+>
+  <nav aria-label="Ubicación">
+    <ol class="breadcrumb shell-breadcrumb">
+      <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Almacén</li>
+    </ol>
+  </nav>
+  <div class="shell-page-heading">
+    <div>
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Propuesta de inventario y Kardex para un solo almacén; proceso operativo por confirmar con J&Y."
+      >
+        <h1>Almacén y Materiales</h1>
+      </div>
+      <p class="shell-page-subtitle">
+        Un almacén · entradas, salidas, devoluciones y ajustes trazables.
+      </p>
+    </div>
+    <a class="btn btn-outline-primary" href="./purchases.html">Órdenes de compra</a>
+  </div>
+  <div class="alert alert-info warehouse-note" role="note">
+    Ejemplo ficticio: la OC de inventario genera una entrada, no un costo ejecutado. El costo neto
+    de la salida se imputa al proyecto una sola vez.
+  </div>
+  <section class="kpi-strip kpi-strip--4" aria-label="Resumen de almacén">
+    <div class="kpi">
+      <span class="kpi-label">Almacenes</span><span class="kpi-value" x-text="warehouseCount"></span
+      ><span class="kpi-foot" x-text="warehouse.name"></span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">Materiales</span
+      ><span class="kpi-value" x-text="materials.length"></span
+      ><span class="kpi-foot">Catálogo de Productos</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">Movimientos</span
+      ><span class="kpi-value" x-text="movements.length"></span
+      ><span class="kpi-foot">Con fecha y responsable</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">Costo neto imputado</span
+      ><span
+        class="kpi-value"
+        x-text="formatAmount(movements.reduce((sum, item) => sum + item.executedCost, 0))"
+      ></span
+      ><a class="kpi-foot" href="./costs.html?project=PY-26-002">Ver Costos</a>
+    </div>
+  </section>
+  <div class="card mt-3" aria-label="Almacén único propuesto">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="validate"
+        data-maturity-note="Ubicación y encargado de almacén por confirmar con J&Y."
+      >
+        <h2 class="workspace-subheading" x-text="warehouse.name"></h2>
+      </div>
+      <div class="warehouse-facts">
+        <div><small>Ubicación</small><strong x-text="warehouse.location"></strong></div>
+        <div>
+          <small>Responsable propuesto</small
+          ><strong x-text="workerName(warehouse.responsibleId)"></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="d9-tabs mt-4" role="tablist" aria-label="Secciones de almacén">
+    <button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'inventario')"
+      :class="{active: tab === 'inventario'}"
+      @click="setTab('inventario')"
+    >
+      Inventario
+    </button>
+    <button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'movimientos')"
+      :class="{active: tab === 'movimientos'}"
+      @click="setTab('movimientos')"
+    >
+      Movimientos
+    </button>
+    <button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'kardex')"
+      :class="{active: tab === 'kardex'}"
+      @click="setTab('kardex')"
+    >
+      Kardex
+    </button>
+  </div>
+  <div class="card mt-3">
+    <div class="card-body">
+      <label class="form-label" for="warehouse-jy-search">Buscar material o movimiento</label
+      ><input
+        id="warehouse-jy-search"
+        class="form-control"
+        type="search"
+        x-model="query"
+        placeholder="Código, nombre o motivo"
+      />
+    </div>
+  </div>
+  <section class="card mt-3" x-show="tab === 'inventario'" aria-label="Inventario de materiales">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Categoría</th>
+              <th>Unidad</th>
+              <th>Stock</th>
+              <th>Mínimo</th>
+              <th>Ficha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="item in filteredMaterials" :key="item.id"
+              ><tr>
+                <td>
+                  <strong x-text="item.name"></strong
+                  ><small class="d-block text-muted" x-text="item.id"></small>
+                </td>
+                <td x-text="item.category"></td>
+                <td x-text="item.unit"></td>
+                <td>
+                  <span
+                    class="badge"
+                    :class="stock(item.id) < item.minimum ? 'text-bg-warning' : 'text-bg-success'"
+                    x-text="stock(item.id)"
+                  ></span>
+                </td>
+                <td x-text="item.minimum"></td>
+                <td><a :href="href('warehouse', item.id)">Ver Kardex</a></td>
+              </tr></template
+            >
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted mb-0" x-show="filteredMaterials.length === 0">
+        Sin materiales para esta búsqueda.
+      </p>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'movimientos'" aria-label="Movimientos de almacén">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Código</th>
+              <th>Tipo</th>
+              <th>Material</th>
+              <th>Cantidad</th>
+              <th>Saldo</th>
+              <th>Operación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="item in filteredMovements" :key="item.id"
+              ><tr>
+                <td x-text="formatDate(item.date)"></td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-link p-0"
+                    @click="select(item)"
+                    x-text="item.id"
+                  ></button>
+                </td>
+                <td x-text="movementNames[item.type]"></td>
+                <td x-text="materialName(item.materialId)"></td>
+                <td
+                  x-text="item.type === 'issue' ? `−${item.quantity}` : item.quantity > 0 ? `+${item.quantity}` : item.quantity"
+                ></td>
+                <td x-text="item.balance"></td>
+                <td>
+                  <a
+                    :href="href(item.type === 'entry' ? 'purchases' : 'documents', item.type === 'entry' ? item.operationId : item.documentId)"
+                    x-text="item.operationId"
+                  ></a>
+                </td></tr
+            ></template>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted mb-0" x-show="filteredMovements.length === 0">
+        Sin movimientos para esta búsqueda.
+      </p>
+    </div>
+  </section>
+  <section
+    class="card mt-3"
+    x-show="tab === 'movimientos' && selected"
+    aria-label="Detalle del movimiento"
+  >
+    <div class="card-body">
+      <h2 class="workspace-subheading" x-text="selected?.id"></h2>
+      <div class="warehouse-facts">
+        <div><small>Fecha</small><strong x-text="formatDate(selected?.date)"></strong></div>
+        <div><small>Motivo</small><strong x-text="selected?.reason"></strong></div>
+        <div>
+          <small>Responsable</small><strong x-text="workerName(selected?.responsibleId)"></strong>
+        </div>
+        <div>
+          <small>Proyecto</small
+          ><a
+            :href="href('projects', selected?.projectId)"
+            x-text="projectName(selected?.projectId)"
+          ></a>
+        </div>
+        <div>
+          <small>OC de origen</small
+          ><a :href="href('purchases', selected?.purchaseId)" x-text="selected?.purchaseId"></a>
+        </div>
+        <div>
+          <small>Documento</small
+          ><a :href="href('documents', selected?.documentId)" x-text="selected?.documentId"></a>
+        </div>
+        <div>
+          <small>Costo ejecutado</small
+          ><a
+            :href="href('costs', selected?.projectId)"
+            x-text="formatAmount(selected?.executedCost)"
+          ></a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'kardex'" aria-label="Kardex">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Propuesta: Kardex generado desde los movimientos; hoy J&Y no tiene un Kardex formal."
+      >
+        <h2 class="workspace-subheading">Kardex · MAT-01</h2>
+      </div>
+      <p>
+        Saldo inicial: <strong x-text="`${opening('MAT-01')} m`"></strong>. Saldo final:
+        <strong x-text="`${stock('MAT-01')} m`"></strong>. Cada entrada, salida, devolución y ajuste
+        aparece abajo.
+      </p>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Movimiento</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Saldo</th>
+              <th>Documento</th>
+              <th>Proyecto</th>
+              <th>Responsable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template
+              x-for="item in movements.filter((movement) => movement.materialId === 'MAT-01')"
+              :key="item.id"
+              ><tr>
+                <td x-text="formatDate(item.date)"></td>
+                <td><a :href="href('warehouse', item.id)" x-text="item.id"></a></td>
+                <td
+                  x-text="item.type === 'entry' || item.type === 'return' || (item.type === 'adjustment' && item.quantity > 0) ? Math.abs(item.quantity) : '—'"
+                ></td>
+                <td
+                  x-text="item.type === 'issue' || (item.type === 'adjustment' && item.quantity < 0) ? Math.abs(item.quantity) : '—'"
+                ></td>
+                <td x-text="item.balance"></td>
+                <td><a :href="href('documents', item.documentId)" x-text="item.documentId"></a></td>
+                <td><a :href="href('projects', item.projectId)" x-text="item.projectId"></a></td>
+                <td x-text="workerName(item.responsibleId)"></td></tr
+            ></template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

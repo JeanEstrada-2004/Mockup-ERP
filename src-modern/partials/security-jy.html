@@ -1,0 +1,168 @@
+<div
+  class="container-fluid shell-page project-workspace delivery-nine-workspace security-workspace"
+  x-data="securityJyWorkspace"
+>
+  <nav aria-label="Ubicación">
+    <ol class="breadcrumb shell-breadcrumb">
+      <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Seguridad</li>
+    </ol>
+  </nav>
+  <div class="shell-page-heading">
+    <div>
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Matriz conceptual; los permisos no se ejecutan en este mockup."
+      >
+        <h1>Seguridad y Control de Acceso</h1>
+      </div>
+      <p class="shell-page-subtitle">
+        Roles propuestos y trazabilidad de acciones de los datos de demostración.
+      </p>
+    </div>
+  </div>
+  <div class="alert alert-info" role="note">
+    Borrador · por validar con J&Y. Esta vista representa permisos y auditoría; no impone controles
+    de acceso reales.
+  </div>
+  <div class="d9-tabs" role="tablist" aria-label="Secciones de seguridad">
+    <button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'roles')"
+      :class="{active: tab === 'roles'}"
+      @click="tab = 'roles'"
+    >
+      Roles y permisos</button
+    ><button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'auditoria')"
+      :class="{active: tab === 'auditoria'}"
+      @click="tab = 'auditoria'"
+    >
+      Auditoría</button
+    ><button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'propuestas')"
+      :class="{active: tab === 'propuestas'}"
+      @click="tab = 'propuestas'"
+    >
+      Controles propuestos
+    </button>
+  </div>
+  <p class="workspace-caption d-md-none">Desliza las pestañas para ver todas las secciones.</p>
+  <section class="card mt-3" x-show="tab === 'roles'" aria-label="Matriz de permisos conceptual">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="validate"
+        data-maturity-note="Borrador de siete perfiles; J&Y debe confirmar atribuciones y límites."
+      >
+        <h2 class="workspace-subheading">Matriz de permisos · borrador</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Rol conceptual</th>
+              <th>Acceso a revisar</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="role in roles" :key="role[0]"
+              ><tr>
+                <td><strong x-text="role[0]"></strong></td>
+                <td x-text="role[1]"></td>
+                <td><span class="badge text-bg-warning">Por validar</span></td>
+              </tr></template
+            >
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'auditoria'" aria-label="Auditoría transversal">
+    <div class="card-body">
+      <div class="shell-section-header">
+        <div>
+          <div
+            class="master-title-row"
+            data-maturity="as-is"
+            data-maturity-note="Historial derivado de registros ficticios y cambios locales guardados por variante."
+          >
+            <h2 class="workspace-subheading">Historial de acciones</h2>
+          </div>
+          <p class="workspace-caption">
+            Rendiciones, presupuestos, maestros, planilla, tareo e incidencias.
+          </p>
+        </div>
+        <span class="badge text-bg-secondary" x-text="`${filteredAudits.length} eventos`"></span>
+      </div>
+      <label class="form-label" for="security-jy-source">Tipo de registro</label
+      ><select class="form-select mb-3" id="security-jy-source" x-model="source">
+        <option value="">Todos</option>
+        <template x-for="item in sources" :key="item"
+          ><option :value="item" x-text="item"></option
+        ></template>
+      </select>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Registro</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template
+              x-for="(item, index) in filteredAudits"
+              :key="`${item.record}-${item.date}-${index}`"
+              ><tr>
+                <td x-text="formatDate(item.date.slice(0,10))"></td>
+                <td x-text="item.user"></td>
+                <td x-text="item.action"></td>
+                <td><a :href="item.href" x-text="item.record"></a></td>
+                <td x-text="item.reason"></td></tr
+            ></template>
+          </tbody>
+        </table>
+      </div>
+      <p x-show="filteredAudits.length === 0" class="text-muted">Sin eventos para este filtro.</p>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'propuestas'" aria-label="Controles por validar">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Opciones de seguridad todavía no implementadas ni activadas."
+      >
+        <h2 class="workspace-subheading">Controles propuestos</h2>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="border rounded p-3 h-100">
+            <h3 class="h6">Autenticación multifactor</h3>
+            <p class="mb-0">Propuesta; método y obligatoriedad por validar. No está activada.</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="border rounded p-3 h-100">
+            <h3 class="h6">Respaldos</h3>
+            <p class="mb-0">
+              Propuesta; frecuencia, responsables y restauración por definir. No hay backup
+              ejecutado.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

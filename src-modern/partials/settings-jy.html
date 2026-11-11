@@ -1,0 +1,149 @@
+<div
+  class="container-fluid shell-page project-workspace delivery-nine-workspace administration-workspace"
+  x-data="administrationJyWorkspace"
+>
+  <nav aria-label="Ubicación">
+    <ol class="breadcrumb shell-breadcrumb">
+      <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Administración</li>
+    </ol>
+  </nav>
+  <div class="shell-page-heading">
+    <div>
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Configuración propuesta; catálogos y parámetros se deben acordar con J&Y."
+      >
+        <h1>Administración</h1>
+      </div>
+      <p class="shell-page-subtitle">Empresa, datos maestros, catálogos y parámetros del Demo.</p>
+    </div>
+  </div>
+  <div class="d9-tabs" role="tablist" aria-label="Secciones de administración">
+    <button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'empresa')"
+      :class="{active: tab === 'empresa'}"
+      @click="tab = 'empresa'"
+    >
+      Empresa y maestros</button
+    ><button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'catalogos')"
+      :class="{active: tab === 'catalogos'}"
+      @click="tab = 'catalogos'"
+    >
+      Catálogos</button
+    ><button
+      type="button"
+      role="tab"
+      :aria-selected="String(tab === 'parametros')"
+      :class="{active: tab === 'parametros'}"
+      @click="tab = 'parametros'"
+    >
+      Parámetros
+    </button>
+  </div>
+  <section class="card mt-3" x-show="tab === 'empresa'" aria-label="Empresa y datos maestros">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="validate"
+        data-maturity-note="Los datos legales deben completarse con la empresa."
+      >
+        <h2 class="workspace-subheading" x-text="company.name"></h2>
+      </div>
+      <p>Ficha legal y datos de contacto: <strong>Por completar con la empresa</strong>.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-primary" href="./clients.html">Clientes</a
+        ><a class="btn btn-outline-primary" href="./suppliers.html">Proveedores</a
+        ><a class="btn btn-outline-primary" href="./products.html">Productos y precios</a>
+      </div>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'catalogos'" aria-label="Catálogos configurables">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="to-be"
+        data-maturity-note="Valores de ejemplo; confirmar con J&Y antes de operar."
+      >
+        <h2 class="workspace-subheading">Catálogos de J&Y</h2>
+      </div>
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <h3 class="h6">Categorías de gasto</h3>
+          <ul>
+            <template x-for="item in categories" :key="item"><li x-text="item"></li></template>
+          </ul>
+        </div>
+        <div class="col-12 col-md-6">
+          <h3 class="h6">Documentos y evidencias</h3>
+          <ul>
+            <template x-for="item in evidence" :key="item"><li x-text="item"></li></template>
+          </ul>
+        </div>
+        <div class="col-12 col-md-6">
+          <h3 class="h6">Unidades</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <template x-for="item in units" :key="item"
+              ><span class="badge text-bg-light border" x-text="item"></span
+            ></template>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <h3 class="h6">Monedas</h3>
+          <div class="d-flex flex-wrap gap-2">
+            <template x-for="item in currencies" :key="item"
+              ><span class="badge text-bg-light border" x-text="item"></span
+            ></template>
+          </div>
+        </div>
+      </div>
+      <hr />
+      <h3 class="h6">Estados de proceso</h3>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <strong>Rendición</strong>
+          <ul>
+            <template x-for="item in expenseStatuses" :key="item"><li x-text="item"></li></template>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <strong>Presupuesto</strong>
+          <ul>
+            <template x-for="item in budgetStatuses" :key="item"><li x-text="item"></li></template>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <strong>OC · provisional</strong>
+          <ul>
+            <template x-for="item in purchaseStatuses" :key="item"
+              ><li x-text="item"></li
+            ></template>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="card mt-3" x-show="tab === 'parametros'" aria-label="Parámetros por validar">
+    <div class="card-body">
+      <div
+        class="master-title-row"
+        data-maturity="validate"
+        data-maturity-note="No se han acordado umbrales, porcentajes ni reparto de control con J&Y."
+      >
+        <h2 class="workspace-subheading">Parámetros por validar</h2>
+      </div>
+      <div class="warehouse-facts">
+        <div><small>Gastos generales por defecto</small><strong>Por validar</strong></div>
+        <div><small>Utilidad por defecto</small><strong>Por validar</strong></div>
+        <div><small>Umbral de alerta presupuestaria</small><strong>Por definir</strong></div>
+        <div><small>Regla de distribución de control</small><strong>Por definir</strong></div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,4 +1,4 @@
-import { activeVariant, isModuleEnabled } from '../config/variants.js';
+import { activeVariant, isModuleEnabled, variantRule } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import {
   getCostBySource,
@@ -8,6 +8,11 @@ import {
   EXPENSE_PENDING_STATUSES,
 } from '../data/mock-data.js';
 import { COST_SOURCES } from '../data/cost-data.js';
+import { formatAmount } from '../data/commercial-data.js';
+import { costLines, groupLines } from '../data/cost-treatment.js';
+import { loadReports } from '../data/expense-reports.js';
+import { payrollMonths, payrollRows, tareoRows } from '../data/personnel-jy.js';
+import { movementNames, warehouseMovements } from '../data/warehouse-data.js';
 import { COST_SOURCE_TOKENS, formatDate } from './project-views.js';
 import { formatMoney, writeProjectId } from './shell.js';
 
@@ -16,18 +21,59 @@ const REPORT_STATUSES = ['Planificado', 'Activo', 'En riesgo', 'Suspendido', 'Ce
 const IN_EXECUTION = ['Activo', 'En riesgo'];
 const allowed = isModuleEnabled('reports');
 const hasBI = isModuleEnabled('bi');
-const reportDefs = [
-  { id: 'projects', label: 'Proyectos', description: 'Avance, presupuesto y ejecución.' },
-  { id: 'budgets', label: 'Presupuestos', description: 'Cotizaciones vinculadas a proyectos.' },
-  { id: 'purchases', label: 'Compras', description: 'Órdenes y compromisos abiertos.' },
-  { id: 'expenses', label: 'Rendiciones', description: 'Gastos y estados de revisión.' },
-  { id: 'personnel', label: 'Tareo', description: 'Operaciones laborales de ejemplo.' },
-  { id: 'costs', label: 'Costos', description: 'Operaciones ejecutadas por fuente.' },
-  ...(isModuleEnabled('warehouse')
-    ? [{ id: 'warehouse', label: 'Almacén', description: 'Salidas de material a proyectos.' }]
-    : []),
-  { id: 'documents', label: 'Documentos', description: 'Referencias y versiones documentales.' },
-];
+const operational = variantRule('reportsCatalog') === 'operational';
+const reportDefs = operational
+  ? [
+      { id: 'cost-project', label: 'Costos por proyecto', description: 'Ejecución por proyecto.' },
+      {
+        id: 'cost-source',
+        label: 'Costos por fuente',
+        description: 'Compras, rendiciones, personal y materiales.',
+      },
+      {
+        id: 'cost-category',
+        label: 'Costos por categoría',
+        description: 'Clasificación económica registrada.',
+      },
+      { id: 'expenses', label: 'Rendiciones', description: 'Gastos presentados y aceptados.' },
+      { id: 'undocumented', label: 'Gastos sin documento', description: 'Importe no documentado.' },
+      { id: 'purchases', label: 'Compras', description: 'OC y recepción.' },
+      {
+        id: 'suppliers',
+        label: 'Proveedores',
+        description: 'Proveedores relacionados con compras.',
+      },
+      { id: 'personnel', label: 'Personal', description: 'Trabajadores del proyecto.' },
+      { id: 'payroll', label: 'Planilla imputada', description: 'Costo laboral distribuido.' },
+      { id: 'timesheets', label: 'Tareo', description: 'Horas y firmas de campo.' },
+      { id: 'materials', label: 'Materiales', description: 'Inventario del almacén principal.' },
+      {
+        id: 'movements',
+        label: 'Movimientos de almacén',
+        description: 'Entradas, salidas, devoluciones y ajustes.',
+      },
+      {
+        id: 'budget-cost',
+        label: 'Presupuesto vs. costo',
+        description: 'Comparación de presupuesto y ejecución.',
+      },
+    ]
+  : [
+      { id: 'projects', label: 'Proyectos', description: 'Avance, presupuesto y ejecución.' },
+      { id: 'budgets', label: 'Presupuestos', description: 'Cotizaciones vinculadas a proyectos.' },
+      { id: 'purchases', label: 'Compras', description: 'Órdenes y compromisos abiertos.' },
+      { id: 'expenses', label: 'Rendiciones', description: 'Gastos y estados de revisión.' },
+      { id: 'personnel', label: 'Tareo', description: 'Operaciones laborales de ejemplo.' },
+      { id: 'costs', label: 'Costos', description: 'Operaciones ejecutadas por fuente.' },
+      ...(isModuleEnabled('warehouse')
+        ? [{ id: 'warehouse', label: 'Almacén', description: 'Salidas de material a proyectos.' }]
+        : []),
+      {
+        id: 'documents',
+        label: 'Documentos',
+        description: 'Referencias y versiones documentales.',
+      },
+    ];
 const months = [
   ...new Set(data.operations.map((item) => item.date?.slice(0, 7)).filter(Boolean)),
 ].sort();
@@ -64,7 +110,9 @@ export function reportsWorkspace() {
     tab: document.body.dataset.page === 'analytics-workspace' && hasBI ? 'bi' : 'reports',
     reportId: reportDefs.some((item) => item.id === params.get('report'))
       ? params.get('report')
-      : 'projects',
+      : operational
+        ? 'cost-project'
+        : 'projects',
     projectFilter: data.projects.some((item) => item.id === params.get('project'))
       ? params.get('project')
       : '',
@@ -86,7 +134,7 @@ export function reportsWorkspace() {
     selectedSource: '',
     budgetChart: null,
     sourceChart: null,
-    formatMoney,
+    formatMoney: operational ? formatAmount : formatMoney,
     formatDate,
     projectName,
     moduleHref,
@@ -146,6 +194,207 @@ export function reportsWorkspace() {
     get reportRows() {
       const projectIds = this.projectIds;
       const period = this.periodFilter;
+      if (operational) {
+        const lines = costLines(data).filter(
+          (line) => projectIds.has(line.projectId) && (!period || line.date.startsWith(period))
+        );
+        const row = (id, label, projectId, date, detail, amount, href) => ({
+          id,
+          label,
+          projectId,
+          date,
+          detail,
+          amount,
+          href,
+        });
+        if (['cost-project', 'budget-cost'].includes(this.reportId))
+          return this.scopedProjects.map((project) => {
+            const cost = getProjectFinancials(data, project.id);
+            return row(
+              project.id,
+              project.name,
+              project.id,
+              project.startDate,
+              this.reportId === 'budget-cost'
+                ? `Presupuesto ${formatMoney(cost.budgetAmount)} · costo ejecutado ${formatMoney(cost.executedCost)}`
+                : 'Costo ejecutado',
+              cost.executedCost,
+              moduleHref('costs', project.id)
+            );
+          });
+        if (['cost-source', 'cost-category'].includes(this.reportId))
+          return this.scopedProjects.flatMap((project) =>
+            groupLines(
+              data,
+              lines.filter((line) => line.projectId === project.id),
+              this.reportId === 'cost-source' ? 'source' : 'category'
+            ).map((group) =>
+              row(
+                `${project.id}-${group.key}`,
+                group.label,
+                project.id,
+                group.lines[0]?.date || project.startDate,
+                `${group.lines.length} operaciones · ${project.name}`,
+                group.total,
+                moduleHref('costs', project.id)
+              )
+            )
+          );
+        if (this.reportId === 'undocumented')
+          return lines
+            .filter((line) => line.treatment.undocumented > 0)
+            .map((line) =>
+              row(
+                line.id,
+                line.description,
+                line.projectId,
+                line.date,
+                line.documentLabel,
+                line.treatment.undocumented,
+                moduleHref('expenses', line.operationId)
+              )
+            );
+        if (this.reportId === 'expenses')
+          return loadReports(data)
+            .filter(
+              (report) =>
+                projectIds.has(report.projectId) && (!period || report.date.startsWith(period))
+            )
+            .map((report) =>
+              row(
+                report.id,
+                report.status,
+                report.projectId,
+                report.date,
+                'Rendición de gastos',
+                report.total || data.operations.find((op) => op.id === report.id)?.amount || 0,
+                moduleHref('expenses', report.id)
+              )
+            );
+        if (this.reportId === 'materials')
+          return data.materials.flatMap((material) => {
+            const movement = warehouseMovements(data).find(
+              (item) => item.materialId === material.id && projectIds.has(item.projectId)
+            );
+            if (this.projectFilter && !movement) return [];
+            return [
+              row(
+                material.id,
+                material.name,
+                movement?.projectId || null,
+                data.today,
+                `${material.category} · ${material.unit}`,
+                null,
+                moduleHref('warehouse', material.id)
+              ),
+            ];
+          });
+        if (this.reportId === 'movements')
+          return warehouseMovements(data)
+            .filter(
+              (movement) =>
+                projectIds.has(movement.projectId) && (!period || movement.date.startsWith(period))
+            )
+            .map((movement) =>
+              row(
+                movement.id,
+                movementNames[movement.type],
+                movement.projectId,
+                movement.date,
+                `${movement.materialId} · saldo ${movement.balance}`,
+                movement.executedCost,
+                moduleHref('warehouse', movement.id)
+              )
+            );
+        if (this.reportId === 'payroll')
+          return payrollMonths(data).filter((month) => !period || month === period).flatMap((month) =>
+            payrollRows(data, month).flatMap((payroll) =>
+              payroll.imputations
+                .filter((item) => projectIds.has(item.projectId))
+                .map((item) =>
+                  row(
+                    `PL-${month}-${payroll.workerId}-${item.projectId}`,
+                    payroll.workerId,
+                    item.projectId,
+                    `${month}-01`,
+                    `Imputación ${item.percent} %`,
+                    item.amount,
+                    `./personnel.html?tab=planilla&month=${month}&worker=${payroll.workerId}&project=${item.projectId}`
+                  )
+                )
+            )
+          );
+        if (this.reportId === 'timesheets')
+          return tareoRows(data)
+            .filter(
+              (item) => projectIds.has(item.projectId) && (!period || item.date.startsWith(period))
+            )
+            .map((item) =>
+              row(
+                item.id,
+                item.workerId,
+                item.projectId,
+                item.date,
+                item.signed ? 'Firmado' : 'Pendiente de firma',
+                null,
+                moduleHref('personnel', item.id)
+              )
+            );
+        if (this.reportId === 'personnel')
+          return data.workers.flatMap((worker) => {
+            const managed = data.projects.find(
+              (project) => projectIds.has(project.id) && project.managerId === worker.id
+            );
+            const payroll = payrollMonths(data)
+              .flatMap((month) => payrollRows(data, month))
+              .find(
+                (item) =>
+                  item.workerId === worker.id &&
+                  item.imputations.some((entry) => projectIds.has(entry.projectId))
+              );
+            const tareo = tareoRows(data).find(
+              (item) => item.workerId === worker.id && projectIds.has(item.projectId)
+            );
+            const projectId =
+              managed?.id ||
+              payroll?.imputations.find((item) => projectIds.has(item.projectId))?.projectId ||
+              tareo?.projectId;
+            if (!projectId) return [];
+            return [
+              row(
+                worker.id,
+                worker.name,
+                projectId,
+                data.today,
+                worker.role || 'Personal',
+                null,
+                moduleHref('personnel', worker.id)
+              ),
+            ];
+          });
+        if (this.reportId === 'suppliers')
+          return data.suppliers.flatMap((supplier) => {
+            const purchase = data.operations.find(
+              (item) =>
+                item.type === 'purchase' &&
+                item.supplierId === supplier.id &&
+                projectIds.has(item.projectId) &&
+                (!period || item.date.startsWith(period))
+            );
+            if ((this.projectFilter || period) && !purchase) return [];
+            return [
+              row(
+                supplier.id,
+                supplier.name,
+                purchase?.projectId || null,
+                purchase?.date || data.today,
+                purchase ? `OC ${purchase.id}` : 'Sin OC en el filtro',
+                null,
+                moduleHref('suppliers', supplier.id)
+              ),
+            ];
+          });
+      }
       if (this.reportId === 'projects')
         return this.scopedProjects.map((item) => ({
           id: item.id,
@@ -266,7 +515,8 @@ export function reportsWorkspace() {
     },
     updateUrl() {
       const query = this.filterQuery();
-      if (!this.biPage && this.reportId !== 'projects') query.set('report', this.reportId);
+      if (!this.biPage && this.reportId !== (operational ? 'cost-project' : 'projects'))
+        query.set('report', this.reportId);
       const page = this.biPage ? './analytics.html' : './reports.html';
       history.replaceState(null, '', `${page}${query.size ? `?${query}` : ''}`);
     },

@@ -488,3 +488,10 @@ tres variantes bajo la subruta de Pages.
   con firma; planilla imputada a proyectos por porcentaje; recibos por honorarios; incidencias.
 - El costo de personal sale de la planilla imputada y de los RxH, sin tarifa por hora.
 - Integraciones con estados honestos: no integrado, propuesta, por definir u opcional.
+
+## Realineamiento de J&Y Demo — R6: cierre (11/11/2026)
+
+- Almacén de un solo depósito conceptual. La OC ficticia de inventario `OC-26-005` no se cuenta como costo ejecutado; la salida neta `SAL-26-001` imputa S/ 135.00 a Materiales. Kardex: 50 m de apertura + 100 de entrada − 70 de salida + 10 de devolución − 5 de ajuste = 85 m. Costo de cartera: S/ 133 643; presupuesto: S/ 407 865.31.
+- Pagos aparece solo en el Demo como proceso en levantamiento; no hay transacción, autorización bancaria ni flujo confirmado.
+- Reportes ofrece 13 vistas operativas, sin BI. Seguridad presenta siete roles conceptuales y una auditoría de historiales; MFA y backups son propuestas. Administración ofrece catálogos y parámetros pendientes de validar.
+- Seis recorridos del Demo cubren presupuesto, compras, almacén, rendiciones, personal y trazabilidad del costo. PETI y PMI mantienen sus flujos. Las marcas de madurez identifican AS-IS, TO-BE y «por validar».
