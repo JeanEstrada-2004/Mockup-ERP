@@ -89,7 +89,7 @@ async function openVariant(variant, expectedName, expectedProjects) {
       .locator('.sidebar-nav a')
       .evaluateAll((links) =>
         links.every((link) =>
-          /\/(index|projects|approvals|clients|suppliers|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
+          /\/(index|projects|approvals|clients|suppliers|products|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
             link.href
           )
         )

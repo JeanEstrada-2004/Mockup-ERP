@@ -1,0 +1,166 @@
+          <div class="container-fluid shell-page project-workspace tech-budgets" x-data="budgetTechList">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Presupuestos</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Presupuestos</h1>
+                <p class="shell-page-subtitle">
+                  Presupuestos por partidas y APU, y presupuestos de productos con precios de proveedores.
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" @click="openNew()">+ Nuevo presupuesto</button>
+            </div>
+
+            <section class="kpi-strip kpi-strip--4" aria-label="Resumen de presupuestos">
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Presupuestos</span>
+                <span class="kpi-value" x-count="records.length"></span>
+                <span class="kpi-foot" x-text="`${countType('A')} por partidas · ${countType('B')} de productos`"></span>
+              </div>
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'En revisión'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>En revisión</span>
+                <span class="kpi-value" x-count="inReview"></span>
+                <span class="kpi-foot">Versión actual por revisar</span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="statusFilter = 'Aceptado'; updateUrl()">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Aceptados</span>
+                <span class="kpi-value" x-count.money="acceptedAmount"></span>
+                <span class="kpi-foot">Total con IGV</span>
+              </button>
+              <a class="kpi" href="./products.html">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Productos y precios</span>
+                <span class="kpi-value">→</span>
+                <span class="kpi-foot">Búsqueda de precios y cotizaciones</span>
+              </a>
+            </section>
+
+            <section class="card" aria-labelledby="tech-budgets-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="validate" data-maturity-note="Código observado: PR2606-0022-V2-GM (PR = presupuesto, AAMM, correlativo, versión). El significado de las iniciales y si el correlativo es mensual o anual están por confirmar.">
+                    <h2 id="tech-budgets-title">Presupuestos registrados</h2>
+                  </div>
+                  <span class="text-muted small" aria-live="polite" x-text="`${filtered.length} de ${records.length}`"></span>
+                </div>
+                <div class="workspace-filters tech-filters mb-3">
+                  <div>
+                    <label class="form-label" for="tech-search">Buscar</label>
+                    <input id="tech-search" class="form-control" type="search" placeholder="Código, título, cliente o proyecto" x-model="search" @input="updateUrl()" />
+                  </div>
+                  <div>
+                    <label class="form-label" for="tech-type">Tipo</label>
+                    <select id="tech-type" class="form-select" x-model="typeFilter" @change="updateUrl()">
+                      <option value="">Todos</option>
+                      <option value="A">Partidas y APU</option>
+                      <option value="B">Productos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="tech-status">Estado</label>
+                    <select id="tech-status" class="form-select" x-model="statusFilter" @change="updateUrl()">
+                      <option value="">Todos</option>
+                      <template x-for="item in statuses" :key="item"><option :value="item" x-text="item" :selected="item === statusFilter"></option></template>
+                    </select>
+                  </div>
+                  <button type="button" class="btn btn-outline-secondary" x-show="search || typeFilter || statusFilter" @click="clearFilters()">Limpiar</button>
+                </div>
+                <div class="table-responsive d-none d-lg-block" x-show="filtered.length">
+                  <table class="table table-hover align-middle mb-0 tech-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Código</th>
+                        <th scope="col">Presupuesto</th>
+                        <th scope="col">Cliente</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Versión</th>
+                        <th scope="col">Responsable</th>
+                        <th scope="col" class="text-end">Total</th>
+                        <th scope="col">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in filtered" :key="item.id">
+                        <tr>
+                          <td>
+                            <a class="data-code" :href="detailHref(item)" x-text="item.code"></a
+                            ><small class="show-block text-muted" x-text="formatDate(item.date)"></small>
+                          </td>
+                          <td>
+                            <span x-text="item.title"></span
+                            ><small class="show-block text-muted" x-show="item.projectId" x-text="item.projectId"></small
+                            ><small class="show-block text-muted" x-show="item.copiedFrom" x-text="`Duplicado de ${item.copiedFrom}`"></small>
+                          </td>
+                          <td x-text="clientName(item.clientId)"></td>
+                          <td x-text="typeLabel(item.type)"></td>
+                          <td x-text="`V${item.currentVersionNumber} · ${item.versionCount} en total`"></td>
+                          <td x-text="workerName(item.responsibleId)"></td>
+                          <td class="text-end data-money" x-text="formatAmount(item.currentAmount)"></td>
+                          <td><span class="badge" :class="$statusClass(item.currentStatus)" x-text="item.currentStatus"></span></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="workspace-project-cards">
+                  <template x-for="item in filtered" :key="item.id"
+                    ><a class="workspace-project-card" :href="detailHref(item)">
+                      <span class="workspace-project-card-top"
+                        ><strong x-text="item.code"></strong
+                        ><span class="badge" :class="$statusClass(item.currentStatus)" x-text="item.currentStatus"></span
+                      ></span>
+                      <span class="workspace-project-card-name" x-text="item.title"></span>
+                      <small x-text="`${clientName(item.clientId)} · ${typeLabel(item.type)}`"></small>
+                      <span class="workspace-project-card-metrics"
+                        ><span><small>Total</small><strong x-text="formatAmount(item.currentAmount)"></strong></span
+                      ></span>
+                      <span class="workspace-project-card-end">Abrir presupuesto →</span>
+                    </a></template
+                  >
+                </div>
+                <div class="workspace-empty" x-show="!filtered.length" role="status">
+                  <i class="bi bi-search" aria-hidden="true"></i>
+                  <p>No hay presupuestos con estos filtros.</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm" @click="clearFilters()">Mostrar todos</button>
+                </div>
+              </div>
+            </section>
+
+            <div class="modal fade" id="budget-new-modal" tabindex="-1" aria-labelledby="budget-new-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" novalidate @submit.prevent="createFromSource()">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="budget-new-title">Nuevo presupuesto</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">
+                      En la demostración, un presupuesto nuevo parte de uno existente: reutiliza sus partidas o productos con un código nuevo.
+                    </p>
+                    <div class="alert alert-danger" role="alert" x-show="formError" x-text="formError"></div>
+                    <label class="form-label" for="budget-new-source">A partir de</label>
+                    <select id="budget-new-source" class="form-select mb-3" x-model="form.sourceId">
+                      <option value="">Selecciona un presupuesto</option>
+                      <template x-for="item in records" :key="item.id"><option :value="item.id" x-text="`${item.code} · ${item.title}`"></option></template>
+                    </select>
+                    <label class="form-label" for="budget-new-title-input">Título</label>
+                    <input id="budget-new-title-input" class="form-control mb-3" maxlength="120" x-model="form.title" />
+                    <label class="form-label" for="budget-new-client">Cliente</label>
+                    <select id="budget-new-client" class="form-select mb-3" x-model="form.clientId">
+                      <option value="">Selecciona un cliente</option>
+                      <template x-for="item in clients" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                    </select>
+                    <label class="form-label" for="budget-new-comment">Comentario</label>
+                    <input id="budget-new-comment" class="form-control" maxlength="160" x-model="form.comment" />
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear borrador</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>

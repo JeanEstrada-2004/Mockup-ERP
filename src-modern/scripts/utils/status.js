@@ -14,11 +14,12 @@ const TONES = {
     'Emitida',
     'Corregida',
     'Corregido',
+    'Enviado al cliente',
     'Conectado',
     'En curso',
     'Vigente',
   ],
-  neutral: ['Borrador', 'Planificado', 'Cerrado', 'Cerrada', 'Vencido', 'Ignorada', 'Referencia mock'],
+  neutral: ['Reemplazado', 'No aceptado', 'Borrador', 'Planificado', 'Cerrado', 'Cerrada', 'Vencido', 'Ignorada', 'Referencia mock'],
   success: [
     'Aprobado',
     'Aprobada',
@@ -35,6 +36,7 @@ const TONES = {
     'Aceptada',
     'Entregada a Contabilidad',
     'Conforme',
+    'Aceptado',
   ],
   warning: [
     'Pendiente',

@@ -2,7 +2,7 @@
 // parent module and do not add 19 separate sidebar entries.
 export const NAV_GROUPS = [
   { label: 'GENERAL', modules: ['dashboard', 'projects', 'approvals'] },
-  { label: 'MAESTROS', modules: ['clients', 'suppliers'] },
+  { label: 'MAESTROS', modules: ['clients', 'suppliers', 'products'] },
   {
     label: 'GESTIÓN',
     modules: ['crm', 'budgets', 'purchases', 'expenses', 'personnel', 'warehouse'],
@@ -36,6 +36,11 @@ export const MODULES = {
     label: 'Proveedores',
     icon: 'bi-truck',
     description: 'Proveedores de productos y servicios, con sus compras.',
+  },
+  products: {
+    label: 'Productos y precios',
+    icon: 'bi-tags',
+    description: 'Catálogo, precios conocidos, cotizaciones y comparación de proveedores.',
   },
   crm: {
     label: 'CRM',
@@ -114,6 +119,11 @@ export function moduleHref(id, recordId) {
   }
   if (id === 'suppliers') {
     return recordId ? `./supplier.html?id=${encodeURIComponent(recordId)}` : './suppliers.html';
+  }
+  if (id === 'products') {
+    return recordId
+      ? `./products.html?tab=precios&product=${encodeURIComponent(recordId)}`
+      : './products.html';
   }
   if (id === 'projects') {
     return recordId ? `./project.html?id=${encodeURIComponent(recordId)}` : './projects.html';

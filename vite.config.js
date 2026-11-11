@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => ({
         client: resolve(__dirname, 'src-modern/client.html'),
         suppliers: resolve(__dirname, 'src-modern/suppliers.html'),
         supplier: resolve(__dirname, 'src-modern/supplier.html'),
+        products: resolve(__dirname, 'src-modern/products.html'),
         project: resolve(__dirname, 'src-modern/project.html'),
         budgets: resolve(__dirname, 'src-modern/budgets.html'),
         budget: resolve(__dirname, 'src-modern/budget.html'),

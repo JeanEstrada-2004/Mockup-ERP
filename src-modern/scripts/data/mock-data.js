@@ -155,7 +155,9 @@ export function getDocuments(data) {
       projectId: budget.projectId,
       module: 'budgets',
       operationId: budget.id,
-      fileName: `${budget.id}.pdf`,
+      fileName: budget.initials
+        ? `${budget.id}-V${budget.version}-${budget.initials}.pdf`
+        : `${budget.id}.pdf`,
       type: 'Presupuesto',
       date: project.startDate,
       responsibleId: project.managerId,

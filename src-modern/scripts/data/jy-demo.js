@@ -1,3 +1,5 @@
+import { budgetTotals } from './budget-calc.js';
+
 // J&Y Demo data set (R1, docs/realineamiento-jy-demo.md). Fictitious records
 // for the proposal shown to J&Y Ingenieros Consultores: they are not real J&Y
 // clients, suppliers, workers, contracts or amounts. Dates use 2026, matching
@@ -547,6 +549,559 @@ const EXPENSE_REPORTS = [
   ),
 ];
 
+// Presupuestos técnicos (R4). Catalogue of resources and products; reference
+// prices are internal (labour per hour-man, materials per unit). Quotes are
+// what suppliers offered, with their attachment.
+/* @__NO_SIDE_EFFECTS__ */
+const product = (id, code, name, kind, category, unit, refPrice, extra = {}) => ({
+  id,
+  code,
+  name,
+  kind,
+  category,
+  unit,
+  refPrice,
+  ...extra,
+});
+const PRODUCTS = [
+  product('MO-01', '470101', 'Operario electricista', 'Mano de obra', 'Mano de obra', 'hh', 26.5),
+  product('MO-02', '470102', 'Oficial electricista', 'Mano de obra', 'Mano de obra', 'hh', 21),
+  product('MO-03', '470104', 'Peón', 'Mano de obra', 'Mano de obra', 'hh', 18.5),
+  product('MO-04', '470201', 'Ingeniero supervisor', 'Mano de obra', 'Mano de obra', 'hh', 75),
+  product('MO-05', '470202', 'Asistente de supervisión', 'Mano de obra', 'Mano de obra', 'hh', 38),
+  product('MO-06', '470203', 'Ingeniero proyectista', 'Mano de obra', 'Mano de obra', 'hh', 70),
+  product('MO-07', '470204', 'Dibujante CAD', 'Mano de obra', 'Mano de obra', 'hh', 32),
+  product('MAT-01', '301201', 'Cable NH-80 2,5 mm²', 'Material', 'Conductores', 'm', 2.2, {
+    brand: 'Indeco',
+  }),
+  product('MAT-02', '301202', 'Cable NH-80 4 mm²', 'Material', 'Conductores', 'm', 3.3, {
+    brand: 'Indeco',
+  }),
+  product('MAT-03', '301209', 'Cable NH-80 16 mm²', 'Material', 'Conductores', 'm', 14.8, {
+    brand: 'Indeco',
+  }),
+  product('MAT-04', '301301', 'Tubo PVC-SAP 3/4"', 'Material', 'Tuberías', 'und', 6.5),
+  product(
+    'MAT-05',
+    '301401',
+    'Caja octogonal de fierro galvanizado',
+    'Material',
+    'Accesorios eléctricos',
+    'und',
+    3.8
+  ),
+  product(
+    'MAT-06',
+    '301402',
+    'Tomacorriente doble con línea a tierra',
+    'Material',
+    'Accesorios eléctricos',
+    'und',
+    19.5,
+    { brand: 'Bticino' }
+  ),
+  product(
+    'MAT-07',
+    '301501',
+    'Interruptor termomagnético 2×32 A',
+    'Material',
+    'Tableros',
+    'und',
+    60,
+    { brand: 'Schneider Electric' }
+  ),
+  product(
+    'MAT-08',
+    '301502',
+    'Tablero de distribución 12 polos',
+    'Material',
+    'Tableros',
+    'und',
+    410
+  ),
+  product('MAT-09', '301601', 'Luminaria LED panel 60×60', 'Material', 'Iluminación', 'und', 98),
+  product('MAT-10', '301701', 'Cinta aislante', 'Material', 'Accesorios eléctricos', 'rollo', 4.5),
+  product('EQ-01', '370101', 'Herramientas manuales', 'Equipo', 'Herramientas', '%MO', 0),
+  product(
+    'EQ-02',
+    '490301',
+    'Estación total (alquiler)',
+    'Equipo',
+    'Alquiler de equipos',
+    'día',
+    185
+  ),
+  product(
+    'EQ-03',
+    '490401',
+    'Camioneta 4×4 (alquiler)',
+    'Equipo',
+    'Alquiler de equipos',
+    'día',
+    340
+  ),
+  product(
+    'EQ-04',
+    '490501',
+    'Equipo de cómputo y software',
+    'Equipo',
+    'Equipos de oficina',
+    'hm',
+    6
+  ),
+  product(
+    'PRD-01',
+    'TI-0101',
+    'Computadora de escritorio',
+    'Producto',
+    'Computadoras',
+    'und',
+    2950,
+    {
+      spec: 'Core i5, 16 GB RAM, SSD 512 GB, monitor 24"',
+    }
+  ),
+  product('PRD-02', 'TI-0201', 'Televisor LED 55"', 'Producto', 'Pantallas', 'und', 2100, {
+    spec: '4K, HDMI ×3, soporte de pared',
+  }),
+  product(
+    'PRD-03',
+    'TI-0301',
+    'Switch administrable 24 puertos',
+    'Producto',
+    'Redes',
+    'und',
+    1290,
+    {
+      spec: '24 puertos Gigabit, 2 SFP',
+    }
+  ),
+  product('PRD-04', 'TI-0401', 'Proyector multimedia', 'Producto', 'Pantallas', 'und', 1820, {
+    spec: '4 000 lúmenes, WXGA',
+  }),
+  product(
+    'PRD-05',
+    'TI-0901',
+    'Instalación y configuración de equipos',
+    'Servicio',
+    'Servicios',
+    'glb',
+    3600
+  ),
+];
+
+/* @__NO_SIDE_EFFECTS__ */
+const offer = (productId, price, extra = {}) => ({
+  productId,
+  price,
+  leadDays: 5,
+  availability: 'En stock',
+  ...extra,
+});
+/* @__NO_SIDE_EFFECTS__ */
+const cotizacion = (id, supplierId, date, validUntil, items, extra = {}) => ({
+  id,
+  supplierId,
+  date,
+  validUntil,
+  currency: 'PEN',
+  items,
+  conditions: 'Precios sin IGV. Pago a 30 días.',
+  attachment: { fileName: `${id}.pdf`, type: 'PDF' },
+  notes: '',
+  budgetId: null,
+  ...extra,
+});
+const QUOTES = [
+  cotizacion(
+    'COT-26-001',
+    'PROV-JY-002',
+    '2026-02-10',
+    '2026-03-12',
+    [
+      offer('EQ-02', 180, { availability: 'Disponible por día' }),
+      offer('EQ-03', 350, { availability: 'Disponible por día' }),
+    ],
+    { budgetId: 'PR2602-0008', conditions: 'Alquiler por día; incluye operador para la camioneta.' }
+  ),
+  cotizacion(
+    'COT-26-002',
+    'PROV-JY-001',
+    '2026-03-20',
+    '2026-04-19',
+    [
+      offer('MAT-01', 2.1, { brand: 'Indeco' }),
+      offer('MAT-02', 3.2, { brand: 'Indeco' }),
+      offer('MAT-03', 14.5, { brand: 'Indeco' }),
+      offer('MAT-06', 18.9, { brand: 'Bticino' }),
+      offer('MAT-07', 58, { brand: 'Schneider Electric' }),
+      offer('MAT-08', 420, { leadDays: 10, availability: 'A pedido' }),
+      offer('MAT-10', 4.5, { brand: '3M' }),
+    ],
+    {
+      budgetId: 'PR2603-0014',
+      attachment: { fileName: 'COT-26-002 Electricos Andinos.pdf', type: 'PDF' },
+    }
+  ),
+  cotizacion(
+    'COT-26-003',
+    'PROV-JY-003',
+    '2026-03-22',
+    '2026-04-21',
+    [
+      offer('MAT-07', 61.5, { brand: 'ABB' }),
+      offer('MAT-08', 395, { brand: 'ABB', leadDays: 7, availability: 'Fabricación 7 días' }),
+    ],
+    { budgetId: 'PR2603-0014', conditions: 'Incluye armado del tablero. Pago 50 % adelanto.' }
+  ),
+  cotizacion(
+    'COT-26-004',
+    'PROV-JY-004',
+    '2026-04-15',
+    '2026-05-15',
+    [
+      offer('PRD-01', 2890, {
+        brand: 'Lenovo',
+        spec: 'Core i5-13400, 16 GB, SSD 512 GB, monitor 24"',
+      }),
+      offer('PRD-02', 2150, { brand: 'Samsung', spec: '55" 4K, 3 HDMI' }),
+      offer('PRD-03', 1240, { brand: 'Cisco', spec: '24 × 1 Gb, 2 SFP' }),
+      offer('PRD-04', 1890, {
+        brand: 'Epson',
+        spec: '4 100 lúmenes, WXGA',
+        leadDays: 12,
+        availability: 'Importación',
+      }),
+      offer('PRD-05', 3500, { availability: 'Según cronograma' }),
+    ],
+    {
+      budgetId: 'PR2604-0019',
+      attachment: { fileName: 'Cotizacion Computo Chachani.pdf', type: 'PDF' },
+    }
+  ),
+  cotizacion(
+    'COT-26-005',
+    'PROV-JY-007',
+    '2026-04-16',
+    '2026-05-16',
+    [
+      offer('PRD-01', 3050, {
+        brand: 'HP',
+        spec: 'Core i5-1340P, 16 GB, SSD 512 GB, monitor 23,8"',
+        leadDays: 3,
+      }),
+      offer('PRD-02', 1990, { brand: 'LG', spec: '55" 4K, 2 HDMI', leadDays: 3 }),
+      offer('PRD-03', 1320, { brand: 'TP-Link', spec: '24 × 1 Gb, 4 SFP', leadDays: 3 }),
+      offer('PRD-04', 1750, { brand: 'Epson', spec: '4 000 lúmenes, WXGA', leadDays: 3 }),
+    ],
+    {
+      budgetId: 'PR2604-0019',
+      attachment: { fileName: 'COT-TED-0416.jpg', type: 'Imagen' },
+      conditions: 'Precios sin IGV. Garantía de 3 años.',
+    }
+  ),
+  cotizacion(
+    'COT-26-006',
+    'PROV-JY-001',
+    '2026-06-10',
+    '2026-07-10',
+    [
+      offer('MAT-01', 2.25, { brand: 'Indeco' }),
+      offer('MAT-03', 15.1, { brand: 'Indeco' }),
+      offer('MAT-07', 59.5, { brand: 'Schneider Electric' }),
+    ],
+    { notes: 'Actualización de precios de conductores.' }
+  ),
+];
+
+// Partida helpers: titles have no APU; leaf partidas carry metrado and APU.
+/* @__NO_SIDE_EFFECTS__ */
+const titulo = (code, description) => ({ code, description, unit: '', quantity: null, apu: null });
+/* @__NO_SIDE_EFFECTS__ */
+const partida = (code, description, unit, quantity, apuYield, resources) => ({
+  code,
+  description,
+  unit,
+  quantity,
+  apu: { yield: apuYield, resources },
+});
+/* @__NO_SIDE_EFFECTS__ */
+const crew = (productId, value) => ({ product: productId, crew: value });
+/* @__NO_SIDE_EFFECTS__ */
+const qty = (productId, value) => ({ product: productId, qty: value });
+const TOOLS = { product: 'EQ-01', percentOfLabour: 3 };
+/* @__NO_SIDE_EFFECTS__ */
+const version = (number, date, responsibleId, status, comment, amount = null) => ({
+  version: number,
+  date,
+  responsibleId,
+  status,
+  comment,
+  amount,
+});
+
+const BUDGETS = [
+  {
+    id: 'PR2602-0008',
+    type: 'A',
+    title: 'Supervisión de obra vial Tramo Sur',
+    projectId: 'PY-26-001',
+    clientId: 'CLI-JY-001',
+    initials: 'GM',
+    responsibleId: 'PER-JY-001',
+    date: '2026-02-12',
+    version: 2,
+    status: 'Aceptado',
+    overheadPct: 10,
+    profitPct: 8,
+    selections: { 'EQ-02': 'COT-26-001', 'EQ-03': 'COT-26-001' },
+    documentId: 'DOC-PR2602-0008',
+    versions: [
+      version(
+        1,
+        '2026-02-05',
+        'PER-JY-001',
+        'Reemplazado',
+        'Primera propuesta con 10 meses de supervisión.',
+        253410
+      ),
+      version(
+        2,
+        '2026-02-12',
+        'PER-JY-001',
+        'Aceptado',
+        'Plazo ajustado a 8 meses según bases del cliente.'
+      ),
+    ],
+    partidas: [
+      titulo('01', 'SUPERVISIÓN DE OBRA'),
+      partida('01.01', 'Ingeniero supervisor', 'mes', 8, null, [qty('MO-04', 104)]),
+      partida('01.02', 'Asistente de supervisión', 'mes', 8, null, [qty('MO-05', 120)]),
+      partida('01.03', 'Movilidad: camioneta 4×4', 'mes', 8, null, [qty('EQ-03', 12)]),
+      partida('01.04', 'Topografía de control', 'día', 16, null, [
+        qty('EQ-02', 1),
+        qty('MO-03', 8),
+      ]),
+      titulo('02', 'INFORMES'),
+      partida('02.01', 'Informe mensual de supervisión', 'und', 8, null, [
+        qty('MO-04', 12),
+        qty('EQ-04', 16),
+      ]),
+    ],
+  },
+  {
+    id: 'PR2603-0014',
+    type: 'A',
+    title: 'Instalaciones eléctricas de local comercial',
+    projectId: 'PY-26-002',
+    clientId: 'CLI-JY-002',
+    initials: 'GM',
+    responsibleId: 'PER-JY-002',
+    date: '2026-03-25',
+    version: 1,
+    status: 'Aceptado',
+    overheadPct: 10,
+    profitPct: 8,
+    selections: {
+      'MAT-01': 'COT-26-002',
+      'MAT-02': 'COT-26-002',
+      'MAT-03': 'COT-26-002',
+      'MAT-06': 'COT-26-002',
+      'MAT-07': 'COT-26-002',
+      'MAT-08': 'COT-26-003',
+      'MAT-10': 'COT-26-002',
+    },
+    documentId: 'DOC-PR2603-0014',
+    versions: [
+      version(1, '2026-03-25', 'PER-JY-002', 'Aceptado', 'Presupuesto según planos del cliente.'),
+    ],
+    partidas: [
+      titulo('01', 'OBRAS PRELIMINARES'),
+      partida('01.01', 'Trazo y replanteo de recorridos', 'm', 420, 120, [
+        crew('MO-01', 1),
+        crew('MO-03', 1),
+        TOOLS,
+      ]),
+      titulo('02', 'INSTALACIONES ELÉCTRICAS'),
+      titulo('02.01', 'SALIDAS'),
+      partida('02.01.01', 'Salida para tomacorriente doble', 'pto', 180, 8, [
+        crew('MO-01', 1),
+        crew('MO-02', 1),
+        qty('MAT-02', 12),
+        qty('MAT-04', 2),
+        qty('MAT-05', 1),
+        qty('MAT-06', 1),
+        qty('MAT-10', 0.1),
+        TOOLS,
+      ]),
+      partida('02.01.02', 'Salida para alumbrado', 'pto', 220, 10, [
+        crew('MO-01', 1),
+        crew('MO-02', 1),
+        qty('MAT-01', 10),
+        qty('MAT-04', 2),
+        qty('MAT-05', 1),
+        qty('MAT-10', 0.1),
+        TOOLS,
+      ]),
+      titulo('02.02', 'ALIMENTADORES Y TABLEROS'),
+      partida('02.02.01', 'Alimentador 3-1×16 mm²', 'm', 450, 60, [
+        crew('MO-01', 1),
+        crew('MO-03', 1),
+        qty('MAT-03', 3.15),
+        TOOLS,
+      ]),
+      partida('02.02.02', 'Tablero de distribución TD', 'und', 6, 1, [
+        crew('MO-01', 1),
+        crew('MO-02', 1),
+        qty('MAT-08', 1),
+        qty('MAT-07', 8),
+        TOOLS,
+      ]),
+      titulo('02.03', 'ILUMINACIÓN'),
+      partida('02.03.01', 'Montaje de luminaria LED 60×60', 'und', 120, 12, [
+        crew('MO-01', 1),
+        crew('MO-03', 1),
+        qty('MAT-09', 1),
+        TOOLS,
+      ]),
+      titulo('03', 'PRUEBAS Y PUESTA EN SERVICIO'),
+      partida('03.01', 'Pruebas de aislamiento y continuidad', 'glb', 1, 1, [
+        crew('MO-01', 2),
+        crew('MO-04', 0.5),
+        TOOLS,
+      ]),
+    ],
+  },
+  {
+    id: 'PR2604-0019',
+    type: 'B',
+    title: 'Equipamiento tecnológico de aulas',
+    projectId: 'PY-26-003',
+    clientId: 'CLI-JY-003',
+    initials: 'GM',
+    responsibleId: 'PER-JY-003',
+    date: '2026-04-20',
+    version: 1,
+    status: 'Aceptado',
+    overheadPct: 8,
+    profitPct: 10,
+    selections: {
+      'PRD-01': 'COT-26-004',
+      'PRD-02': 'COT-26-005',
+      'PRD-03': 'COT-26-004',
+      'PRD-04': 'COT-26-005',
+      'PRD-05': 'COT-26-004',
+    },
+    documentId: 'DOC-PR2604-0019',
+    versions: [
+      version(
+        1,
+        '2026-04-20',
+        'PER-JY-003',
+        'Aceptado',
+        'Equipamiento de 6 aulas según requerimiento del colegio.'
+      ),
+    ],
+    products: [
+      {
+        id: 'B-01',
+        productId: 'PRD-01',
+        request: 'Computadora para sala de cómputo',
+        quantity: 12,
+      },
+      { id: 'B-02', productId: 'PRD-02', request: 'Pantalla para aula', quantity: 6 },
+      { id: 'B-03', productId: 'PRD-03', request: 'Switch para red de aulas', quantity: 2 },
+      {
+        id: 'B-04',
+        productId: 'PRD-04',
+        request: 'Proyector para auditorio y laboratorios',
+        quantity: 4,
+      },
+      {
+        id: 'B-05',
+        productId: 'PRD-05',
+        request: 'Instalación, cableado y configuración',
+        quantity: 1,
+      },
+    ],
+  },
+  {
+    id: 'PR2606-0022',
+    type: 'A',
+    title: 'Expediente técnico de redes eléctricas',
+    projectId: 'PY-26-004',
+    clientId: 'CLI-JY-004',
+    initials: 'GM',
+    responsibleId: 'PER-JY-001',
+    date: '2026-06-24',
+    version: 2,
+    status: 'En revisión',
+    overheadPct: 12,
+    profitPct: 10,
+    selections: { 'EQ-02': 'COT-26-001' },
+    documentId: 'DOC-PR2606-0022',
+    versions: [
+      version(
+        1,
+        '2026-06-10',
+        'PER-JY-001',
+        'Reemplazado',
+        'Primera propuesta: 18 láminas.',
+        68120
+      ),
+      version(
+        2,
+        '2026-06-24',
+        'PER-JY-001',
+        'En revisión',
+        'Planos ampliados a 24 láminas y GG de 12 %.'
+      ),
+    ],
+    partidas: [
+      titulo('01', 'ESTUDIOS PRELIMINARES'),
+      partida('01.01', 'Levantamiento topográfico de redes', 'km', 6, null, [
+        qty('EQ-02', 1.5),
+        qty('MO-03', 12),
+        qty('MO-06', 6),
+      ]),
+      titulo('02', 'DISEÑO'),
+      partida('02.01', 'Memoria de cálculo eléctrico', 'glb', 1, null, [
+        qty('MO-06', 160),
+        qty('EQ-04', 160),
+      ]),
+      partida('02.02', 'Planos de redes de media y baja tensión', 'lám', 24, null, [
+        qty('MO-07', 16),
+        qty('MO-06', 4),
+        qty('EQ-04', 16),
+      ]),
+      titulo('03', 'EXPEDIENTE TÉCNICO'),
+      partida('03.01', 'Especificaciones técnicas y metrados', 'glb', 1, null, [
+        qty('MO-06', 90),
+        qty('MO-07', 60),
+        qty('EQ-04', 120),
+      ]),
+      partida('03.02', 'Presupuesto y análisis de precios unitarios', 'glb', 1, null, [
+        qty('MO-06', 70),
+        qty('EQ-04', 70),
+      ]),
+    ],
+  },
+];
+
+// Budget figures come from their partidas or products: the project budget is
+// the total of its accepted (or current) budget, so every view agrees.
+/* @__NO_SIDE_EFFECTS__ */
+function withBudgetFigures(data) {
+  const ctx = { products: data.products, quotes: data.quotes };
+  for (const budget of data.budgets) {
+    budget.amount = budgetTotals(ctx, budget).total;
+    for (const entry of budget.versions) if (entry.amount === null) entry.amount = budget.amount;
+    const project = data.projects.find((item) => item.budgetId === budget.id);
+    if (project) project.budgetAmount = budget.amount;
+  }
+  return data;
+}
+
 // Evidence the "Tomar foto / Subir archivo" buttons use in the demonstration.
 const EXPENSE_SAMPLES = [
   gasto(
@@ -631,7 +1186,7 @@ const expenseOperation = (report) =>
   );
 
 function buildJyDemoData() {
-  return {
+  return withBudgetFigures({
     id: 'jy-demo',
     fictitious: true,
     // Reference "today" of the scenario and the date used by sample receipts.
@@ -1052,6 +1607,60 @@ function buildJyDemoData() {
           ),
         ],
       },
+      {
+        id: 'PROV-JY-007',
+        name: 'Tecnología Educativa del Sur S.A.C.',
+        tradeName: 'TecEdu Sur',
+        ruc: '20610000207',
+        specialty: 'Equipamiento tecnológico educativo',
+        brands: ['HP', 'LG', 'Epson', 'TP-Link'],
+        categories: ['Computadoras', 'Pantallas', 'Redes'],
+        address: 'Av. Lambramani 220, José Luis Bustamante y Rivero, Arequipa',
+        phone: '(054) 610 207',
+        email: 'ventas@tecedusur.pe',
+        status: 'Activo',
+        since: '2026-04-16',
+        contacts: [
+          {
+            name: 'Renzo Valdez',
+            role: 'Asesor comercial',
+            phone: '988 000 208',
+            email: 'rvaldez@tecedusur.pe',
+            primary: true,
+          },
+        ],
+        offerings: [
+          {
+            name: 'Computadora de escritorio',
+            kind: 'Producto',
+            brand: 'HP',
+            category: 'Computadoras',
+            unit: 'und',
+          },
+          {
+            name: 'Televisor LED 55"',
+            kind: 'Producto',
+            brand: 'LG',
+            category: 'Pantallas',
+            unit: 'und',
+          },
+          {
+            name: 'Proyector multimedia',
+            kind: 'Producto',
+            brand: 'Epson',
+            category: 'Pantallas',
+            unit: 'und',
+          },
+        ],
+        history: [
+          event(
+            '2026-04-16',
+            'Rosa Huamán',
+            'Registró el proveedor',
+            'Cotización COT-26-005 para el equipamiento de aulas.'
+          ),
+        ],
+      },
     ],
     workers: [
       {
@@ -1173,72 +1782,41 @@ function buildJyDemoData() {
     // Budget ids follow the observed code PR + AAMM + correlative. The version
     // and the initials suffix (V2-GM) are shown apart; their rules are still to
     // be validated with J&Y (R4 rebuilds this module).
-    budgets: [
-      {
-        id: 'PR2602-0008',
-        projectId: 'PY-26-001',
-        clientId: 'CLI-JY-001',
-        version: 2,
-        amount: 168000,
-        status: 'Aprobado',
-        documentId: 'DOC-PR2602-0008',
-      },
-      {
-        id: 'PR2603-0014',
-        projectId: 'PY-26-002',
-        clientId: 'CLI-JY-002',
-        version: 1,
-        amount: 96000,
-        status: 'Aprobado',
-        documentId: 'DOC-PR2603-0014',
-      },
-      {
-        id: 'PR2604-0019',
-        projectId: 'PY-26-003',
-        clientId: 'CLI-JY-003',
-        version: 1,
-        amount: 54000,
-        status: 'Aprobado',
-        documentId: 'DOC-PR2604-0019',
-      },
-      {
-        id: 'PR2606-0022',
-        projectId: 'PY-26-004',
-        clientId: 'CLI-JY-004',
-        version: 2,
-        amount: 72000,
-        status: 'En revisión',
-        documentId: 'DOC-PR2606-0022',
-      },
-    ],
+    budgets: BUDGETS,
+    products: PRODUCTS,
+    quotes: QUOTES,
     // The warehouse module is enabled for the Demo in R6.
     materials: [],
     expenseReports: EXPENSE_REPORTS,
     expenseSamples: EXPENSE_SAMPLES,
     operations: [
       operation('OC-26-001', 'PY-26-001', 'purchase', 38400, 'purchases', {
-      category: 'Suministro',
-      description: 'Conductores y tableros para obra',
+        quoteId: 'COT-26-002',
+        receptionKind: 'Material',
+        category: 'Suministro',
+        description: 'Conductores y tableros para obra',
         supplierId: 'PROV-JY-001',
         status: 'Atendida',
         date: '2026-04-14',
       }),
       operation('TAR-26-001', 'PY-26-001', 'timesheet', 26800, 'personnel', {
-      category: 'Planilla',
-      description: 'Tareo de supervisión de campo',
+        category: 'Planilla',
+        description: 'Tareo de supervisión de campo',
         workerId: 'PER-JY-002',
         status: 'Aprobado',
         date: '2026-05-29',
       }),
       operation('AJ-26-001', 'PY-26-001', 'other', 1800, 'other', {
-      category: 'Otros',
-      description: 'Ajuste de costo registrado por Contabilidad',
+        category: 'Otros',
+        description: 'Ajuste de costo registrado por Contabilidad',
         status: 'Registrado',
         date: '2026-05-31',
       }),
       operation('OC-26-004', 'PY-26-001', 'purchase', 6200, null, {
-      category: 'Servicio',
-      description: 'Alquiler de estación total',
+        quoteId: 'COT-26-001',
+        receptionKind: 'Servicio',
+        category: 'Servicio',
+        description: 'Alquiler de estación total',
         supplierId: 'PROV-JY-002',
         status: 'Pendiente',
         date: '2026-07-06',
@@ -1246,37 +1824,41 @@ function buildJyDemoData() {
       }),
 
       operation('OC-26-002', 'PY-26-002', 'purchase', 21500, 'purchases', {
-      category: 'Suministro',
-      description: 'Tablero autosoportado e instalación',
+        quoteId: 'COT-26-003',
+        receptionKind: 'Material',
+        category: 'Suministro',
+        description: 'Tablero autosoportado e instalación',
         supplierId: 'PROV-JY-003',
         status: 'Atendida',
         date: '2026-05-08',
       }),
       operation('TAR-26-002', 'PY-26-002', 'timesheet', 14200, 'personnel', {
-      category: 'Planilla',
-      description: 'Tareo de instalaciones eléctricas',
+        category: 'Planilla',
+        description: 'Tareo de instalaciones eléctricas',
         workerId: 'PER-JY-004',
         status: 'Aprobado',
         date: '2026-06-30',
       }),
 
       operation('OC-26-003', 'PY-26-003', 'purchase', 16900, 'purchases', {
-      category: 'Suministro',
-      description: 'Equipos de cómputo y pantallas',
+        quoteId: 'COT-26-004',
+        receptionKind: 'Material',
+        category: 'Suministro',
+        description: 'Equipos de cómputo y pantallas',
         supplierId: 'PROV-JY-004',
         status: 'Atendida',
         date: '2026-05-27',
       }),
       operation('TAR-26-003', 'PY-26-003', 'timesheet', 5400, 'personnel', {
-      category: 'Planilla',
-      description: 'Tareo de equipamiento de aulas',
+        category: 'Planilla',
+        description: 'Tareo de equipamiento de aulas',
         workerId: 'PER-JY-001',
         status: 'Aprobado',
         date: '2026-06-30',
       }),
       ...EXPENSE_REPORTS.map(expenseOperation),
     ],
-  };
+  });
 }
 
 // Built lazily so the other presentations drop this data set entirely.

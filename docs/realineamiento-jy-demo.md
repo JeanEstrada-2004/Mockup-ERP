@@ -1,6 +1,6 @@
 # Realineamiento funcional de J&Y Demo — auditoría y propuesta
 
-> Estado: **R1, R2 y R3 terminadas** (11/11/2026); siguiente: R4 (Presupuestos, APU, cotizaciones, OC). Análisis sobre `6b7dc4e`.
+> Estado: **R1–R4 terminadas** (11/11/2026); siguiente: R5 (Personal: asistencia, tareo, planilla, RxH). Análisis sobre `6b7dc4e`.
 > Fuente de requisitos: prompt "Revisión funcional integral" del usuario (secciones 1–40),
 > resumido aquí. Este documento es la referencia para las fases R1–R6 (sección 9).
 
@@ -614,3 +614,45 @@ Preguntas originales:
   de Pendientes.
 - **Para R4:** Presupuestos (Tipo A con partidas, APU e insumos; Tipo B de productos),
   Productos y precios, cotizaciones y comparador, OC con cotización de origen.
+
+## 13. Notas de R4 (11/11/2026) — Presupuestos, Productos y precios, OC
+
+- **Regla:** `budgetFlow` (`'simple'` en PETI/PMI, `'technical'` en el Demo). El Demo habilita
+  los módulos `budgets` y `products` ("Productos y precios", en MAESTROS). Páginas:
+  `budgets.html`/`budget.html` con parciales `budget-tech-*` (bloques IF); nueva `products.html`
+  (30 páginas).
+- **Cálculo puro** (`data/budget-calc.js`): APU con cuadrilla y rendimiento (cantidad =
+  cuadrilla × 8 h ÷ rendimiento), cantidad fija por unidad o % de mano de obra (herramientas 3 %);
+  costo unitario = Σ parciales; parcial = metrado × CU; lista de insumos consolidada; Tipo B =
+  cantidad × precio de la opción elegida. Precio cliente = CD + GG % + utilidad %; IGV aparte.
+  Código `PR2606-0022-V2-GM` (`budgetCode`).
+- **Datos del Demo:** catálogo de 26 recursos y productos (mano de obra por hh, materiales,
+  equipos, equipamiento), 6 cotizaciones con adjunto y vigencia, proveedor nuevo PROV-JY-007
+  para comparar equipamiento, y 4 presupuestos: PR2602-0008 (supervisión, V2), PR2603-0014
+  (instalaciones eléctricas, APU completos), PR2604-0019 (Tipo B, productos) y PR2606-0022
+  (expediente técnico, V2 en revisión). **El presupuesto de cada proyecto se deriva del total
+  de su presupuesto** (`withBudgetFigures`): cartera S/ 407 865.31. Las OC del Demo llevan
+  `quoteId` (cotización de origen) y `receptionKind` (Material → almacén / Servicio → costo).
+- **Modelo local** (`data/budget-model.js`): nueva versión (mismo código, V siguiente, en
+  borrador y editable: metrados, cantidades, GG, utilidad y proveedor por insumo) ≠ duplicar
+  (código nuevo PR + AAMM + correlativo, reutiliza partidas/productos). Estados de versión
+  (TO-BE por validar): Borrador → En revisión → Enviado al cliente → Aceptado / No aceptado.
+  Cotizaciones registradas en la demostración (`COT-DEMO-NNN`) e histórico de precios.
+- **Vistas:** resumen CD → precio cliente; partidas jerárquicas con metrados; APU por partida;
+  insumos con selección de proveedor, "Buscar precios" y "Generar OC" (abre la OC prellenada
+  con la cotización); productos con opciones de proveedor; precios y cotizaciones con
+  comparador; versiones. **Vista interna / vista cliente** (simula permisos: oculta CD, APU,
+  insumos y precios de proveedor; muestra precios de venta). Productos y precios: catálogo,
+  búsqueda con histórico, cotizaciones (vigentes/vencidas, adjunto) y comparador por criterio.
+  Proveedor: pestañas "Precios conocidos" y "Cotizaciones". Pendientes: "Presupuestos por
+  revisar" (7 tareas al inicio).
+- **OC en el Demo:** sin "partida presupuestaria" referencial, "Cotización de origen" en lugar
+  de "Cotización adjunta", botón "Registrar orden"; la fecha por defecto es la del escenario.
+- **Por validar con J&Y:** significado de "GM", correlativo mensual o anual, si usan S10 u
+  otra herramienta para APU, si GG y utilidad son fijos, quién ve los costos internos, estados
+  del presupuesto, tratamiento del IGV en el precio cliente.
+- **Pruebas:** `jy-budgets-interaction-test.mjs` (`npm run test:jy-budgets`); validador de
+  códigos, totales, presupuesto del proyecto, cotizaciones, selecciones y APU; R2/R3 cuentan 7
+  pendientes; la auditoría final cuenta 30 páginas.
+- **Para R5:** Personal (asistencia SF100, tareo de campo, planilla con imputación %, RxH,
+  temporales) e Integraciones con estados honestos.

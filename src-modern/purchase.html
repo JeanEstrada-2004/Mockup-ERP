@@ -157,6 +157,13 @@
                               <span>Fecha</span><strong x-text="formatDate(purchase.date)"></strong>
                             </div>
                             <div><span>Moneda</span><strong>Soles (PEN)</strong></div>
+                            <div x-show="purchase.quoteId">
+                              <span>Cotización de origen</span><a :href="quoteHref" x-text="purchase.quoteId"></a>
+                            </div>
+                            <div x-show="purchase.receptionKind" data-maturity="to-be" data-maturity-note="Propuesta: el material recibido entra a almacén; el servicio pasa directo a costos. Los estados de la OC siguen por validar.">
+                              <span>Recepción</span
+                              ><strong x-text="purchase.receptionKind === 'Material' ? 'Material → entrada a almacén' : 'Servicio → costo del proyecto'"></strong>
+                            </div>
                             <div>
                               <span>Presupuesto asociado</span
                               ><a

@@ -164,6 +164,57 @@
                     </div>
                   </div>
                 </section>
+                <!-- IF budgetFlow=technical -->
+                <section class="card" x-show="tab === 'precios'" aria-labelledby="master-prices-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: los precios que el proveedor ofreció quedan registrados y sirven para presupuestar.">
+                        <h2 id="master-prices-title">Precios conocidos</h2>
+                      </div>
+                    </div>
+                    <div class="table-responsive" x-show="relations.prices.length">
+                      <table class="table align-middle mb-0 d9-table">
+                        <thead><tr><th scope="col">Producto</th><th scope="col">Marca</th><th scope="col" class="text-end">Precio</th><th scope="col">Fecha</th><th scope="col">Cotización</th></tr></thead>
+                        <tbody>
+                          <template x-for="item in relations.prices" :key="`${item.quoteId}-${item.productId}`"
+                            ><tr>
+                              <td><a :href="priceHref(item.productId)" x-text="item.product?.name || item.productId"></a></td>
+                              <td x-text="item.brand || '—'"></td>
+                              <td class="text-end data-money" x-text="formatMoneyCents(item.price)"></td>
+                              <td x-text="formatDate(item.date)"></td>
+                              <td><a class="data-code" :href="quoteHref(item.quoteId)" x-text="item.quoteId"></a></td>
+                            </tr></template
+                          >
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d9-empty" x-show="!relations.prices.length">
+                      <i class="bi bi-tags" aria-hidden="true"></i>
+                      <p>Este proveedor todavía no tiene precios registrados.</p>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'cotizaciones'" aria-labelledby="master-quotes-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="master-quotes-title">Cotizaciones</h2>
+                      <a class="btn btn-outline-primary btn-sm" href="./products.html?tab=cotizaciones">Registrar cotización</a>
+                    </div>
+                    <div class="d9-link-list" x-show="relations.quotes.length">
+                      <template x-for="quote in relations.quotes" :key="quote.id"
+                        ><a :href="quoteHref(quote.id)">
+                          <i class="bi" :class="quote.attachment?.type === 'PDF' ? 'bi-file-earmark-pdf' : 'bi-image'" aria-hidden="true"></i>
+                          <span><strong x-text="quote.id"></strong><small class="show-block" x-text="`${formatDate(quote.date)} · vigente hasta ${formatDate(quote.validUntil)} · ${quote.items.length} ítems · ${quote.attachment?.fileName || 'sin adjunto'}`"></small></span>
+                        </a></template
+                      >
+                    </div>
+                    <div class="d9-empty" x-show="!relations.quotes.length">
+                      <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                      <p>No hay cotizaciones de este proveedor.</p>
+                    </div>
+                  </div>
+                </section>
+                <!-- /IF -->
                 <section class="card" x-show="tab === 'compras'" aria-labelledby="master-purchases-title">
                   <div class="card-body">
                     <div class="shell-section-header">

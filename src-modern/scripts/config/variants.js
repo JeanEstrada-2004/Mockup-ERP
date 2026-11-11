@@ -50,6 +50,8 @@ const jyDemoModules = [
   'approvals',
   'clients',
   'suppliers',
+  'products',
+  'budgets',
   'purchases',
   'expenses',
   'personnel',
@@ -87,6 +89,9 @@ export const DEFAULT_RULES = {
   controlAllocation: true, // referential budget split by source (40/25/15/15/5)
   costTreatment: false, // J&Y Real vs. formal treatment, categories, consolidation
   documentViewer: false, // visual preview of documents and evidence
+  // R4 — 'technical': partidas, metrados, APU, insumos, supplier quotes and
+  // product budgets (J&Y Demo); 'simple': lines × price (SurTec, PMI).
+  budgetFlow: 'simple',
 };
 
 // Fictitious signed-in user shown in the header (punto 3).
@@ -189,6 +194,7 @@ export const VARIANTS = {
       controlAllocation: false,
       costTreatment: true,
       documentViewer: true,
+      budgetFlow: 'technical',
     },
     labels: {
       approvals: 'Pendientes',

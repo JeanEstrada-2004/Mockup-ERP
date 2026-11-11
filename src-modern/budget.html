@@ -16,6 +16,7 @@
         <!-- APP_SIDEBAR -->
         <div class="sidebar-backdrop" aria-hidden="true"></div>
         <main id="main-content" class="admin-main">
+          <!-- IF budgetFlow=technical --><!-- INCLUDE budget-tech-detail --><!-- ELSE -->
           <div
             class="container-fluid shell-page project-workspace commercial-workspace"
             x-data="budgetDetail"
@@ -341,6 +342,7 @@
               </div></template
             >
           </div>
+          <!-- /IF -->
         </main>
         <!-- APP_FOOTER -->
       </div>

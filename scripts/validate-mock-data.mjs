@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import {
   VARIANT_IDS,
   getVariantConfig,
+  variantRule,
   variantStorageKey,
 } from '../src-modern/scripts/config/variants.js';
 import {
@@ -24,6 +25,7 @@ import {
 } from '../src-modern/scripts/data/warehouse-data.js';
 import { projectCostModel } from '../src-modern/scripts/data/cost-data.js';
 import { costLines, treatmentTotals } from '../src-modern/scripts/data/cost-treatment.js';
+import { budgetCode, budgetTotals } from '../src-modern/scripts/data/budget-calc.js';
 import {
   EVIDENCE_TYPES,
   EXPENSE_CATEGORIES,
@@ -239,10 +241,12 @@ for (const variantId of VARIANT_IDS) {
       costModel.commitments.reduce((sum, item) => sum + item.amount, 0),
       costModel.financials.outstandingCommitments
     );
-    assert.equal(
-      costModel.parts.reduce((sum, item) => sum + item.budget, 0),
-      project.budgetAmount
-    );
+    // The referential split by source only exists where the rule is on (not J&Y Demo).
+    if (variantRule('controlAllocation', config))
+      assert.equal(
+        costModel.parts.reduce((sum, item) => sum + item.budget, 0),
+        project.budgetAmount
+      );
     for (const entry of costModel.entries) assert.ok(documentIds.has(entry.documentId));
     assert.equal(
       laborCostRows(data)
@@ -367,7 +371,8 @@ assert.deepEqual(getPortfolioFinancials(jy), {
 const demo = getDataForVariant('jy-demo');
 assert.deepEqual(getPortfolioFinancials(demo), {
   activeProjectCount: 3,
-  budgetAmount: 318000,
+  // R4: project budgets are the totals of their budgets (partidas / products).
+  budgetAmount: 407865.31,
   // R2: rendiciones derive from their expenses (accepted ones are cost).
   executedCost: 127618,
 });
@@ -404,6 +409,54 @@ assert.deepEqual(
   ['Aceptada', 'Corregida', 'Entregada a Contabilidad', 'Observada', 'Presentada']
 );
 for (const sample of demo.expenseSamples) assert.ok(EVIDENCE_TYPES[sample.docType], sample.id);
+
+// R4 — technical budgets, catalogue and quotes.
+const budgetCtx = { products: demo.products, quotes: demo.quotes };
+const productIds = new Set(demo.products.map((item) => item.id));
+uniqueIds(demo.products, 'jy-demo.products');
+uniqueIds(demo.quotes, 'jy-demo.quotes');
+for (const quote of demo.quotes) {
+  assert.ok(demo.suppliers.some((item) => item.id === quote.supplierId), `${quote.id}: proveedor`);
+  assert.ok(quote.validUntil >= quote.date, `${quote.id}: vigencia`);
+  assert.ok(quote.attachment?.fileName, `${quote.id}: adjunto`);
+  for (const item of quote.items) {
+    assert.ok(productIds.has(item.productId), `${quote.id}: ${item.productId}`);
+    assert.ok(item.price > 0, `${quote.id}: precio`);
+  }
+}
+for (const budget of demo.budgets) {
+  assert.match(budget.id, /^PR26\d{2}-\d{4}$/);
+  assert.match(budgetCode(budget), /^PR\d{4}-\d{4}-V\d+-GM$/);
+  assert.ok(['A', 'B'].includes(budget.type), `${budget.id}: tipo`);
+  const totals = budgetTotals(budgetCtx, budget);
+  assert.equal(budget.amount, totals.total, `${budget.id}: total`);
+  assert.equal(
+    Math.round((totals.directCost + totals.overhead + totals.profit) * 100),
+    Math.round(totals.subtotal * 100)
+  );
+  const project = demo.projects.find((item) => item.budgetId === budget.id);
+  assert.equal(project.budgetAmount, budget.amount, `${budget.id}: presupuesto del proyecto`);
+  assert.equal(budget.versions.at(-1).version, budget.version, `${budget.id}: versión actual`);
+  assert.equal(budget.versions.at(-1).amount, budget.amount);
+  for (const [productId, quoteId] of Object.entries(budget.selections)) {
+    const quote = demo.quotes.find((item) => item.id === quoteId);
+    assert.ok(quote?.items.some((item) => item.productId === productId), `${budget.id}: ${productId} en ${quoteId}`);
+  }
+  for (const partida of budget.partidas || []) {
+    if (!partida.apu) continue;
+    assert.ok(partida.quantity > 0, `${partida.code}: metrado`);
+    for (const resource of partida.apu.resources)
+      assert.ok(productIds.has(resource.product), `${partida.code}: ${resource.product}`);
+    if (partida.apu.resources.some((resource) => resource.crew !== undefined))
+      assert.ok(partida.apu.yield > 0, `${partida.code}: rendimiento`);
+  }
+  for (const line of budget.products || []) assert.ok(productIds.has(line.productId), line.id);
+}
+assert.equal(budgetCode(demo.budgets.find((item) => item.id === 'PR2606-0022')), 'PR2606-0022-V2-GM');
+for (const operation of demo.operations.filter((item) => item.type === 'purchase')) {
+  const quote = demo.quotes.find((item) => item.id === operation.quoteId);
+  assert.equal(quote?.supplierId, operation.supplierId, `${operation.id}: cotización de origen`);
+}
 
 // R3 — J&Y Real and formal treatment: every line splits exactly, and the lines
 // of a project add up to its executed cost (the same sol everywhere).
@@ -442,6 +495,6 @@ for (const worker of demo.workers) {
   assert.ok(['Planilla', 'RxH'].includes(worker.regime), `${worker.id}: régimen`);
 }
 assert.equal(demo.clients.length, 5);
-assert.equal(demo.suppliers.length, 6);
+assert.equal(demo.suppliers.length, 7);
 
 console.log('Configuraciones, logos, referencias y cifras mock: correctos.');

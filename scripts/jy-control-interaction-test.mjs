@@ -153,14 +153,15 @@ async function testWorklist() {
   );
   assert.equal(
     await page.locator('[data-approvals-link]').getAttribute('aria-label'),
-    'Pendientes: 6'
+    'Pendientes: 7'
   );
   const tabs = page.locator('.worklist-workspace .workspace-tabs [role="tab"]');
-  assert.equal(await tabs.count(), 5);
+  assert.equal(await tabs.count(), 6);
   for (const [name, count] of [
     ['Por revisar', 2],
     ['Observadas', 1],
     ['Por entregar', 1],
+    ['Presupuestos', 1],
     ['Órdenes de compra', 1],
     ['Documentos', 1],
   ]) {

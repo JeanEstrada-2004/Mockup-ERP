@@ -93,6 +93,9 @@ function searchItems() {
   for (const worker of data.workers) {
     push('Trabajador', worker.name, worker.role, 'personnel', worker.id);
   }
+  for (const product of (data.products || []).filter((item) => item.unit !== '%MO')) {
+    push('Producto', product.name, `${product.code} · ${product.category}`, 'products', product.id);
+  }
   for (const material of data.materials) {
     push(
       'Material',
@@ -464,6 +467,8 @@ export function initShellActions(app) {
         ? 'clients'
       : ['suppliers-list', 'supplier-detail'].includes(document.body.dataset.page)
         ? 'suppliers'
+      : document.body.dataset.page === 'products-workspace'
+        ? 'products'
       : ['projects-list', 'project-detail'].includes(document.body.dataset.page)
         ? 'projects'
         : ['budgets-list', 'budget-detail'].includes(document.body.dataset.page)

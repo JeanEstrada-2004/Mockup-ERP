@@ -1,0 +1,438 @@
+          <div class="container-fluid shell-page project-workspace tech-budget" x-data="budgetTechDetail">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./budgets.html">Presupuestos</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="budget ? code : 'No encontrado'"></li>
+              </ol>
+            </nav>
+            <template x-if="!budget"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  <h1>Presupuesto no encontrado</h1>
+                  <p>El código solicitado no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./budgets.html">Ver presupuestos</a>
+                </div>
+              </div></template
+            >
+            <template x-if="budget"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="project-code" x-text="code"></p>
+                    <h1 x-text="budget.title"></h1>
+                    <div class="project-meta">
+                      <span x-text="clientName(budget.clientId)"></span><span>·</span
+                      ><span x-text="typeLabel(budget.type)"></span><span>·</span
+                      ><span x-text="workerName(budget.responsibleId)"></span
+                      ><span class="badge" :class="$statusClass(version?.status)" x-text="version?.status"></span
+                      ><span class="badge text-bg-secondary" x-show="!budget.base">Creado en esta demostración</span>
+                    </div>
+                  </div>
+                  <div class="review-actions">
+                    <button type="button" class="btn btn-outline-primary" @click="openVersion()">Nueva versión</button>
+                    <button type="button" class="btn btn-outline-secondary" @click="openDuplicate()">Duplicar</button>
+                    <template x-for="status in nextStatuses" :key="status"
+                      ><button type="button" class="btn btn-primary" @click="setStatus(status)" x-text="status === 'Borrador' ? 'Volver a borrador' : `Marcar: ${status}`"></button
+                    ></template>
+                    <a class="btn btn-outline-secondary" x-show="documentHref" :href="documentHref">Documento</a>
+                  </div>
+                </div>
+
+                <div class="tech-toolbar">
+                  <div>
+                    <label class="form-label" for="tech-version">Versión</label>
+                    <select id="tech-version" class="form-select" @change="selectVersion(Number($event.target.value))">
+                      <template x-for="item in versions" :key="item.version"
+                        ><option :value="item.version" :selected="item.version === selectedVersion" x-text="`V${item.version} · ${item.status} · ${formatDate(item.date)}${item.local ? ' · local' : ''}`"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div class="tech-view-toggle" role="group" aria-label="Vista del presupuesto" data-maturity="to-be" data-maturity-note="Propuesta: los costos internos (costo directo, APU, precios de proveedores) se restringen según permisos; el cliente ve precios de venta.">
+                    <button type="button" class="btn" :class="internal ? 'btn-primary' : 'btn-outline-secondary'" :aria-pressed="String(internal)" @click="setView('interna')">Vista interna</button>
+                    <button type="button" class="btn" :class="!internal ? 'btn-primary' : 'btn-outline-secondary'" :aria-pressed="String(!internal)" @click="setView('cliente')">Vista cliente</button>
+                  </div>
+                  <p class="tech-edit-note" x-text="editable ? 'Versión en borrador: puedes ajustar metrados, cantidades, GG, utilidad y proveedores; el total se recalcula.' : `V${selectedVersion} es de solo lectura. Crea una nueva versión para modificarla.`"></p>
+                </div>
+
+                <section class="kpi-strip kpi-strip--5" aria-label="Totales del presupuesto" x-show="internal">
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Costo directo</span><span class="kpi-value" x-text="formatAmount(totals.directCost)"></span><span class="kpi-foot" x-text="typeLabel(budget.type)"></span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Gastos generales</span><span class="kpi-value" x-text="formatAmount(totals.overhead)"></span><span class="kpi-foot" x-text="`${totals.overheadPct} % del costo directo`"></span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Utilidad</span><span class="kpi-value" x-text="formatAmount(totals.profit)"></span><span class="kpi-foot" x-text="`${totals.profitPct} % del costo directo`"></span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Precio cliente</span><span class="kpi-value" x-text="formatAmount(totals.subtotal)"></span><span class="kpi-foot">Sin IGV</span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Total</span><span class="kpi-value" x-text="formatAmount(totals.total)"></span><span class="kpi-foot">Con IGV 18 %</span></div>
+                </section>
+                <section class="kpi-strip kpi-strip--4" aria-label="Totales para el cliente" x-show="!internal" x-cloak>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Subtotal</span><span class="kpi-value" x-text="formatAmount(totals.subtotal)"></span><span class="kpi-foot">Precio de venta sin IGV</span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>IGV</span><span class="kpi-value" x-text="formatAmount(totals.igv)"></span><span class="kpi-foot">18 %</span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Total</span><span class="kpi-value" x-text="formatAmount(totals.total)"></span><span class="kpi-foot" x-text="code"></span></div>
+                  <div class="kpi"><span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Proyecto</span><span class="kpi-value tech-kpi-text" x-text="budget.projectId || 'Sin proyecto'"></span><span class="kpi-foot" x-text="projectName(budget.projectId)"></span></div>
+                </section>
+
+                <div class="workspace-tabs" role="tablist" aria-label="Secciones del presupuesto">
+                  <template x-for="[id, label] in tabs" :key="id"
+                    ><button type="button" role="tab" :aria-selected="String(tab === id)" :class="tab === id ? 'active' : ''" x-show="internal || !['apu', 'insumos', 'precios'].includes(id)" @click="setTab(id)" x-text="label"></button
+                  ></template>
+                </div>
+
+                <!-- Resumen -->
+                <section class="card" x-show="tab === 'resumen'" aria-labelledby="tech-summary-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: costo directo + gastos generales + utilidad = precio cliente. Falta validar si los porcentajes son fijos o por presupuesto y el tratamiento del IGV.">
+                        <h2 id="tech-summary-title">Del costo directo al precio cliente</h2>
+                      </div>
+                    </div>
+                    <table class="table align-middle tech-summary">
+                      <tbody>
+                        <tr x-show="internal"><th scope="row">Costo directo</th><td></td><td class="text-end data-money" x-text="formatAmount(totals.directCost)"></td></tr>
+                        <tr x-show="internal">
+                          <th scope="row">Gastos generales</th>
+                          <td>
+                            <label class="visually-hidden" for="tech-overhead">Gastos generales en porcentaje</label>
+                            <input id="tech-overhead" class="form-control form-control-sm tech-pct" type="number" min="0" max="50" step="0.5" :value="totals.overheadPct" :disabled="!editable" @change="setPct('overheadPct', $event.target.value)" />
+                            <span>%</span>
+                          </td>
+                          <td class="text-end data-money" x-text="formatAmount(totals.overhead)"></td>
+                        </tr>
+                        <tr x-show="internal">
+                          <th scope="row">Utilidad</th>
+                          <td>
+                            <label class="visually-hidden" for="tech-profit">Utilidad en porcentaje</label>
+                            <input id="tech-profit" class="form-control form-control-sm tech-pct" type="number" min="0" max="50" step="0.5" :value="totals.profitPct" :disabled="!editable" @change="setPct('profitPct', $event.target.value)" />
+                            <span>%</span>
+                          </td>
+                          <td class="text-end data-money" x-text="formatAmount(totals.profit)"></td>
+                        </tr>
+                        <tr class="tech-summary-strong"><th scope="row">Precio cliente (subtotal)</th><td></td><td class="text-end data-money" x-text="formatAmount(totals.subtotal)"></td></tr>
+                        <tr><th scope="row">IGV</th><td>18 %</td><td class="text-end data-money" x-text="formatAmount(totals.igv)"></td></tr>
+                        <tr class="tech-summary-strong"><th scope="row">Total del presupuesto</th><td></td><td class="text-end data-money" x-text="formatAmount(totals.total)"></td></tr>
+                      </tbody>
+                    </table>
+                    <dl class="review-facts">
+                      <div><dt>Cliente</dt><dd x-text="clientName(budget.clientId)"></dd></div>
+                      <div><dt>Proyecto</dt><dd><a x-show="budget.projectId" :href="projectHref(budget.projectId)" x-text="`${budget.projectId} · ${projectName(budget.projectId)}`"></a><span x-show="!budget.projectId">Sin proyecto (oportunidad)</span></dd></div>
+                      <div><dt>Fecha de la versión</dt><dd x-text="formatDate(version?.date)"></dd></div>
+                      <div><dt>Responsable</dt><dd x-text="workerName(version?.responsibleId)"></dd></div>
+                      <div class="review-facts-wide"><dt>Comentario de la versión</dt><dd x-text="version?.comment || '—'"></dd></div>
+                      <div class="review-facts-wide" x-show="budget.copiedFrom"><dt>Origen</dt><dd x-text="`Duplicado de ${budget.copiedFrom}`"></dd></div>
+                    </dl>
+                  </div>
+                </section>
+
+                <!-- Partidas y metrados -->
+                <section class="card" x-show="tab === 'partidas'" aria-labelledby="tech-partidas-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="as-is" data-maturity-note="J&amp;Y presupuesta por partidas jerárquicas (6, 6.1, 6.1.1) con unidad y metrado; una partida es un trabajo, no un producto.">
+                        <h2 id="tech-partidas-title">Partidas y metrados</h2>
+                      </div>
+                      <span class="workspace-caption" x-text="internal ? 'Costo unitario = APU' : 'Precios de venta (incluyen GG y utilidad)'"></span>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table align-middle tech-partidas">
+                        <thead>
+                          <tr>
+                            <th scope="col">Ítem</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Und.</th>
+                            <th scope="col" class="text-end">Metrado</th>
+                            <th scope="col" class="text-end" x-text="internal ? 'Costo unitario' : 'Precio unitario'"></th>
+                            <th scope="col" class="text-end">Parcial</th>
+                            <th scope="col" x-show="internal"><span class="visually-hidden">APU</span></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="row in rows" :key="row.code">
+                            <tr :class="row.title ? `tech-title tech-level-${row.level}` : ''">
+                              <td class="data-code" x-text="row.code"></td>
+                              <td x-text="row.description"></td>
+                              <td x-text="row.unit"></td>
+                              <td class="text-end">
+                                <template x-if="!row.title && editable"
+                                  ><input class="form-control form-control-sm tech-qty" type="number" min="0" step="0.01" :value="row.quantity" :aria-label="`Metrado de ${row.code}`" @change="setQuantity(row.code, $event.target.value)"
+                                /></template>
+                                <span x-show="!row.title && !editable" x-text="row.quantity"></span>
+                              </td>
+                              <td class="text-end data-money" x-text="row.title ? '' : formatAmount(internal ? row.unitCost : clientPrice(row.unitCost))"></td>
+                              <td class="text-end data-money" x-text="formatAmount(internal ? row.partial : clientPrice(row.partial))"></td>
+                              <td x-show="internal">
+                                <button type="button" class="btn btn-link btn-sm p-0" x-show="!row.title" @click="openApu(row.code)" :aria-label="`Ver APU de ${row.code}`">APU</button>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                        <tfoot>
+                          <tr><th scope="row" colspan="5" x-text="internal ? 'Costo directo' : 'Subtotal'"></th><td class="text-end data-money" x-text="formatAmount(internal ? totals.directCost : totals.subtotal)"></td><td x-show="internal"></td></tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- APU -->
+                <section class="card" x-show="tab === 'apu' && internal" aria-labelledby="tech-apu-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="as-is" data-maturity-note="Análisis de precio unitario con mano de obra, materiales y equipos; rendimiento y cuadrilla definen las horas.">
+                        <h2 id="tech-apu-title">Análisis de precio unitario</h2>
+                      </div>
+                    </div>
+                    <div class="tech-apu-select">
+                      <label class="form-label" for="tech-apu-partida">Partida</label>
+                      <select id="tech-apu-partida" class="form-select" x-model="apuCode" @change="syncUrl()">
+                        <template x-for="row in rows.filter((item) => !item.title)" :key="row.code"
+                          ><option :value="row.code" x-text="`${row.code} · ${row.description}`" :selected="row.code === apuCode"></option
+                        ></template>
+                      </select>
+                    </div>
+                    <dl class="review-facts tech-apu-facts" x-show="apuRow">
+                      <div><dt>Rendimiento</dt><dd x-text="apuRow?.apu.yield ? `${apuRow.apu.yield} ${apuRow.unit}/día` : 'Por cantidad'"></dd></div>
+                      <div><dt>Unidad</dt><dd x-text="apuRow?.unit"></dd></div>
+                      <div><dt>Costo unitario</dt><dd x-text="formatAmount(apuRow?.unitCost)"></dd></div>
+                      <div><dt>Metrado y parcial</dt><dd x-text="`${apuRow?.quantity} ${apuRow?.unit} · ${formatAmount(apuRow?.partial)}`"></dd></div>
+                    </dl>
+                    <template x-for="group in resourceGroups" :key="group.id">
+                      <div class="tech-apu-group" x-show="linesOf(group.id).length">
+                        <h3 class="form-section-title" x-text="group.label"></h3>
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle tech-apu-table">
+                            <thead><tr><th scope="col">Código</th><th scope="col">Descripción</th><th scope="col">Und.</th><th scope="col" class="text-end">Cuadrilla</th><th scope="col" class="text-end">Cantidad</th><th scope="col" class="text-end">Precio</th><th scope="col" class="text-end">Parcial</th></tr></thead>
+                            <tbody>
+                              <template x-for="line in linesOf(group.id)" :key="line.productId">
+                                <tr>
+                                  <td class="data-code" x-text="line.code"></td>
+                                  <td x-text="line.name"></td>
+                                  <td x-text="line.unit"></td>
+                                  <td class="text-end" x-text="line.crew ?? ''"></td>
+                                  <td class="text-end" x-text="line.qty"></td>
+                                  <td class="text-end data-money" x-text="formatAmount(line.price)"></td>
+                                  <td class="text-end data-money" x-text="formatAmount(line.partial)"></td>
+                                </tr>
+                              </template>
+                            </tbody>
+                            <tfoot><tr><th scope="row" colspan="6" x-text="`Subtotal ${group.label.toLowerCase()}`"></th><td class="text-end data-money" x-text="formatAmount(groupTotal(group.id))"></td></tr></tfoot>
+                          </table>
+                        </div>
+                      </div>
+                    </template>
+                    <p class="workspace-caption mb-0">Cantidad de mano de obra y equipos = cuadrilla × 8 h ÷ rendimiento. Herramientas manuales: 3 % de la mano de obra.</p>
+                  </div>
+                </section>
+
+                <!-- Insumos -->
+                <section class="card" x-show="tab === 'insumos' && internal" aria-labelledby="tech-insumos-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: consolidar los recursos de todas las partidas y elegir el precio de un proveedor; conecta Presupuestos con Proveedores y Compras.">
+                        <h2 id="tech-insumos-title">Lista de insumos</h2>
+                      </div>
+                      <span class="workspace-caption" x-text="`${insumos.length} insumos`"></span>
+                    </div>
+                    <template x-for="group in resourceGroups" :key="group.id">
+                      <div class="tech-apu-group" x-show="insumosOf(group.id).length">
+                        <h3 class="form-section-title" x-text="group.label"></h3>
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle tech-insumos">
+                            <thead><tr><th scope="col">Insumo</th><th scope="col">Und.</th><th scope="col" class="text-end">Cantidad</th><th scope="col">Precio de</th><th scope="col" class="text-end">Precio</th><th scope="col" class="text-end">Parcial</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+                            <tbody>
+                              <template x-for="item in insumosOf(group.id)" :key="item.productId">
+                                <tr>
+                                  <td><span x-text="item.name"></span><small class="show-block text-muted data-code" x-text="item.code"></small></td>
+                                  <td x-text="item.unit"></td>
+                                  <td class="text-end" x-text="item.quantity"></td>
+                                  <td>
+                                    <select class="form-select form-select-sm" :disabled="!editable" :aria-label="`Precio de ${item.name}`" @change="selectQuote(item.productId, $event.target.value)">
+                                      <option value="" :selected="!item.quoteId" x-text="`Precio interno · ${formatAmount(item.refPrice)}`"></option>
+                                      <template x-for="offer in offersFor(item.productId)" :key="offer.quoteId"
+                                        ><option :value="offer.quoteId" :selected="offer.quoteId === item.quoteId" x-text="`${supplierName(offer.supplierId)} · ${formatAmount(offer.price)} · ${offer.quoteId}`"></option
+                                      ></template>
+                                    </select>
+                                  </td>
+                                  <td class="text-end data-money" x-text="formatAmount(item.price)"></td>
+                                  <td class="text-end data-money" x-text="formatAmount(item.partial)"></td>
+                                  <td class="text-end tech-row-actions">
+                                    <a class="btn btn-link btn-sm" :href="productHref(item.productId)">Buscar precios</a
+                                    ><a class="btn btn-link btn-sm" x-show="orderHref(item)" :href="orderHref(item)">Generar OC</a>
+                                  </td>
+                                </tr>
+                              </template>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </section>
+
+                <!-- Productos (Tipo B) -->
+                <section class="card" x-show="tab === 'productos'" aria-labelledby="tech-products-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="as-is" data-maturity-note="Presupuesto de productos: especificación del cliente, búsqueda de proveedores, precios, comparación y margen. Sin APU.">
+                        <h2 id="tech-products-title">Productos solicitados</h2>
+                      </div>
+                    </div>
+                    <div class="tech-products">
+                      <template x-for="line in products" :key="line.id">
+                        <article class="tech-product">
+                          <header>
+                            <div>
+                              <strong x-text="line.request"></strong>
+                              <small x-text="`${productName(line.productId)} · ${ctx.products.find((item) => item.id === line.productId)?.spec || ''}`"></small>
+                            </div>
+                            <div class="tech-product-qty">
+                              <label class="form-label" :for="`qty-${line.id}`">Cantidad</label>
+                              <input :id="`qty-${line.id}`" class="form-control form-control-sm" type="number" min="0" step="1" :value="line.quantity" :disabled="!editable" @change="setQuantity(line.id, $event.target.value)" />
+                            </div>
+                            <div class="text-end">
+                              <small>Parcial</small>
+                              <b x-text="formatAmount(internal ? line.partial : clientPrice(line.partial))"></b>
+                            </div>
+                          </header>
+                          <div class="table-responsive" x-show="internal">
+                            <table class="table table-sm align-middle mb-0">
+                              <thead><tr><th scope="col">Proveedor</th><th scope="col">Marca y especificación</th><th scope="col" class="text-end">Precio</th><th scope="col">Plazo</th><th scope="col">Disponibilidad</th><th scope="col">Elegido</th></tr></thead>
+                              <tbody>
+                                <template x-for="(offer, index) in line.options" :key="offer.quoteId">
+                                  <tr :class="{ 'is-selected': offer.quoteId === line.quoteId }">
+                                    <td><a :href="supplierHref(offer.supplierId)" x-text="supplierName(offer.supplierId)"></a><small class="show-block text-muted" x-text="offer.quoteId"></small></td>
+                                    <td><span x-text="offer.brand || '—'"></span><small class="show-block text-muted" x-text="offer.spec || ''"></small></td>
+                                    <td class="text-end data-money"><span x-text="formatAmount(offer.price)"></span><small class="show-block tech-best" x-show="index === 0">Menor precio</small></td>
+                                    <td x-text="`${offer.leadDays} días`"></td>
+                                    <td x-text="offer.availability"></td>
+                                    <td>
+                                      <input class="form-check-input" type="radio" :name="`option-${line.id}`" :checked="offer.quoteId === line.quoteId" :disabled="!editable" :aria-label="`Elegir ${supplierName(offer.supplierId)}`" @change="selectQuote(line.productId, offer.quoteId)" />
+                                    </td>
+                                  </tr>
+                                </template>
+                              </tbody>
+                            </table>
+                          </div>
+                        </article>
+                      </template>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Precios y cotizaciones -->
+                <section class="card" x-show="tab === 'precios' && internal" aria-labelledby="tech-quotes-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: cotizaciones con su documento adjunto y un comparador de proveedores por producto.">
+                        <h2 id="tech-quotes-title">Cotizaciones relacionadas</h2>
+                      </div>
+                      <a class="btn btn-outline-primary btn-sm" href="./products.html?tab=cotizaciones">Registrar cotización</a>
+                    </div>
+                    <div class="tech-quotes">
+                      <template x-for="quote in relatedQuotes" :key="quote.id"
+                        ><a class="tech-quote" :href="quoteHref(quote.id)">
+                          <span class="tech-quote-top"><strong x-text="quote.id"></strong><span class="attachment-chip" x-text="`${quote.attachment?.type || 'Sin adjunto'}`"></span></span>
+                          <span x-text="supplierName(quote.supplierId)"></span>
+                          <small x-text="`${formatDate(quote.date)} · vigente hasta ${formatDate(quote.validUntil)} · ${quote.items.length} ítems`"></small>
+                        </a></template
+                      >
+                    </div>
+                    <h3 class="form-section-title">Comparador de proveedores</h3>
+                    <p class="workspace-caption" x-show="!comparable.length">No hay insumos con dos o más cotizaciones.</p>
+                    <div class="table-responsive" x-show="comparable.length">
+                      <table class="table table-sm align-middle tech-compare">
+                        <thead><tr><th scope="col">Producto</th><th scope="col">Ofertas (de menor a mayor precio)</th></tr></thead>
+                        <tbody>
+                          <template x-for="item in comparable" :key="item.productId">
+                            <tr>
+                              <td><strong x-text="productName(item.productId)"></strong></td>
+                              <td>
+                                <ul class="tech-offers">
+                                  <template x-for="(offer, index) in item.offers" :key="offer.quoteId"
+                                    ><li :class="{ 'is-best': index === 0, 'is-selected': offer.quoteId === item.quoteId }">
+                                      <span x-text="supplierName(offer.supplierId)"></span>
+                                      <b x-text="formatAmount(offer.price)"></b>
+                                      <small x-text="`${offer.brand || 'Sin marca'} · ${offer.leadDays} días · ${offer.availability}`"></small>
+                                      <small x-show="offer.quoteId === item.quoteId">Elegido en este presupuesto</small>
+                                    </li></template
+                                  >
+                                </ul>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Versiones -->
+                <section class="card" x-show="tab === 'versiones'" aria-labelledby="tech-versions-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="as-is" data-maturity-note="J&amp;Y versiona sus presupuestos (V1, V2). Nueva versión mantiene el código; duplicar crea otro presupuesto.">
+                        <h2 id="tech-versions-title">Versiones</h2>
+                      </div>
+                    </div>
+                    <p class="workspace-caption">
+                      <strong>Nueva versión</strong> mantiene la identidad del presupuesto (mismo código, V siguiente).
+                      <strong>Duplicar</strong> crea otro presupuesto con un código nuevo que reutiliza sus partidas o productos.
+                    </p>
+                    <ol class="review-history">
+                      <template x-for="item in versions" :key="item.version"
+                        ><li>
+                          <strong x-text="`V${item.version} · ${item.status}${item.local ? ' · en esta demostración' : ''}`"></strong>
+                          <small x-text="`${formatDate(item.date)} · ${workerName(item.responsibleId)} · ${formatAmount(item.amount)}`"></small>
+                          <span x-text="item.comment"></span>
+                          <button type="button" class="btn btn-link btn-sm p-0 text-start" x-show="item.version !== selectedVersion" @click="selectVersion(item.version)">Ver esta versión</button>
+                        </li></template
+                      >
+                    </ol>
+                  </div>
+                </section>
+              </div></template
+            >
+
+            <div class="modal fade" id="budget-version-new-modal" tabindex="-1" aria-labelledby="budget-version-new-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" novalidate @submit.prevent="createVersion()">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="budget-version-new-title">Nueva versión</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption" x-text="budget ? `Se crea ${budget.id}-V${versions[0]?.version + 1}${budget.initials ? `-${budget.initials}` : ''} en borrador, a partir de la versión actual.` : ''"></p>
+                    <label class="form-label" for="budget-version-comment">Qué cambia</label>
+                    <textarea id="budget-version-comment" class="form-control" rows="2" maxlength="200" x-model="versionComment" placeholder="Ejemplo: ajuste de metrados por cambio de planos"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" :disabled="!versionComment.trim()">Crear versión</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="modal fade" id="budget-duplicate-modal" tabindex="-1" aria-labelledby="budget-duplicate-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" novalidate @submit.prevent="duplicate()">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="budget-duplicate-title">Duplicar presupuesto</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">Crea otro presupuesto con código nuevo; este no cambia.</p>
+                    <div class="alert alert-danger" role="alert" x-show="duplicateError" x-text="duplicateError"></div>
+                    <label class="form-label" for="budget-duplicate-title-input">Título</label>
+                    <input id="budget-duplicate-title-input" class="form-control mb-3" maxlength="120" x-model="duplicateForm.title" />
+                    <label class="form-label" for="budget-duplicate-client">Cliente</label>
+                    <select id="budget-duplicate-client" class="form-select mb-3" x-model="duplicateForm.clientId">
+                      <template x-for="item in clients" :key="item.id"><option :value="item.id" x-text="item.name" :selected="item.id === duplicateForm.clientId"></option></template>
+                    </select>
+                    <label class="form-label" for="budget-duplicate-comment">Comentario</label>
+                    <input id="budget-duplicate-comment" class="form-control" maxlength="160" x-model="duplicateForm.comment" />
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Duplicar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>

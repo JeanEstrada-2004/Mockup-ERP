@@ -66,6 +66,7 @@
     "test:masters": "node scripts/masters-interaction-test.mjs",
     "test:jy-expenses": "node scripts/expense-review-interaction-test.mjs",
     "test:jy-control": "node scripts/jy-control-interaction-test.mjs",
+    "test:jy-budgets": "node scripts/jy-budgets-interaction-test.mjs",
     "preview:pages": "node scripts/preview-pages.mjs",
     "preview": "vite preview",
     "serve": "vite build && vite preview",

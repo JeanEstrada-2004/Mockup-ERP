@@ -295,23 +295,29 @@
                         <label class="form-label" for="purchase-place">Lugar de entrega</label>
                         <input id="purchase-place" class="form-control" type="text" maxlength="120" x-model="form.deliveryPlace" placeholder="Almacén principal u obra" required />
                       </div>
-                      <div class="col-md-4">
+                      <!-- IF controlAllocation=true --><div class="col-md-4">
                         <label class="form-label" for="purchase-line">Partida presupuestaria</label>
                         <select id="purchase-line" class="form-select" x-model="form.budgetLine">
                           <template x-for="line in budgetLines" :key="line.id"><option :value="line.id" x-text="`${line.label} (${line.allocation} % referencial)`"></option></template>
                         </select>
-                      </div>
+                      </div><!-- /IF -->
                       <div class="col-md-4">
                         <label class="form-label" for="purchase-cost-center">Centro de costo</label>
                         <input id="purchase-cost-center" class="form-control" type="text" maxlength="40" x-model="form.costCenter" />
                       </div>
-                      <div class="col-md-4">
+                      <!-- IF budgetFlow=technical --><div class="col-md-4">
+                        <label class="form-label" for="purchase-quote-origin">Cotización de origen</label>
+                        <select id="purchase-quote-origin" class="form-select" x-model="form.quoteId">
+                          <option value="">Sin cotización</option>
+                          <template x-for="item in supplierQuotes" :key="item.id"><option :value="item.id" :selected="item.id === form.quoteId" x-text="`${item.id} · ${formatDate(item.date)} · ${item.attachment?.fileName || 'sin adjunto'}`"></option></template>
+                        </select>
+                      </div><!-- ELSE --><div class="col-md-4">
                         <label class="form-label" for="purchase-quotation">Cotización adjunta</label>
                         <select id="purchase-quotation" class="form-select" x-model="form.quotation">
                           <option value="">Sin cotización</option>
                           <template x-for="item in quotations" :key="item.id"><option :value="item.id" x-text="`${item.id}.pdf`"></option></template>
                         </select>
-                      </div>
+                      </div><!-- /IF -->
                       <div class="col-12">
                         <label class="form-label" for="purchase-notes">Observaciones</label>
                         <textarea id="purchase-notes" class="form-control" rows="2" maxlength="300" x-model="form.notes"></textarea>
@@ -373,7 +379,7 @@
                   <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-outline-primary">Guardar borrador</button>
-                    <button type="button" class="btn btn-primary" @click="save('Pendiente')">Enviar a aprobación</button>
+                    <button type="button" class="btn btn-primary" @click="save('Pendiente')"><!-- IF approvalsMode=worklist -->Registrar orden<!-- ELSE -->Enviar a aprobación<!-- /IF --></button>
                   </div>
                 </form>
               </div>

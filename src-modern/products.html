@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Productos y precios: catálogo, búsqueda de precios, cotizaciones y comparador de proveedores" />
+    <meta name="theme-color" content="#1A365D" />
+    <!-- APP_FAVICON -->
+    <title>Productos y precios</title>
+  </head>
+  <body data-page="products-workspace" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div class="container-fluid shell-page project-workspace delivery-nine-workspace products-workspace" x-data="productsWorkspace">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Productos y precios</li>
+              </ol>
+            </nav>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Productos y precios no disponible</h1>
+                  <p>Este módulo no forma parte de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: catálogo único de productos e insumos con el histórico de precios y las cotizaciones de cada proveedor.">
+                      <h1>Productos y precios</h1>
+                    </div>
+                    <p class="shell-page-subtitle">Catálogo, precios conocidos, cotizaciones de proveedores y comparación.</p>
+                  </div>
+                  <button type="button" class="btn btn-primary" @click="openQuote()">+ Registrar cotización</button>
+                </div>
+                <div class="d9-tabs" role="tablist" aria-label="Secciones de productos y precios">
+                  <template x-for="[id, label] in tabs" :key="id"
+                    ><button type="button" role="tab" :class="{ active: tab === id }" :aria-selected="String(tab === id)" @click="setTab(id)" x-text="label"></button
+                  ></template>
+                </div>
+
+                <!-- Catálogo -->
+                <section class="card" x-show="tab === 'catalogo'" aria-labelledby="products-catalog-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="products-catalog-title">Catálogo</h2>
+                      <span class="workspace-caption" x-text="`${filteredProducts.length} de ${products.length}`"></span>
+                    </div>
+                    <div class="d9-filters products-filters mb-3">
+                      <div>
+                        <label class="form-label" for="products-search">Buscar</label
+                        ><input id="products-search" class="form-control" type="search" placeholder="Código, nombre, categoría o marca" x-model="search" />
+                      </div>
+                      <div>
+                        <label class="form-label" for="products-kind">Tipo</label
+                        ><select id="products-kind" class="form-select" x-model="kindFilter">
+                          <option value="">Todos</option>
+                          <template x-for="item in kinds" :key="item"><option :value="item" x-text="item"></option></template>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle mb-0 d9-table products-table">
+                        <thead><tr><th scope="col">Código</th><th scope="col">Producto o insumo</th><th scope="col">Tipo</th><th scope="col">Categoría</th><th scope="col">Und.</th><th scope="col" class="text-end">Precio de referencia</th><th scope="col">Última cotización</th></tr></thead>
+                        <tbody>
+                          <template x-for="item in filteredProducts" :key="item.id">
+                            <tr>
+                              <td class="data-code" x-text="item.code"></td>
+                              <td>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-start" @click="choose(item.id); setTab('precios')" x-text="item.name"></button
+                                ><small class="show-block text-muted" x-show="item.spec || item.brand" x-text="item.spec || item.brand"></small>
+                              </td>
+                              <td x-text="item.kind"></td>
+                              <td x-text="item.category"></td>
+                              <td x-text="item.unit"></td>
+                              <td class="text-end data-money" x-text="formatAmount(item.refPrice)"></td>
+                              <td>
+                                <span x-show="lastQuote(item.id)" x-text="lastQuote(item.id) ? `${formatAmount(lastQuote(item.id).price)} · ${supplierName(lastQuote(item.id).quote.supplierId)}` : ''"></span
+                                ><span class="text-muted" x-show="!lastQuote(item.id)">Sin cotizaciones</span>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Búsqueda de precios -->
+                <section class="card" x-show="tab === 'precios'" aria-labelledby="products-price-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="products-price-title">Búsqueda de precios</h2>
+                    </div>
+                    <div class="price-search">
+                      <label class="form-label" for="price-search-input">Producto o especificación</label>
+                      <input id="price-search-input" class="form-control" type="search" placeholder="Ejemplo: cable 4 mm, computadora, tablero" x-model="priceSearch" autocomplete="off" />
+                      <ul class="price-search-results" x-show="priceMatches.length">
+                        <template x-for="item in priceMatches" :key="item.id"
+                          ><li><button type="button" @click="choose(item.id)"><strong x-text="item.name"></strong><small x-text="`${item.code} · ${item.category}`"></small></button></li
+                        ></template>
+                      </ul>
+                    </div>
+                    <template x-if="selected"
+                      ><div class="price-detail">
+                        <div class="price-detail-head">
+                          <div>
+                            <h3 x-text="selected.name"></h3>
+                            <p class="workspace-caption" x-text="`${selected.code} · ${selected.kind} · ${selected.unit}${selected.spec ? ' · ' + selected.spec : ''}`"></p>
+                          </div>
+                          <button type="button" class="btn btn-outline-primary btn-sm" @click="openQuote(selected.id)">Registrar cotización</button>
+                        </div>
+                        <dl class="review-facts price-facts">
+                          <div><dt>Precio interno de referencia</dt><dd x-text="formatAmount(selected.refPrice)"></dd></div>
+                          <div><dt>Última cotización</dt><dd x-text="lastQuote(selected.id) ? `${formatAmount(lastQuote(selected.id).price)} · ${formatDate(lastQuote(selected.id).quote.date)}` : 'Sin cotizaciones'"></dd></div>
+                          <div><dt>Menor precio cotizado</dt><dd x-text="offersOf(selected.id)[0] ? `${formatAmount(offersOf(selected.id)[0].price)} · ${supplierName(offersOf(selected.id)[0].quote.supplierId)}` : '—'"></dd></div>
+                          <div><dt>Proveedores conocidos</dt><dd x-text="knownSuppliers.length"></dd></div>
+                        </dl>
+                        <h4 class="form-section-title">Histórico</h4>
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle price-history">
+                            <thead><tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col">Proveedor</th><th scope="col">Marca y especificación</th><th scope="col" class="text-end">Precio</th></tr></thead>
+                            <tbody>
+                              <template x-for="(row, index) in history" :key="`${row.quoteId}-${index}`">
+                                <tr>
+                                  <td x-text="row.date ? formatDate(row.date) : '—'"></td>
+                                  <td><span x-text="row.source"></span><small class="show-block text-muted" x-show="row.quoteId" x-text="`${row.quoteId}${row.local ? ' · registrada en esta demostración' : ''}`"></small></td>
+                                  <td><a x-show="row.supplierId" :href="supplierHref(row.supplierId)" x-text="supplierName(row.supplierId)"></a><span x-show="!row.supplierId">J&amp;Y</span></td>
+                                  <td><span x-text="row.brand || '—'"></span><small class="show-block text-muted" x-text="row.spec"></small></td>
+                                  <td class="text-end data-money" x-text="formatAmount(row.price)"></td>
+                                </tr>
+                              </template>
+                            </tbody>
+                          </table>
+                        </div>
+                        <h4 class="form-section-title">Proveedores conocidos</h4>
+                        <div class="d9-link-list">
+                          <template x-for="supplier in knownSuppliers" :key="supplier.id"
+                            ><a :href="supplierHref(supplier.id)"><i class="bi bi-truck" aria-hidden="true"></i><span><strong x-text="supplier.name"></strong><small class="show-block" x-text="supplier.specialty"></small></span></a></template
+                          >
+                        </div>
+                        <p class="workspace-caption" x-show="!knownSuppliers.length">No hay proveedores registrados para este producto: registra una cotización.</p>
+                      </div></template
+                    >
+                  </div>
+                </section>
+
+                <!-- Cotizaciones -->
+                <section class="card" x-show="tab === 'cotizaciones'" aria-labelledby="products-quotes-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="products-quotes-title">Cotizaciones de proveedores</h2>
+                      <span class="workspace-caption" x-text="`${filteredQuotes.length} cotizaciones`"></span>
+                    </div>
+                    <div class="d9-filters products-filters mb-3">
+                      <div>
+                        <label class="form-label" for="quotes-supplier">Proveedor</label
+                        ><select id="quotes-supplier" class="form-select" x-model="supplierFilter">
+                          <option value="">Todos</option>
+                          <template x-for="item in suppliers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="quote-cards">
+                      <template x-for="quote in filteredQuotes" :key="quote.id"
+                        ><article class="quote-card" :id="`quote-${quote.id}`" :class="{ 'is-highlighted': quote.id === highlightQuote }">
+                          <header>
+                            <div>
+                              <strong x-text="quote.id"></strong>
+                              <a :href="supplierHref(quote.supplierId)" x-text="supplierName(quote.supplierId)"></a>
+                            </div>
+                            <span class="badge" :class="validity(quote) === 'Vigente' ? 'status-badge status-badge--success' : 'status-badge status-badge--neutral'" x-text="validity(quote)"></span>
+                          </header>
+                          <small x-text="`${formatDate(quote.date)} · vigente hasta ${formatDate(quote.validUntil)} · ${quote.currency === 'USD' ? 'Dólares' : 'Soles'}`"></small>
+                          <ul>
+                            <template x-for="item in quote.items" :key="item.productId"
+                              ><li><span x-text="product(item.productId)?.name || item.productId"></span><b x-text="formatAmount(item.price)"></b></li></template
+                            >
+                          </ul>
+                          <footer>
+                            <span class="attachment-chip"><i class="bi" :class="quote.attachment?.type === 'PDF' ? 'bi-file-earmark-pdf' : 'bi-image'" aria-hidden="true"></i><span x-text="quote.attachment?.fileName || 'Sin adjunto'"></span></span>
+                            <small x-show="quote.conditions" x-text="quote.conditions"></small>
+                            <small x-show="quote.notes" x-text="quote.notes"></small>
+                            <small x-show="!quote.base">Registrada en esta demostración</small>
+                          </footer>
+                        </article></template
+                      >
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Comparador -->
+                <section class="card" x-show="tab === 'comparador'" aria-labelledby="products-compare-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="products-compare-title">Comparador de proveedores</h2>
+                    </div>
+                    <div class="d9-filters products-filters mb-3">
+                      <div>
+                        <label class="form-label" for="compare-product">Producto</label
+                        ><select id="compare-product" class="form-select" x-model="compareId">
+                          <template x-for="item in comparable" :key="item.id"><option :value="item.id" x-text="item.name" :selected="item.id === compareId"></option></template>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="table-responsive" x-show="comparison.length">
+                      <table class="table align-middle compare-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Criterio</th>
+                            <template x-for="offer in comparison" :key="offer.quote.id"><th scope="col" x-text="supplierName(offer.quote.supplierId)"></th></template>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr><th scope="row">Precio</th><template x-for="(offer, index) in comparison" :key="offer.quote.id"><td :class="{ 'is-best': index === 0 }"><b x-text="formatAmount(offer.price)"></b><small class="show-block" x-show="index === 0">Menor precio</small></td></template></tr>
+                          <tr><th scope="row">Plazo de entrega</th><template x-for="offer in comparison" :key="offer.quote.id"><td x-text="`${offer.leadDays} días`"></td></template></tr>
+                          <tr><th scope="row">Marca</th><template x-for="offer in comparison" :key="offer.quote.id"><td x-text="offer.brand || '—'"></td></template></tr>
+                          <tr><th scope="row">Especificación</th><template x-for="offer in comparison" :key="offer.quote.id"><td x-text="offer.spec || '—'"></td></template></tr>
+                          <tr><th scope="row">Disponibilidad</th><template x-for="offer in comparison" :key="offer.quote.id"><td x-text="offer.availability"></td></template></tr>
+                          <tr><th scope="row">Condiciones</th><template x-for="offer in comparison" :key="offer.quote.id"><td x-text="offer.quote.conditions || '—'"></td></template></tr>
+                          <tr><th scope="row">Cotización</th><template x-for="offer in comparison" :key="offer.quote.id"><td><span x-text="offer.quote.id"></span><small class="show-block" x-text="validity(offer.quote)"></small></td></template></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+              </div></template
+            >
+
+            <div class="modal fade" id="quote-new-modal" tabindex="-1" aria-labelledby="quote-new-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <form class="modal-content" novalidate @submit.prevent="saveQuoteForm()">
+                  <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="quote-new-title">Registrar cotización</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" x-show="formError" x-text="formError"></div>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label" for="quote-supplier">Proveedor</label>
+                        <select id="quote-supplier" class="form-select" x-model="form.supplierId">
+                          <option value="">Selecciona</option>
+                          <template x-for="item in suppliers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="quote-product">Producto o servicio</label>
+                        <select id="quote-product" class="form-select" x-model="form.productId">
+                          <option value="">Selecciona</option>
+                          <template x-for="item in products" :key="item.id"><option :value="item.id" x-text="item.name" :selected="item.id === form.productId"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-price">Precio unitario</label>
+                        <input id="quote-price" class="form-control" type="number" min="0" step="0.01" x-model="form.price" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-currency">Moneda</label>
+                        <select id="quote-currency" class="form-select" x-model="form.currency"><option value="PEN">Soles</option><option value="USD">Dólares</option></select>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-lead">Plazo (días)</label>
+                        <input id="quote-lead" class="form-control" type="number" min="0" step="1" x-model="form.leadDays" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-date">Fecha</label>
+                        <input id="quote-date" class="form-control" type="date" x-model="form.date" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-valid">Vigente hasta</label>
+                        <input id="quote-valid" class="form-control" type="date" x-model="form.validUntil" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-brand">Marca</label>
+                        <input id="quote-brand" class="form-control" maxlength="40" x-model="form.brand" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="quote-attachment-type">Adjunto</label>
+                        <select id="quote-attachment-type" class="form-select" x-model="form.attachmentType"><option>PDF</option><option>Imagen</option><option>Otro</option></select>
+                      </div>
+                      <div class="col-md-8">
+                        <label class="form-label" for="quote-attachment-name">Nombre del archivo</label>
+                        <input id="quote-attachment-name" class="form-control" maxlength="80" x-model="form.attachmentName" placeholder="Ejemplo: cotizacion-proveedor.pdf (simulado)" />
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label" for="quote-notes">Observaciones</label>
+                        <input id="quote-notes" class="form-control" maxlength="200" x-model="form.notes" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar cotización</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

@@ -8,7 +8,7 @@
 
 import { Modal } from 'bootstrap';
 import Swal from 'sweetalert2';
-import { activeVariant, variantStorageKey } from '../config/variants.js';
+import { activeVariant, variantStorageKey, variantRule } from '../config/variants.js';
 import { getCostBySource, getDataForVariant, getProject } from '../data/mock-data.js';
 import { COST_SOURCES } from '../data/cost-data.js';
 import { TAX_RATE, formatAmount } from '../data/commercial-data.js';
@@ -204,7 +204,8 @@ function emptyPurchase(id) {
     id,
     projectId: '',
     supplierId: '',
-    date: today(),
+    // Scenario date of the data set (J&Y Demo lives in 2026).
+    date: data.today || today(),
     currency: 'PEN',
     managerId: '',
     paymentTerms: PAYMENT_TERMS[1],
@@ -213,6 +214,7 @@ function emptyPurchase(id) {
     budgetLine: 'purchases',
     costCenter: '',
     quotation: '',
+    quoteId: '',
     lines: [{ description: '', quantity: 1, unit: 'und', unitPrice: 0 }],
   };
 }
@@ -267,6 +269,15 @@ export function purchaseCreate() {
     get exceedsLine() {
       return Boolean(this.balance && this.total > this.balance.available);
     },
+    // R4 (J&Y Demo): quotes of the chosen supplier, newest first.
+    get supplierQuotes() {
+      return (data.quotes || [])
+        .filter((quote) => !this.form.supplierId || quote.supplierId === this.form.supplierId)
+        .sort((a, b) => b.date.localeCompare(a.date));
+    },
+    formatDate(iso) {
+      return iso ? iso.split('-').reverse().join('/') : '—';
+    },
     get quotations() {
       return data.budgets.filter(
         (item) => !this.form.projectId || item.projectId === this.form.projectId
@@ -277,7 +288,29 @@ export function purchaseCreate() {
     },
     open() {
       this.form = emptyPurchase(nextId('OC-DEMO-', loadDemo(DEMO_PURCHASES_KEY)));
+      this.prefillFromQuote();
       Modal.getOrCreateInstance(document.getElementById('purchase-create-modal')).show();
+    },
+    // R4: "Generar OC" from a budget's insumo arrives with project, supplier
+    // and the quote of origin; its offered items become the OC lines.
+    prefillFromQuote() {
+      const params = new URLSearchParams(location.search);
+      if (getProject(data, params.get('project'))) {
+        this.form.projectId = params.get('project');
+        this.selectProject();
+      }
+      if (data.suppliers.some((item) => item.id === params.get('supplier')))
+        this.form.supplierId = params.get('supplier');
+      const quote = (data.quotes || []).find((item) => item.id === params.get('quote'));
+      if (!quote) return;
+      this.form.quoteId = quote.id;
+      this.form.lines = quote.items.map((item) => ({
+        description:
+          data.products?.find((entry) => entry.id === item.productId)?.name || item.productId,
+        quantity: 1,
+        unit: data.products?.find((entry) => entry.id === item.productId)?.unit || 'und',
+        unitPrice: item.price,
+      }));
     },
     selectProject() {
       const project = getProject(data, this.form.projectId);
@@ -307,7 +340,9 @@ export function purchaseCreate() {
       window.dispatchEvent(new CustomEvent('demo-purchases-changed'));
       window.AdminApp?.notificationManager?.success(
         status === 'Pendiente'
-          ? 'Orden de Compra enviada a aprobación.'
+          ? variantRule('approvalsMode') === 'worklist'
+            ? `Orden de compra ${entry.id} registrada.`
+            : 'Orden de Compra enviada a aprobación.'
           : `Orden de Compra ${entry.id} guardada como borrador.`
       );
     },

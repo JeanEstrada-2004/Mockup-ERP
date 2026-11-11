@@ -39,7 +39,7 @@ El workflow [.github/workflows/pages.yml](.github/workflows/pages.yml) publica `
 
 ## Estructura
 
-- `src-modern/`: 29 vistas ERP, Alpine.js y SCSS.
+- `src-modern/`: 30 vistas ERP, Alpine.js y SCSS.
 - `src-modern/scripts/data/`: datos ficticios y operaciones compartidas por identificador.
 - `src-modern/scripts/charts/`: gráficos D3 accesibles.
 - `scripts/app-shell-template.mjs`: shell y marca por presentación.

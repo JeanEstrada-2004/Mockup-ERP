@@ -133,8 +133,8 @@ async function checkVariant(variant) {
   const variantDir = path.join(dist, variant);
   const htmlPages = (await readdir(variantDir)).filter((file) => file.endsWith('.html'));
   // 22 views + design-system (E2) + approvals (E4) + analytics (E6)
-  // + clientes y proveedores, lista y ficha (R1).
-  assert.equal(htmlPages.length, 29);
+  // + clientes y proveedores, lista y ficha (R1) + productos y precios (R4).
+  assert.equal(htmlPages.length, 30);
   const manifest = JSON.parse(await readFile(path.join(variantDir, 'manifest.json'), 'utf8'));
   assert.match(manifest.name, new RegExp(config.company.shortName.replace('&', '&')));
   assert.equal(manifest.start_url, './index.html');

@@ -4,6 +4,7 @@
 // never change projects, purchases or costs.
 import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
 import { getDocuments, getProjectFinancials } from './mock-data.js';
+import { loadQuotes } from './budget-model.js';
 
 export const MASTER_KINDS = {
   clients: {
@@ -314,10 +315,27 @@ export function supplierRelations(data, supplierId) {
   const documents = enabledDocuments(data).filter((document) =>
     purchaseIds.has(document.operationId)
   );
+  // R4 (J&Y Demo): quotes of this supplier and the prices they offered.
+  const quotes = data.quotes
+    ? loadQuotes(data)
+        .filter((quote) => quote.supplierId === supplierId)
+        .sort((a, b) => b.date.localeCompare(a.date))
+    : [];
+  const prices = quotes.flatMap((quote) =>
+    quote.items.map((item) => ({
+      ...item,
+      quoteId: quote.id,
+      date: quote.date,
+      validUntil: quote.validUntil,
+      product: (data.products || []).find((entry) => entry.id === item.productId),
+    }))
+  );
   return {
     purchases,
     projects,
     documents,
+    quotes,
+    prices,
     // Executed purchases only: the ones that already count as project cost.
     purchasedAmount: purchases
       .filter((item) => item.costSource)

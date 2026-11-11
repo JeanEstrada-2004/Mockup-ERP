@@ -7,6 +7,7 @@ import { activeVariant } from '../config/variants.js';
 import { loadDecisions } from './approval-demo.js';
 import { loadReports, reportNumber, reportTotals } from './expense-reports.js';
 import { getProject } from './mock-data.js';
+import { currentVersion, displayCode, loadBudgets } from './budget-model.js';
 
 export const WORKLIST_TABS = [
   {
@@ -29,6 +30,13 @@ export const WORKLIST_TABS = [
     short: 'Por entregar',
     action: 'Entregar',
     foot: 'Rendiciones aceptadas',
+  },
+  {
+    id: 'budgets',
+    label: 'Presupuestos por revisar',
+    short: 'Presupuestos',
+    action: 'Revisar',
+    foot: 'Versión actual en revisión',
   },
   {
     id: 'purchases',
@@ -73,6 +81,25 @@ export function worklistItems(data, variant = activeVariant) {
         amount: reportTotals(report).total,
         date: report.date,
         href: `./expense.html?id=${encodeURIComponent(report.id)}`,
+      });
+    }
+  }
+  if (enabled('budgets') && data.products) {
+    for (const budget of loadBudgets(data)) {
+      const current = currentVersion(data, budget);
+      if (current?.status !== 'En revisión') continue;
+      items.push({
+        id: `budgets-${budget.id}`,
+        tab: 'budgets',
+        kind: 'Presupuesto',
+        label: displayCode(data, budget),
+        title: current.comment || budget.title,
+        note: '',
+        projectId: budget.projectId,
+        responsibleId: budget.responsibleId,
+        amount: current.amount,
+        date: current.date,
+        href: `./budget.html?id=${encodeURIComponent(budget.id)}`,
       });
     }
   }

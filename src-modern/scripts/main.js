@@ -52,6 +52,8 @@ import {
   supplierDetail,
 } from './components/master-views.js';
 import { initMaturityTags } from './utils/maturity.js';
+import { budgetTechList, budgetTechDetail } from './components/budget-tech-views.js';
+import { productsWorkspace } from './components/product-views.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -286,6 +288,9 @@ class AdminApp {
     Alpine.data('clientDetail', clientDetail);
     Alpine.data('suppliersList', suppliersList);
     Alpine.data('supplierDetail', supplierDetail);
+    Alpine.data('budgetTechList', budgetTechList);
+    Alpine.data('budgetTechDetail', budgetTechDetail);
+    Alpine.data('productsWorkspace', productsWorkspace);
 
     Alpine.data('themeSwitch', () => ({
       currentTheme: 'light',

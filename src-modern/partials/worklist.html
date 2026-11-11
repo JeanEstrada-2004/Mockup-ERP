@@ -16,7 +16,7 @@
               </div>
             </div>
 
-            <section class="kpi-strip kpi-strip--5" aria-label="Pendientes por tipo">
+            <section class="kpi-strip kpi-strip--6" aria-label="Pendientes por tipo">
               <template x-for="item in tabs" :key="item.id">
                 <button type="button" class="kpi kpi--button" :class="{ 'is-active': tab === item.id }" @click="selectTab(item.id)">
                   <span class="kpi-label"><i class="kpi-dot" :class="item.id === 'observed' ? 'kpi-dot--bad' : item.id === 'review' ? 'kpi-dot--s3' : ''" aria-hidden="true"></i><span x-text="item.short"></span></span>

@@ -223,10 +223,11 @@ async function purchaseFlow(variant, purchaseId) {
 try {
   await budgetFlow('surtec-peti', 'PRE-001');
   await budgetFlow('jy-pmi', 'PRE-JY-001');
+  // R4: J&Y Demo has technical budgets (jy-budgets-interaction-test.mjs).
   await page.goto(url('jy-demo', 'budgets.html'));
   await ready();
-  assert.equal(await page.locator('.sidebar-nav [data-module="budgets"]').count(), 0);
-  assert.ok((await page.locator('main').innerText()).includes('Módulo no incluido'));
+  assert.equal(await page.locator('.sidebar-nav [data-module="budgets"]').count(), 1);
+  assert.equal(await page.locator('[x-data="budgetTechList"]').count(), 1);
   await purchaseFlow('surtec-peti', 'OC-033');
   await page.goto(url('surtec-peti', 'purchase.html?id=OC-201'));
   await ready();

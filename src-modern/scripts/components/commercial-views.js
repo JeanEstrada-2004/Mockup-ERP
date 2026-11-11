@@ -477,6 +477,11 @@ export function purchaseDetail() {
     get projectHref() {
       return this.project ? moduleHref('projects', this.project.id) : null;
     },
+    get quoteHref() {
+      return this.purchase?.quoteId
+        ? `./products.html?tab=cotizaciones&quote=${encodeURIComponent(this.purchase.quoteId)}`
+        : null;
+    },
     get supplierHref() {
       return this.purchase && isModuleEnabled('suppliers')
         ? moduleHref('suppliers', this.purchase.supplierId)

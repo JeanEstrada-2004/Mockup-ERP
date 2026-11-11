@@ -474,3 +474,10 @@ tres variantes bajo la subruta de Pages.
 - Documentos con vista previa del comprobante, la rendición o la orden de compra.
 - Pendientes como bandeja de tareas; Inicio con "Proyecto en contexto"; sin avance físico ni
   alerta automática del 80 % en el Demo.
+
+## Realineamiento de J&Y Demo — R4: presupuestos y precios (11/11/2026)
+
+- Presupuestos por partidas con metrados, APU e insumos, y presupuestos de productos con
+  opciones de proveedor; vista interna y vista cliente; nueva versión distinta de duplicar.
+- Productos y precios: catálogo, búsqueda con histórico, cotizaciones con adjunto y comparador.
+- OC con cotización de origen y recepción según sea material o servicio.

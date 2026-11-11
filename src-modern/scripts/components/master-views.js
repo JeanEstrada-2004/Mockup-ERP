@@ -18,6 +18,7 @@ import {
   validateMasterForm,
 } from '../data/master-data.js';
 import { formatMoney } from './shell.js';
+import { formatAmount } from '../data/commercial-data.js';
 import { formatDate } from './project-views.js';
 
 const data = getDataForVariant(activeVariant);
@@ -40,6 +41,13 @@ const DETAIL_TABS = {
     ['general', 'General'],
     ['contactos', 'Contactos'],
     ['productos', 'Productos y servicios'],
+    // R4: known prices and quotes exist where the data set has a catalogue.
+    ...(data.quotes
+      ? [
+          ['precios', 'Precios conocidos'],
+          ['cotizaciones', 'Cotizaciones'],
+        ]
+      : []),
     ['compras', 'Órdenes de compra'],
     ['proyectos', 'Proyectos'],
     ['documentos', 'Documentos'],
@@ -60,6 +68,7 @@ function masterShared(kind) {
     form: emptyMasterForm(kind),
     formError: '',
     formatMoney,
+    formatMoneyCents: formatAmount,
     formatDate,
     primaryContact(record) {
       return record?.contacts.find((item) => item.primary) || record?.contacts[0] || null;
@@ -78,6 +87,12 @@ function masterShared(kind) {
     },
     documentHref(id) {
       return moduleHref('documents', id);
+    },
+    quoteHref(id) {
+      return `./products.html?tab=cotizaciones&quote=${encodeURIComponent(id)}`;
+    },
+    priceHref(productId) {
+      return `./products.html?tab=precios&product=${encodeURIComponent(productId)}`;
     },
     projectName(id) {
       return data.projects.find((item) => item.id === id)?.name || id;
@@ -243,6 +258,8 @@ function masterDetail(kind) {
         presupuestos: relations.budgets?.length,
         documentos: relations.documents.length,
         productos: this.record.offerings.length,
+        precios: relations.prices?.length,
+        cotizaciones: relations.quotes?.length,
         compras: relations.purchases?.length,
       }[id];
     },
