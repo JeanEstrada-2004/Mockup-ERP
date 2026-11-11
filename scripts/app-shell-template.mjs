@@ -25,11 +25,6 @@ const escapeHtml = (value) =>
       })[character]
   );
 
-const formatMoney = (amount) =>
-  `S/ ${Math.round(amount)
-    .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}`;
-
 // --------------------------------------------------------------------------
 // Brand palette. Each variant declares two colours (primary, accent); the
 // rest of the palette is derived here so light and dark themes stay legible.
@@ -139,10 +134,6 @@ function renderNotificationItem(item) {
   return `<li><a class="dropdown-item shell-notification shell-notification--${escapeHtml(item.level)}" href="${href}"><i class="bi ${NOTIFICATION_ICONS[item.level] || NOTIFICATION_ICONS.info}" aria-hidden="true"></i><span><small>${escapeHtml(item.category)}</small>${escapeHtml(item.text)}</span></a></li>`;
 }
 
-function renderApprovalItem(item) {
-  return `<li><a class="dropdown-item shell-approval" href="${moduleHref(item.moduleId, item.id)}"><span><small>${escapeHtml(item.kind)} · ${escapeHtml(item.projectId)}</small><strong>${escapeHtml(item.id)}</strong></span><span class="shell-approval-amount">${formatMoney(item.amount)}</span></a></li>`;
-}
-
 function renderHeader(variant, data) {
   const notifications = getShellNotifications(data, variant);
   const approvals = getPendingApprovals(data, variant);
@@ -157,9 +148,6 @@ function renderHeader(variant, data) {
   const notificationItems = notifications.length
     ? notifications.map(renderNotificationItem).join('')
     : '<li><span class="dropdown-item-text text-body-secondary">No hay avisos pendientes.</span></li>';
-  const approvalItems = approvals.length
-    ? approvals.map(renderApprovalItem).join('')
-    : '<li><span class="dropdown-item-text text-body-secondary">No hay aprobaciones pendientes.</span></li>';
 
   return `
     <header class="admin-header shell-header">
@@ -198,15 +186,11 @@ function renderHeader(variant, data) {
             <span class="shell-demo-badge" title="Todos los registros de esta aplicación son ficticios">
               <i class="bi bi-info-circle" aria-hidden="true"></i><span class="shell-demo-badge-long">Datos de demostración</span><span class="shell-demo-badge-short">Demo</span>
             </span>
-            <div class="dropdown">
-              <button class="btn shell-icon-button position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Aprobaciones: ${approvals.length} pendientes" title="Aprobaciones pendientes">
+            <div>
+              <a class="btn shell-icon-button position-relative" href="./approvals.html" data-approvals-link aria-label="Aprobaciones: ${approvals.length} pendientes" title="Aprobaciones pendientes">
                 <i class="bi bi-check2-square" aria-hidden="true"></i>
-                ${approvals.length ? `<span class="shell-notification-count">${approvals.length}</span>` : ''}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shell-approval-menu">
-                <li><h6 class="dropdown-header">Aprobaciones pendientes</h6></li>
-                ${approvalItems}
-              </ul>
+                <span class="shell-notification-count" data-approvals-count${approvals.length ? '' : ' hidden'}>${approvals.length}</span>
+              </a>
             </div>
             <div x-data="themeSwitch">
               <button class="btn shell-icon-button" type="button" @click="toggle()" :aria-label="currentTheme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'" title="Cambiar tema">
@@ -244,14 +228,19 @@ function renderHeader(variant, data) {
     </header>`;
 }
 
-function renderSidebar(variant) {
+function renderSidebar(variant, data) {
+  const pendingCount = getPendingApprovals(data, variant).length;
   const sections = NAV_GROUPS.map((group) => {
     const ids = group.modules.filter((id) => variant.enabledModules.includes(id));
     if (!ids.length) return '';
     const links = ids
       .map((id) => {
         const item = MODULES[id];
-        return `<li class="nav-item"><a class="nav-link" data-module="${id}" href="${moduleHref(id)}" title="${escapeHtml(moduleLabel(id, variant))}"><i class="bi ${item.icon}" aria-hidden="true"></i><span>${escapeHtml(moduleLabel(id, variant))}</span></a></li>`;
+        const count =
+          id === 'approvals'
+            ? `<span class="shell-nav-count" data-approvals-count${pendingCount ? '' : ' hidden'}>${pendingCount}</span>`
+            : '';
+        return `<li class="nav-item"><a class="nav-link" data-module="${id}" href="${moduleHref(id)}" title="${escapeHtml(moduleLabel(id, variant))}"><i class="bi ${item.icon}" aria-hidden="true"></i><span>${escapeHtml(moduleLabel(id, variant))}</span>${count}</a></li>`;
       })
       .join('');
     return `<div class="shell-nav-group"><small>${group.label}</small><ul class="nav flex-column">${links}</ul></div>`;
@@ -332,7 +321,7 @@ export function appShellPlugin(mode) {
             `<link rel="manifest" href="./manifest.json">${brandStyle}${earlyTheme}</head>`
           )
           .replace('<!-- APP_HEADER -->', renderHeader(variant, data))
-          .replace('<!-- APP_SIDEBAR -->', renderSidebar(variant))
+          .replace('<!-- APP_SIDEBAR -->', renderSidebar(variant, data))
           .replace('<!-- APP_FOOTER -->', renderFooter(variant))
           .replace(
             /<meta name="theme-color" content="[^"]*">/,

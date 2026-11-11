@@ -15,6 +15,12 @@ import {
 } from '../data/mock-data.js';
 import { formatMoney, writeProjectId } from './shell.js';
 import { formatDate } from './project-views.js';
+import {
+  DEMO_BUDGETS_KEY,
+  DEMO_PURCHASES_KEY,
+  generateDocument,
+  loadDemo,
+} from './commercial-forms.js';
 
 const data = getDataForVariant(activeVariant);
 const versionKey = variantStorageKey('budget-versions');
@@ -101,10 +107,20 @@ function listQuery(keys) {
   return params.size ? `?${params}` : '';
 }
 
+function budgetDate(budget) {
+  return budget.date || getProject(data, budget.projectId)?.startDate || '';
+}
+
 export function budgetsList() {
   return {
     allowed: isModuleEnabled('budgets'),
     budgets: isModuleEnabled('budgets') ? data.budgets : [],
+    demoBudgets: [],
+    budgetDate,
+    formatDate,
+    reloadDemo() {
+      this.demoBudgets = loadDemo(DEMO_BUDGETS_KEY);
+    },
     extras: [],
     search: '',
     projectFilter: '',
@@ -116,6 +132,7 @@ export function budgetsList() {
     statusClass,
     init() {
       this.extras = storedVersions();
+      this.reloadDemo();
       const params = new URLSearchParams(location.search);
       this.search = params.get('search') || '';
       this.projectFilter = data.projects.some((item) => item.id === params.get('project'))
@@ -219,6 +236,12 @@ export function budgetDetail() {
       document.title = `${base.id} · Presupuesto · ${activeVariant.company.shortName}`;
       writeProjectId(base.projectId);
     },
+    generatePdf() {
+      generateDocument(
+        `${base.id}-V${this.selectedVersion}.pdf`,
+        `Cotización de ${base.id}, versión V${this.selectedVersion}`
+      );
+    },
     selectVersion(version) {
       this.selectedVersion = version;
       const next = new URL(location.href);
@@ -276,6 +299,10 @@ export function budgetDetail() {
 export function purchasesList() {
   return {
     purchases: purchaseRecords(),
+    demoPurchases: [],
+    reloadDemo() {
+      this.demoPurchases = loadDemo(DEMO_PURCHASES_KEY);
+    },
     projects: data.projects,
     suppliers: data.suppliers,
     search: '',
@@ -288,6 +315,7 @@ export function purchasesList() {
     projectName,
     statusClass,
     init() {
+      this.reloadDemo();
       const params = new URLSearchParams(location.search);
       this.search = params.get('search') || '';
       this.projectFilter = data.projects.some((item) => item.id === params.get('project'))
@@ -380,6 +408,7 @@ export function purchaseDetail() {
     backHref: `./purchases.html${listQuery(backParams)}`,
     demoStatus: null,
     receiptRegistered: false,
+    demoEvents: [],
     formatAmount,
     formatMoney,
     formatDate,
@@ -392,7 +421,38 @@ export function purchaseDetail() {
       return this.purchase?.status === 'Pendiente' && !this.demoStatus;
     },
     get canReceive() {
-      return this.displayStatus === 'Aprobada' && !this.receiptRegistered;
+      return ['Aprobada', 'Emitida'].includes(this.displayStatus) && !this.receiptRegistered;
+    },
+    get canIssue() {
+      return this.displayStatus === 'Aprobada';
+    },
+    // Status trail derived from the record (Borrador → … → Atendida) plus the
+    // actions simulated in this view.
+    get history() {
+      if (!this.purchase) return [];
+      const order = ['Pendiente', 'Aprobada', 'Emitida', 'Atendida'];
+      const reached = order.indexOf(
+        this.purchase.status === 'Atendida' ? 'Atendida' : this.purchase.status
+      );
+      const when = formatDate(this.purchase.date);
+      const events = [
+        { label: 'Creada', note: `Registrada para ${this.purchase.projectId}.`, when },
+        { label: 'Enviada a aprobación', note: 'Pendiente de revisión de Logística.', when },
+      ];
+      if (reached >= 1)
+        events.push({
+          label: 'Aprobada',
+          note: 'Aprobación registrada en los datos de demostración.',
+          when,
+        });
+      if (reached >= 3)
+        events.push({
+          label: 'Atendida',
+          note: 'Recepción registrada; el costo se imputa a su fuente.',
+          when,
+        });
+      this.demoEvents.forEach((event) => events.push(event));
+      return events;
     },
     get availableBeforeOrder() {
       return this.financials.availableToCommit + (this.purchase.commitmentOpen || 0);
@@ -430,8 +490,26 @@ export function purchaseDetail() {
     approve() {
       if (!this.canApprove) return;
       this.demoStatus = 'Aprobada';
+      this.demoEvents.push({
+        label: 'Aprobada',
+        note: 'Aprobación simulada en esta vista.',
+        when: 'Ahora',
+      });
       modal('purchase-approval-modal').hide();
       toast(`${purchase.id}: aprobación simulada. Los importes del proyecto no cambian.`);
+    },
+    issue() {
+      if (!this.canIssue) return;
+      this.demoStatus = 'Emitida';
+      this.demoEvents.push({
+        label: 'Emitida',
+        note: `Enviada a ${supplierName(purchase.supplierId)} (simulado).`,
+        when: 'Ahora',
+      });
+      toast(`${purchase.id} emitida al proveedor (simulado).`);
+    },
+    generateDocument() {
+      generateDocument(`${purchase.id}.pdf`, `Orden de Compra ${purchase.id}`);
     },
     openReceiptModal() {
       modal('purchase-receipt-modal').show();
@@ -440,6 +518,11 @@ export function purchaseDetail() {
       if (!this.canReceive) return;
       this.demoStatus = 'Atendida';
       this.receiptRegistered = true;
+      this.demoEvents.push({
+        label: 'Recepción registrada',
+        note: 'Recepción simulada; no genera costo real.',
+        when: 'Ahora',
+      });
       modal('purchase-receipt-modal').hide();
       toast(`${purchase.id}: recepción simulada. No se registró un costo real.`);
     },

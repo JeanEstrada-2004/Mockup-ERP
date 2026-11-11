@@ -35,6 +35,28 @@
                 <i class="bi bi-plus-circle" aria-hidden="true"></i> Nueva rendición
               </a>
             </div>
+            <section class="my-expenses" aria-labelledby="my-expenses-title">
+              <h2 id="my-expenses-title">Mis Rendiciones</h2>
+              <a class="btn btn-primary btn-lg my-expenses-new" href="./expense.html?new=1">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva rendición
+              </a>
+              <ul class="my-expenses-list">
+                <template x-for="item in myRecords" :key="item.id">
+                  <li>
+                    <a :href="detailHref(item)">
+                      <span>
+                        <strong x-text="item.id"></strong>
+                        <small x-text="`${item.projectId} · ${formatDate(item.date)}`"></small>
+                      </span>
+                      <span class="text-end">
+                        <b x-text="formatAmount(item.amount)"></b>
+                        <span class="badge" :class="statusClass(item.status)" x-text="item.status"></span>
+                      </span>
+                    </a>
+                  </li>
+                </template>
+              </ul>
+            </section>
             <section class="card" aria-labelledby="expenses-list-title">
               <div class="card-body">
                 <div class="shell-section-header">
@@ -72,6 +94,34 @@
                     </select>
                   </div>
                   <div>
+                    <label class="form-label" for="expenses-responsible">Responsable</label>
+                    <select
+                      id="expenses-responsible"
+                      class="form-select"
+                      x-model="responsibleFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="item in responsibles" :key="item.id"
+                        ><option :value="item.id" x-text="item.name" :selected="item.id === responsibleFilter"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="expenses-period">Periodo</label>
+                    <select
+                      id="expenses-period"
+                      class="form-select"
+                      x-model="periodFilter"
+                      @change="updateUrl()"
+                    >
+                      <option value="">Todos</option>
+                      <template x-for="item in periods" :key="item"
+                        ><option :value="item" x-text="periodLabel(item)" :selected="item === periodFilter"></option
+                      ></template>
+                    </select>
+                  </div>
+                  <div>
                     <label class="form-label" for="expenses-status">Estado</label>
                     <select
                       id="expenses-status"
@@ -89,11 +139,23 @@
                   <button
                     class="btn btn-outline-secondary"
                     type="button"
-                    x-show="search || projectFilter || statusFilter"
+                    x-show="search || projectFilter || responsibleFilter || periodFilter || statusFilter"
                     @click="clearFilters()"
                   >
                     Limpiar
                   </button>
+                </div>
+                <div class="filter-chips" x-show="activeChips().length" x-cloak aria-label="Filtros aplicados">
+                  <template x-for="chip in activeChips()" :key="chip.key"
+                    ><button
+                      type="button"
+                      class="filter-chip"
+                      @click="clearChip(chip.key)"
+                      :aria-label="`Quitar filtro ${chip.label}: ${chip.value}`"
+                    >
+                      <span x-text="`${chip.label}: ${chip.value}`"></span
+                      ><i class="bi bi-x" aria-hidden="true"></i></button
+                  ></template>
                 </div>
                 <div class="table-responsive workspace-project-table expense-table">
                   <table class="table table-hover align-middle mb-0">

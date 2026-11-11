@@ -241,11 +241,6 @@ export function dashboardView() {
       this.selectedProjectId = id;
       this.charts[0]?.update(this.flowData);
     },
-    openApprovals() {
-      const toggle = document.querySelector('.shell-approval-menu')?.previousElementSibling;
-      toggle?.click();
-      toggle?.focus();
-    },
     openNotifications() {
       const toggle = document.querySelector('.shell-notification-menu')?.previousElementSibling;
       toggle?.click();

@@ -5,6 +5,7 @@ export const VARIANT_IDS = ['surtec-peti', 'jy-pmi', 'jy-demo'];
 const surtecModules = [
   'dashboard',
   'projects',
+  'approvals',
   'crm',
   'budgets',
   'purchases',
@@ -25,6 +26,7 @@ const surtecModules = [
 const jyPmiModules = [
   'dashboard',
   'projects',
+  'approvals',
   'budgets',
   'purchases',
   'expenses',
@@ -40,6 +42,7 @@ const jyPmiModules = [
 const jyDemoModules = [
   'dashboard',
   'projects',
+  'approvals',
   'purchases',
   'expenses',
   'personnel',

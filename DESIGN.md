@@ -128,6 +128,10 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.badge` + `$statusClass()` / `.status-badge--*` | Estados (sin cambios de API) |
 | `.workspace-tabs`, `.d9-tabs`, `.personnel-tabs`, `.warehouse-tabs` | Un solo estilo de pestañas (subrayado animado) |
 | `.legend`, `.legend--rows`, `.chart`, `.chart-tip`, `.chart-table`, `.exec-row` | Gráficos |
+| `button.kpi`, `.tab-count`, `.empty-state`, `.approval-actions` | Bandeja de aprobaciones (Entrega 4) |
+| `.form-section-title`, `.budget-chapter`, `.budget-summary`, `.totals-list` | Formularios largos y totales |
+| `.record-timeline` | Historial de un registro |
+| `.my-expenses`, `.expense-capture` | Rendiciones en móvil y captura simulada |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema
 visual", fuera del menú; se abre por URL). Es la referencia para las Entregas 3–7.

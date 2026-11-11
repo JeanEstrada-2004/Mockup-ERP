@@ -288,7 +288,8 @@ async function testCRM() {
   );
   await page.getByRole('link', { name: 'Abrir presupuesto' }).click();
   await page.waitForURL(/budget\.html\?id=PRE-001/);
-  await page.getByRole('link', { name: 'Abrir proyecto' }).first().click();
+  // Entrega 4: "Ver proyecto" from every operation (punto 123).
+  await page.getByRole('link', { name: 'Ver proyecto', exact: true }).first().click();
   await page.waitForURL(/project\.html\?id=PR-2027-001/);
   await page.goto(url('surtec-peti', 'crm.html'));
   await ready();

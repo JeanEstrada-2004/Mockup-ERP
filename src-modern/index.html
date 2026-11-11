@@ -126,14 +126,9 @@
                       ><strong x-text="formatMoney(item.amount)"></strong></a
                   ></template>
                 </div>
-                <button
-                  type="button"
-                  class="btn btn-light"
-                  x-show="approvals.length"
-                  @click="openApprovals()"
-                >
+                <a class="btn btn-light" href="./approvals.html" x-show="approvals.length">
                   Abrir bandeja
-                </button>
+                </a>
               </section>
               <section class="panel" aria-labelledby="dashboard-flow-title">
                 <div class="panel-head">

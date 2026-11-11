@@ -74,12 +74,6 @@ export function designSystemView() {
       if (getProject(data, saved)) this.focusProjectId = saved;
       this.$nextTick(() => this.renderCharts(cumulativeMonths));
     },
-    // The approvals inbox is the header menu until approvals.html (Entrega 4).
-    openApprovals() {
-      const toggle = document.querySelector('.shell-approval-menu')?.previousElementSibling;
-      toggle?.click();
-      toggle?.focus();
-    },
     selectProject(id) {
       if (!getProject(data, id)) return;
       this.focusProjectId = id;

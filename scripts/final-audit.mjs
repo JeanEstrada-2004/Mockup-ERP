@@ -132,8 +132,8 @@ async function checkVariant(variant) {
   const data = getDataForVariant(variant);
   const variantDir = path.join(dist, variant);
   const htmlPages = (await readdir(variantDir)).filter((file) => file.endsWith('.html'));
-  // 22 views + design-system.html (Sistema visual, Entrega 2 de mejoras).
-  assert.equal(htmlPages.length, 23);
+  // 22 views + design-system.html (Entrega 2) + approvals.html (Entrega 4).
+  assert.equal(htmlPages.length, 24);
   const manifest = JSON.parse(await readFile(path.join(variantDir, 'manifest.json'), 'utf8'));
   assert.match(manifest.name, new RegExp(config.company.shortName.replace('&', '&')));
   assert.equal(manifest.start_url, './index.html');
@@ -228,7 +228,7 @@ async function checkVariant(variant) {
     assert.ok(overflow <= 1, `Desbordamiento móvil ${overflow}px: ${variant}/${html}`);
   }
   console.log(
-    `${variant}: 23 vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
+    `${variant}: 24 vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
   );
 }
 

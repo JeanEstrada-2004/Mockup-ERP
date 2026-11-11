@@ -184,9 +184,31 @@ try {
   await ready();
   assert.equal(await page.locator('.expense-table tbody tr').count(), 2);
   await flow('jy-demo', 'PR-JY-001');
+
+  // Entrega 4: "Mis Rendiciones" is the phone entry point; desktop keeps the table.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(url('surtec-peti', 'expenses.html'));
+  await ready();
+  assert.ok(await page.locator('#my-expenses-title').isVisible());
+  const newButton = page.locator('.my-expenses-new');
+  assert.ok((await newButton.boundingBox()).height >= 48);
+  assert.ok((await page.locator('.my-expenses-list li').count()) > 0);
+  await newButton.click();
+  await page.waitForURL(/expense\.html\?new=1/);
+  await ready();
+  await page.selectOption('#expense-project', 'PR-2027-001');
+  await page.getByRole('button', { name: 'Continuar a comprobantes →' }).click();
+  await page.getByRole('button', { name: 'Tomar foto' }).click();
+  assert.equal(await page.locator('.expense-added-list > div').count(), 1);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(url('surtec-peti', 'expenses.html?responsible=PER-003'));
+  await ready();
+  assert.equal(await page.locator('#my-expenses-title').isVisible(), false);
+  assert.match(await page.locator('.filter-chips').innerText(), /Responsable: Luis Quispe/);
+
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log(
-    'Rendiciones: selección, propuesta editable, observación, corrección, aprobación, Costos y móvil correctos.'
+    'Rendiciones: Mis Rendiciones (móvil), captura simulada, filtros, propuesta editable, observación, corrección, aprobación, Costos y móvil correctos.'
   );
 } finally {
   await browser.close();

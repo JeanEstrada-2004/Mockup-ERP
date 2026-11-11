@@ -103,7 +103,8 @@ async function budgetFlow(variant, budgetId) {
   await page.waitForURL(/document\.html\?id=/);
   assert.equal(await page.locator('#document-facts-title').count(), 1);
   await page.goBack();
-  await page.getByRole('link', { name: 'Abrir proyecto' }).click();
+  // Entrega 4: "Ver proyecto" from every operation (punto 123).
+  await page.getByRole('link', { name: 'Ver proyecto', exact: true }).click();
   await page.waitForURL(/project\.html\?id=/);
   assert.equal(await page.locator('.workspace-detail-heading h1').innerText(), project.name);
   await page.goBack();
@@ -175,7 +176,8 @@ async function purchaseFlow(variant, purchaseId) {
   await page.waitForURL(/document\.html\?id=/);
   assert.equal(await page.locator('#document-facts-title').count(), 1);
   await page.goBack();
-  await page.getByRole('link', { name: 'Abrir proyecto' }).click();
+  // Entrega 4: "Ver proyecto" from every operation (punto 123).
+  await page.getByRole('link', { name: 'Ver proyecto', exact: true }).click();
   await page.waitForURL(/project\.html\?id=/);
   assert.equal(await page.locator('.workspace-detail-heading h1').innerText(), project.name);
   await page.goBack();
@@ -231,8 +233,57 @@ try {
   assert.equal(await page.locator('.commercial-budget-alert.alert-warning:visible').count(), 1);
   await purchaseFlow('jy-pmi', 'OC-JY-003');
   await purchaseFlow('jy-demo', 'OC-JY-003');
+
+  // Entrega 4: create flows (demonstration records, outside the totals).
+  await page.goto(url('surtec-peti', 'budgets.html'));
+  await ready();
+  await page.evaluate(() => {
+    localStorage.removeItem('mockup-erp:surtec-peti:demo-budgets');
+    localStorage.removeItem('mockup-erp:surtec-peti:demo-purchases');
+  });
+  await page.reload();
+  await ready();
+  await page.getByRole('button', { name: '+ Nuevo presupuesto' }).click();
+  await page.locator('#budget-create-modal').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('#budget-code').inputValue(), 'PRE-DEMO-001');
+  await page.selectOption('#budget-project', 'PR-2027-001');
+  assert.equal(await page.locator('#budget-client').inputValue(), 'CLI-001');
+  assert.equal(await page.locator('.budget-lines tbody tr').count(), 6);
+  assert.equal(await page.locator('.budget-chapter').count(), 2);
+  assert.match(await page.locator('.budget-summary').innerText(), /Valor de venta/);
+  await page.getByRole('button', { name: 'Enviar a revisión' }).click();
+  await page.locator('#demo-budgets-title').waitFor({ state: 'visible' });
+  assert.match(await page.locator('#demo-budgets-title').locator('xpath=ancestor::section').innerText(), /PRE-DEMO-001[\s\S]*En revisión/);
+
+  await page.goto(url('surtec-peti', 'budget.html?id=PRE-001'));
+  await ready();
+  await page.getByRole('button', { name: 'Generar PDF' }).click();
+  await page.getByRole('heading', { name: 'Documento generado correctamente' }).waitFor();
+  await page.locator('.swal2-confirm').click();
+
+  await page.goto(url('surtec-peti', 'purchases.html'));
+  await ready();
+  await page.getByRole('button', { name: '+ Nueva orden de compra' }).click();
+  await page.locator('#purchase-create-modal').waitFor({ state: 'visible' });
+  await page.selectOption('#purchase-project', 'PR-2027-002');
+  await page.selectOption('#purchase-supplier', { index: 1 });
+  await page.fill('#purchase-place', 'Almacén principal');
+  await page.getByRole('textbox', { name: 'Producto o servicio 1' }).fill('Cámaras IP');
+  await page.getByRole('spinbutton', { name: 'Cantidad 1' }).fill('40');
+  await page.getByRole('spinbutton', { name: 'Precio 1' }).fill('1500');
+  await page
+    .getByText('Advertencia: esta compra supera el saldo disponible de la partida seleccionada.')
+    .waitFor();
+  await page.getByRole('button', { name: 'Enviar a aprobación' }).click();
+  await page.getByText('Orden de Compra enviada a aprobación.').first().waitFor();
+  assert.match(await page.locator('#demo-purchases-title').locator('xpath=ancestor::section').innerText(), /OC-DEMO-001[\s\S]*Pendiente/);
+
+  await page.goto(url('surtec-peti', 'purchase.html?id=OC-034'));
+  await ready();
+  assert.ok((await page.locator('#purchase-history-title').count()) === 1);
+
   assert.equal(errors.length, 0, errors.join('\n'));
-  console.log('Presupuestos, versiones, OC, modales, enlaces y variantes: correctos.');
+  console.log('Presupuestos, versiones, OC, altas, modales, enlaces y variantes: correctos.');
 } finally {
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

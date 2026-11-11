@@ -18,7 +18,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 | 1. Base técnica: datos, estados, tabla, header | **Terminada** (10/11/2026) | `Entrega 1: base del sistema de diseño` | Ver "Notas de la Entrega 1" |
 | 2. Sistema visual "Red de Integración" + kit D3 | **Terminada** (10/11/2026) | `Entrega 2: sistema visual Red de Integración y kit D3` | Ver "Notas de la Entrega 2" |
 | 3. Panel General, Proyectos y Ficha Integral | **Terminada** (10/11/2026) | `Entrega 3: panel, proyectos y ficha integral` | Ver "Notas de la Entrega 3" |
-| 4. Aprobaciones, Rendiciones, Presupuestos, Compras | Pendiente | — | — |
+| 4. Aprobaciones, Rendiciones, Presupuestos, Compras | **Terminada** (10/11/2026) | `Entrega 4: aprobaciones, rendiciones, presupuestos y compras` | Ver "Notas de la Entrega 4" |
 | 5. Personal, Almacén y Costos | Pendiente | — | — |
 | 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | Pendiente | — | — |
 | 7. Cierre: quitar ApexCharts y Metis, recorridos, verificación final | Pendiente | — | — |
@@ -111,6 +111,42 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 - **Para la Entrega 4:** crear `approvals.html` y conectar el botón "Abrir bandeja" del
   Panel. Hoy abre el desplegable de aprobaciones del header. Mantener separados los
   cambios visuales de aprobación y los costos ejecutados del conjunto base.
+
+### Notas de la Entrega 4 (para las siguientes)
+
+- **Cambio oculto de presentación** (commit propio, antes de esta entrega): triple clic en
+  la etiqueta PETI/PMI/Demo del riel o Alt + Shift + P. La raíz `/Mockup-ERP/` reabre la
+  última presentación usada. Pedido del usuario; sigue sin haber selector visible.
+- **Bandeja** `approvals.html` (módulo `approvals` en GENERAL, en las tres variantes):
+  pestañas con contador, tabla compartida, Revisar / Observar (motivo + comentario) /
+  Aprobar (confirmación "¿Deseas aprobar la rendición R-050?"). Decisiones locales en
+  `approval-decisions` (`data/approval-demo.js`); `syncApprovalCounters()` mantiene iguales
+  el contador del header, el del riel y la bandeja. El botón del header y "Abrir bandeja"
+  del Panel llevan a esta vista (el desplegable del header se retiró).
+- **Altas de demostración** (`components/commercial-forms.js`): "+ Nuevo presupuesto"
+  (cabecera del punto 25, partidas jerárquicas 1/1.1/1.2/2/2.1/2.2 editables, subtotal,
+  descuento, valor de venta, IGV, total, costo estimado y margen) y "+ Nueva orden de
+  compra" (punto 32, detalle con IGV por línea, partida referencial, centro de costo,
+  cotización y la alerta no bloqueante del punto 35). Se guardan en `demo-budgets` /
+  `demo-purchases`, aparecen en una sección propia y no entran en totales ni costos.
+- **Fichas:** presupuesto con Duplicar, Generar PDF ("Documento generado correctamente") y
+  Ver historial; OC con Emitir, Generar documento e historial derivado del estado.
+  "Ver proyecto" en ambas (punto 123).
+- **Rendiciones:** filtros de responsable y periodo con chips; "Mis Rendiciones" como
+  entrada móvil (botón de 56 px, últimas rendiciones); "+ Agregar gasto" con Tomar foto /
+  Subir imagen / Adjuntar PDF simulados que usan un comprobante de ejemplo y abren la
+  propuesta OCR. Se conserva el recorrido de 4 pasos y su `localStorage`.
+- **Tablas:** encabezados en texto normal en todas las vistas (se anuló el uppercase de
+  Metis en `.table thead th`).
+- **Pendiente:** los importes de Rendiciones usan el formato `S/ 1,250.00` del módulo
+  original; unificar a `S/ 1 250.00` (punto 134) cuando se toque Rendiciones otra vez.
+  Las decisiones de la bandeja no cambian el estado mostrado en la ficha de cada registro
+  base (son demostración separada).
+- **Pruebas cambiadas (intencional):** `shell` (bandeja, contadores, atajo oculto),
+  `commercial` (altas, Generar PDF, "Ver proyecto"), `expenses` (Mis Rendiciones,
+  captura, filtros), `delivery-nine` ("Ver proyecto"), `final-audit` (24 páginas).
+  Una corrida de `test:delivery10` falló una vez en una comparación `deepEqual` que no se
+  pudo reproducir en dos corridas completas posteriores; vigilar si reaparece.
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

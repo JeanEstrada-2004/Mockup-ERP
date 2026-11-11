@@ -88,7 +88,7 @@ async function openVariant(variant, expectedName, expectedProjects) {
       .locator('.sidebar-nav a')
       .evaluateAll((links) =>
         links.every((link) =>
-          /\/(index|projects|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
+          /\/(index|projects|approvals|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
             link.href
           )
         )
@@ -390,6 +390,51 @@ try {
     await page.goto(pageUrl('surtec-peti'));
     await page.screenshot({ path: path.join(out, 'surtec-desktop.png'), fullPage: true });
   }
+
+  // Entrega 4: approvals inbox. Header and rail counters equal the inbox, and
+  // a local approval lowers all of them without touching base records.
+  await page.goto(pageUrl('surtec-peti', 'approvals.html'));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  await page.evaluate(() => localStorage.removeItem('mockup-erp:surtec-peti:approval-decisions'));
+  await page.reload();
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.equal(await page.locator('.sidebar-nav [data-module="approvals"].active').count(), 1);
+  const headerCount = Number(await page.locator('[data-approvals-link] [data-approvals-count]').innerText());
+  assert.ok(headerCount > 0);
+  assert.equal(
+    Number(await page.locator('.sidebar-nav [data-approvals-count]').innerText()),
+    headerCount
+  );
+  const inboxTotal = await page.evaluate(() =>
+    [...document.querySelectorAll('.workspace-tabs .tab-count')].reduce(
+      (sum, el) => sum + Number(el.textContent),
+      0
+    )
+  );
+  assert.equal(inboxTotal, headerCount);
+  await page.getByRole('tab', { name: /Rendiciones/ }).click();
+  const expenseRow = page.locator('.approvals-workspace tbody tr').first();
+  const expenseId = await expenseRow.locator('.data-code').first().innerText();
+  await expenseRow.getByRole('button', { name: 'Aprobar' }).click();
+  await page.getByRole('heading', { name: `¿Deseas aprobar la rendición ${expenseId}?` }).waitFor();
+  await page.locator('.swal2-confirm').click();
+  await page.waitForFunction(
+    (expected) =>
+      document.querySelector('[data-approvals-link] [data-approvals-count]')?.textContent ===
+      String(expected),
+    headerCount - 1
+  );
+  assert.ok((await page.locator('.approval-resolved').innerText()).includes(expenseId));
+  await page.locator('.approval-resolved').getByRole('button', { name: 'Deshacer' }).first().click();
+  await page.waitForFunction(
+    (expected) =>
+      document.querySelector('[data-approvals-link] [data-approvals-count]')?.textContent ===
+      String(expected),
+    headerCount
+  );
+  await page.goto(pageUrl('surtec-peti'));
+  await page.locator('a', { hasText: 'Abrir bandeja' }).click();
+  await page.waitForURL(/approvals\.html$/);
 
   // Hidden presentation switcher: not in the page until opened; Alt+Shift+P or
   // a triple click on the rail label; same screen in the other build when it

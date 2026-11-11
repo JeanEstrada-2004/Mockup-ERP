@@ -1,7 +1,7 @@
 // This order is shared by every presentation. Subfeatures stay inside their
 // parent module and do not add 19 separate sidebar entries.
 export const NAV_GROUPS = [
-  { label: 'GENERAL', modules: ['dashboard', 'projects'] },
+  { label: 'GENERAL', modules: ['dashboard', 'projects', 'approvals'] },
   {
     label: 'GESTIÓN',
     modules: ['crm', 'budgets', 'purchases', 'expenses', 'personnel', 'warehouse'],
@@ -15,6 +15,11 @@ export const MODULES = {
     label: 'Inicio',
     icon: 'bi-house',
     description: 'Visión consolidada de proyectos y operación.',
+  },
+  approvals: {
+    label: 'Aprobaciones',
+    icon: 'bi-check2-square',
+    description: 'Presupuestos, compras y rendiciones que esperan revisión.',
   },
   projects: {
     label: 'Proyectos',
@@ -90,6 +95,9 @@ export function moduleLabel(id, variant) {
 
 export function moduleHref(id, recordId) {
   if (id === 'dashboard') return './index.html';
+  if (id === 'approvals') {
+    return recordId ? `./approvals.html?tab=${encodeURIComponent(recordId)}` : './approvals.html';
+  }
   if (id === 'projects') {
     return recordId ? `./project.html?id=${encodeURIComponent(recordId)}` : './projects.html';
   }

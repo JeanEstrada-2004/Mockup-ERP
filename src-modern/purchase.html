@@ -76,12 +76,23 @@
                     @click="openReceiptModal()"
                   >
                     Registrar recepción</button
+                  ><button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    x-show="canIssue"
+                    @click="issue()"
+                  >
+                    Emitir OC</button
+                  ><button type="button" class="btn btn-outline-secondary btn-sm" @click="generateDocument()">
+                    <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Generar documento</button
+                  ><a class="btn btn-outline-secondary btn-sm" href="#historial"
+                    ><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Ver historial</a
                   ><a
                     class="btn btn-outline-secondary btn-sm"
                     x-show="warehouseHref"
                     :href="warehouseHref"
                     >Ver entrada en almacén</a
-                  ><a class="btn btn-outline-secondary btn-sm" :href="projectHref">Abrir proyecto</a
+                  ><a class="btn btn-outline-secondary btn-sm" :href="projectHref">Ver proyecto</a
                   ><a class="btn btn-outline-secondary btn-sm" :href="documentHref"
                     >Documento mock</a
                   >
@@ -283,6 +294,24 @@
                     </div>
                   </div>
                 </div>
+
+                <section class="card mt-3" id="historial" aria-labelledby="purchase-history-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="purchase-history-title">Historial de la orden</h2>
+                      <span class="workspace-caption" x-text="`${history.length} eventos`"></span>
+                    </div>
+                    <ol class="record-timeline">
+                      <template x-for="(event, index) in history" :key="index">
+                        <li>
+                          <i aria-hidden="true"></i>
+                          <span><b x-text="event.label"></b><small x-text="event.note"></small></span>
+                          <time x-text="event.when"></time>
+                        </li>
+                      </template>
+                    </ol>
+                  </div>
+                </section>
 
                 <div
                   class="modal fade"

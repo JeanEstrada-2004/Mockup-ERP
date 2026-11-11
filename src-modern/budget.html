@@ -77,7 +77,13 @@
                     @click="openApprovalModal()"
                   >
                     Aprobar versión</button
-                  ><a class="btn btn-outline-secondary btn-sm" :href="projectHref">Abrir proyecto</a
+                  ><a class="btn btn-outline-secondary btn-sm" :href="`./budgets.html?duplicate=${encodeURIComponent(base.id)}`"
+                    ><i class="bi bi-copy me-1" aria-hidden="true"></i>Duplicar</a
+                  ><button type="button" class="btn btn-outline-secondary btn-sm" @click="generatePdf()">
+                    <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>Generar PDF</button
+                  ><a class="btn btn-outline-secondary btn-sm" href="#historial"
+                    ><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Ver historial</a
+                  ><a class="btn btn-outline-secondary btn-sm" :href="projectHref">Ver proyecto</a
                   ><a class="btn btn-outline-secondary btn-sm" :href="documentHref"
                     >Documento mock</a
                   >
@@ -191,7 +197,7 @@
                           </p>
                         </div>
                       </section>
-                      <section class="card" aria-labelledby="budget-history-title">
+                      <section class="card" id="historial" aria-labelledby="budget-history-title">
                         <div class="card-body">
                           <div class="shell-section-header">
                             <h2 id="budget-history-title">Historial de versiones</h2>

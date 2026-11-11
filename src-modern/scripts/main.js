@@ -39,6 +39,8 @@ import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
 import { designSystemView } from './components/design-system-view.js';
 import { initPresentationSwitcher } from './components/presentation-switcher.js';
+import { approvalsView, syncApprovalCounters } from './components/approvals-view.js';
+import { budgetCreate, purchaseCreate } from './components/commercial-forms.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -119,6 +121,9 @@ class AdminApp {
 
       // Hidden presentation switcher: triple click on the rail label or Alt+Shift+P.
       this.stopPresentationSwitcher = initPresentationSwitcher();
+
+      // Header and rail counters reflect local approval decisions (Entrega 4).
+      syncApprovalCounters();
 
       this.isInitialized = true;
 
@@ -508,6 +513,9 @@ class AdminApp {
     Alpine.data('materialDetail', materialDetail);
     Alpine.data('costWorkspace', costWorkspace);
     Alpine.data('designSystemView', designSystemView);
+    Alpine.data('approvalsView', approvalsView);
+    Alpine.data('budgetCreate', budgetCreate);
+    Alpine.data('purchaseCreate', purchaseCreate);
     Alpine.data('documentsWorkspace', documentsWorkspace);
     Alpine.data('documentDetail', documentDetail);
     Alpine.data('reportsWorkspace', reportsWorkspace);

@@ -416,3 +416,15 @@ explicativo donde Almacén no está habilitado.
 La prueba del shell cubre el nuevo recorrido y las nueve pestañas. La de Costos comprueba
 el flujo D3 del Panel. Los cinco escenarios de `test:delivery10` siguen pasando en las
 tres variantes bajo la subruta de Pages.
+
+## Mejoras — Entrega 4: aprobaciones, rendiciones, presupuestos y compras (10/11/2026)
+
+- **Cambio oculto de presentación:** triple clic en la etiqueta del riel o Alt + Shift + P;
+  la raíz de Pages recuerda la última presentación.
+- **Aprobaciones Pendientes** (`approvals.html`): bandeja por área con contadores que
+  coinciden con el header y el riel; aprobar y observar se guardan solo en el navegador.
+- **Presupuestos y Compras:** altas en modal con partidas, impuestos y totales; Duplicar,
+  Generar PDF, Emitir e historial. Los registros creados son de demostración y no alteran
+  costos, compromisos ni saldos.
+- **Rendiciones:** "Mis Rendiciones" en móvil, captura simulada (foto, imagen, PDF) y
+  filtros de responsable y periodo.

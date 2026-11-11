@@ -15,6 +15,7 @@ import {
 } from '../data/expense-demo.js';
 import { formatDate } from './project-views.js';
 import { writeProjectId } from './shell.js';
+import { tableControls } from '../utils/data-table.js';
 
 const data = getDataForVariant(activeVariant);
 const sourceExpenses = data.operations.filter((item) => item.type === 'expense');
@@ -91,13 +92,45 @@ function toast(message) {
   window.AdminApp?.notificationManager?.info(message);
 }
 
+const MONTH_NAMES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Setiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
+];
+function periodLabel(period) {
+  const [year, month] = period.split('-').map(Number);
+  return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
 export function expensesList() {
   return {
+    // Chips only; this list keeps its own ordering (most recent first).
+    ...tableControls({
+      chipDefs: [
+        { key: 'search', label: 'Búsqueda' },
+        { key: 'projectFilter', label: 'Proyecto' },
+        { key: 'responsibleFilter', label: 'Responsable', format: (id) => workerName(id) },
+        { key: 'statusFilter', label: 'Estado' },
+        { key: 'periodFilter', label: 'Periodo', format: periodLabel },
+      ],
+    }),
     records: [],
     projects: data.projects,
     search: '',
     projectFilter: '',
+    responsibleFilter: '',
     statusFilter: '',
+    periodFilter: '',
+    periodLabel,
     formatAmount,
     formatDate,
     projectName,
@@ -111,6 +144,34 @@ export function expensesList() {
         ? params.get('project')
         : '';
       this.statusFilter = statuses.includes(params.get('status')) ? params.get('status') : '';
+      this.responsibleFilter = this.responsibles.some(
+        (item) => item.id === params.get('responsible')
+      )
+        ? params.get('responsible')
+        : '';
+      this.periodFilter = this.periods.includes(params.get('period')) ? params.get('period') : '';
+    },
+    get responsibles() {
+      const ids = [...new Set(this.records.map((item) => item.workerId).filter(Boolean))];
+      return ids.map((id) => ({ id, name: workerName(id) }));
+    },
+    get periods() {
+      return [...new Set(this.records.map((item) => item.date?.slice(0, 7)).filter(Boolean))]
+        .sort()
+        .reverse();
+    },
+    // "Mis Rendiciones" (móvil): drafts and observed ones first, then the rest.
+    get myRecords() {
+      const weight = { Borrador: 0, Observada: 1, 'En revisión': 2, Aprobada: 3 };
+      return [...this.records]
+        .sort(
+          (a, b) =>
+            (weight[a.status] ?? 4) - (weight[b.status] ?? 4) || b.date.localeCompare(a.date)
+        )
+        .slice(0, 5);
+    },
+    onFiltersChange() {
+      this.updateUrl();
     },
     get filtered() {
       const term = normalize(this.search.trim());
@@ -120,6 +181,8 @@ export function expensesList() {
           return (
             (!term || normalize(text).includes(term)) &&
             (!this.projectFilter || item.projectId === this.projectFilter) &&
+            (!this.responsibleFilter || item.workerId === this.responsibleFilter) &&
+            (!this.periodFilter || item.date?.startsWith(this.periodFilter)) &&
             (!this.statusFilter || item.status === this.statusFilter)
           );
         })
@@ -137,11 +200,15 @@ export function expensesList() {
       if (this.search.trim()) params.set('search', this.search.trim());
       if (this.projectFilter) params.set('project', this.projectFilter);
       if (this.statusFilter) params.set('status', this.statusFilter);
+      if (this.responsibleFilter) params.set('responsible', this.responsibleFilter);
+      if (this.periodFilter) params.set('period', this.periodFilter);
       history.replaceState(null, '', `./expenses.html${params.size ? `?${params}` : ''}`);
     },
     clearFilters() {
       this.search = '';
       this.projectFilter = '';
+      this.responsibleFilter = '';
+      this.periodFilter = '';
       this.statusFilter = '';
       this.updateUrl();
     },
@@ -247,6 +314,22 @@ export function expenseDetail() {
       this.isNew = false;
       this.step = 2;
       document.title = `${this.record.id} · ${activeVariant.company.shortName}`;
+    },
+    captureSources: [
+      { id: 'photo', label: 'Tomar foto', icon: 'bi-camera' },
+      { id: 'image', label: 'Subir imagen', icon: 'bi-image' },
+      { id: 'pdf', label: 'Adjuntar PDF', icon: 'bi-file-earmark-pdf' },
+    ],
+    capture(sourceId) {
+      if (!this.isEditable) return;
+      const used = new Set(this.record.items.map((item) => item.number));
+      const example = this.examples.find((item) => !used.has(item.number)) || this.examples[0];
+      if (!example) return;
+      this.addExample(example.id);
+      const source = this.captureSources.find((item) => item.id === sourceId);
+      toast(
+        `${source?.label || 'Comprobante'}: se usó el comprobante de ejemplo ${example.number}. Revisa los datos propuestos por OCR.`
+      );
     },
     addExample(exampleId) {
       if (!this.isEditable) return;

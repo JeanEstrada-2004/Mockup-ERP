@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aprobaciones pendientes de presupuestos, compras y rendiciones" />
+    <meta name="theme-color" content="#1A365D" />
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg" />
+    <title>Aprobaciones Pendientes</title>
+  </head>
+  <body data-page="approvals" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div class="container-fluid shell-page approvals-workspace" x-data="approvalsView">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Aprobaciones</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Aprobaciones Pendientes</h1>
+                <p class="shell-page-subtitle">
+                  Presupuestos, órdenes de compra y rendiciones que esperan tu revisión
+                </p>
+              </div>
+            </div>
+
+            <section class="kpi-strip kpi-strip--4" aria-label="Resumen de aprobaciones">
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Pendientes</span>
+                <span class="kpi-value" x-count="pendingTotal"></span>
+                <span class="kpi-foot">En las tres áreas</span>
+              </div>
+              <template x-for="item in tabs" :key="item.id">
+                <button type="button" class="kpi kpi--button" @click="selectTab(item.id)">
+                  <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i><span x-text="item.label"></span></span>
+                  <span class="kpi-value" x-text="pendingIn(item.id).length"></span>
+                  <span class="kpi-foot" x-text="pendingIn(item.id).length === 1 ? 'pendiente' : 'pendientes'"></span>
+                </button>
+              </template>
+            </section>
+
+            <section class="card" aria-labelledby="approvals-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="approvals-title" x-text="currentTab ? `${currentTab.label} por aprobar` : 'Por aprobar'"></h2>
+                  <span class="text-muted small" aria-live="polite" x-text="`${rows.length} pendientes`"></span>
+                </div>
+                <div class="workspace-tabs" role="tablist" aria-label="Áreas">
+                  <template x-for="item in tabs" :key="item.id">
+                    <button
+                      type="button"
+                      role="tab"
+                      :id="`approvals-tab-${item.id}`"
+                      :aria-selected="String(tab === item.id)"
+                      :class="tab === item.id ? 'active' : ''"
+                      @click="selectTab(item.id)"
+                    >
+                      <span x-text="item.label"></span>
+                      <span class="tab-count" x-text="pendingIn(item.id).length"></span>
+                    </button>
+                  </template>
+                </div>
+
+                <div class="table-responsive data-table" x-show="rows.length">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Tipo</th>
+                        <template
+                          x-for="column in [['id','Código'],['responsible','Responsable'],['projectId','Proyecto'],['amount','Monto'],['date','Fecha']]"
+                          :key="column[0]"
+                          ><th scope="col" :aria-sort="ariaSort(column[0])" :class="{ 'text-end': column[0] === 'amount' }">
+                            <button type="button" class="data-sort" @click="sortBy(column[0])">
+                              <span x-text="column[1]"></span><i class="bi" :class="sortIcon(column[0])" aria-hidden="true"></i>
+                            </button></th
+                        ></template>
+                        <th scope="col" class="text-end">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in rows" :key="item.id">
+                        <tr>
+                          <td><span class="badge status-badge status-badge--warning" x-text="item.kind"></span></td>
+                          <td><a class="data-code" :href="reviewHref(item)" x-text="item.id"></a></td>
+                          <td x-text="item.responsible"></td>
+                          <td>
+                            <a class="data-code" :href="projectHref(item)" x-text="item.projectId"></a>
+                            <small class="d-block text-muted" x-text="item.projectName"></small>
+                          </td>
+                          <td class="text-end data-money" x-text="formatMoney(item.amount)"></td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td class="text-end">
+                            <div class="approval-actions">
+                              <a class="btn btn-outline-secondary btn-sm" :href="reviewHref(item)">Revisar</a>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" @click="openObservation(item)">Observar</button>
+                              <button type="button" class="btn btn-primary btn-sm" @click="approve(item)">Aprobar</button>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="empty-state" x-show="!rows.length" x-cloak>
+                  <i class="bi bi-check2-square" aria-hidden="true"></i>
+                  <p x-text="`No existen ${currentTab ? currentTab.label.toLowerCase() : 'registros'} pendientes.`"></p>
+                  <a class="btn btn-outline-secondary btn-sm" :href="`./${tab}.html`">Ver todos</a>
+                </div>
+              </div>
+            </section>
+
+            <section class="card mt-4" aria-labelledby="approvals-resolved-title" x-show="resolved.length" x-cloak>
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div>
+                    <h2 id="approvals-resolved-title">Resueltas en esta demostración</h2>
+                    <p class="workspace-caption">Se guardan en este navegador y no modifican costos ni registros base.</p>
+                  </div>
+                </div>
+                <ul class="approval-resolved">
+                  <template x-for="item in resolved" :key="item.id">
+                    <li>
+                      <span class="badge status-badge" :class="item.decision.status === 'Aprobada' ? 'status-badge--success' : 'status-badge--danger'" x-text="item.decision.status"></span>
+                      <span><b x-text="item.id"></b> · <span x-text="item.projectId"></span><small class="d-block text-muted" x-show="item.decision.reason" x-text="item.decision.reason"></small></span>
+                      <button type="button" class="btn btn-link btn-sm" @click="undo(item)">Deshacer</button>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+            </section>
+
+            <div class="modal fade" id="approval-observe-modal" tabindex="-1" aria-labelledby="approval-observe-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" @submit.prevent="saveObservation()">
+                  <div class="modal-header">
+                    <h2 class="modal-title" id="approval-observe-title" x-text="target ? `Observar ${target.id}` : 'Observar'"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <label class="form-label" for="approval-reason">Motivo</label>
+                    <select id="approval-reason" class="form-select mb-3" x-model="observation.reason">
+                      <template x-for="reason in reasons" :key="reason"><option :value="reason" x-text="reason"></option></template>
+                    </select>
+                    <label class="form-label" for="approval-comment">Comentario</label>
+                    <textarea id="approval-comment" class="form-control" rows="3" maxlength="240" x-model="observation.comment" placeholder="Indica qué debe corregirse"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar observación</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

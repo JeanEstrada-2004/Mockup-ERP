@@ -50,6 +50,7 @@ export default defineConfig(({ mode }) => ({
         settings: resolve(__dirname, 'src-modern/settings.html'),
         'module-preview': resolve(__dirname, 'src-modern/module-preview.html'),
         'design-system': resolve(__dirname, 'src-modern/design-system.html'),
+        approvals: resolve(__dirname, 'src-modern/approvals.html'),
       },
 
       output: {

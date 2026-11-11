@@ -1991,10 +1991,13 @@ textarea.form-control {
   thead {
     --bs-table-bg: var(--panel-2);
 
+    // Sentence case everywhere (DESIGN.md: no small caps labels).
     th {
       color: var(--ink-2);
       font-size: var(--fs-xs);
       font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
       white-space: nowrap;
     }
   }
@@ -2673,6 +2676,331 @@ th.text-end .data-sort {
     width: 10px;
     height: 10px;
     border-radius: 3px;
+  }
+}
+
+// A KPI cell that filters the page instead of navigating.
+button.kpi {
+  width: 100%;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--panel-2);
+  }
+
+  &:focus-visible {
+    outline-offset: -2px;
+  }
+}
+
+.tab-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+
+  .active > & {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+}
+
+.approval-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+// Empty state: icon + message + action (punto 109).
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 16px;
+  color: var(--ink-2);
+  text-align: center;
+
+  > i {
+    color: var(--good);
+    font-size: 1.75rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.approval-resolved {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-sm);
+  }
+
+  li:first-child {
+    border-top: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .approval-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  // "Mis Rendiciones" carries the big button on phones.
+  .expense-new-button {
+    display: none;
+  }
+}
+
+// Rendiciones — "Mis Rendiciones" is the phone entry point (punto 46).
+.my-expenses {
+  display: none;
+}
+
+.expense-capture {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 6px;
+}
+
+.expense-capture-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+
+  i {
+    color: var(--accent);
+    font-size: 1.125rem;
+  }
+}
+
+.expense-capture-note {
+  margin: 10px 0 8px;
+}
+
+@media (max-width: 767.98px) {
+  .my-expenses {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    h2 {
+      margin: 0;
+      font-size: var(--fs-lg);
+      font-weight: 700;
+    }
+  }
+
+  .my-expenses-new {
+    min-height: 56px;
+    font-size: var(--fs-md);
+  }
+
+  .my-expenses-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 64px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    strong,
+    small,
+    b {
+      display: block;
+    }
+
+    small {
+      color: var(--ink-3);
+      font-size: var(--fs-xs);
+    }
+
+    b {
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .expense-capture {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+// Long forms in sections (punto 113): Nuevo presupuesto, Nueva OC.
+.form-section-title {
+  margin: 22px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-md);
+  font-weight: 700;
+
+  .modal-body > &:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+.budget-lines,
+.purchase-lines {
+  td {
+    padding-block: 0.5rem;
+  }
+
+  input,
+  select {
+    min-width: 88px;
+  }
+}
+
+.purchase-lines td:first-child input {
+  min-width: 220px;
+}
+
+.budget-chapter td {
+  background: var(--panel-2);
+  font-weight: 700;
+}
+
+.budget-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 360px);
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.totals-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+
+  > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: var(--fs-sm);
+  }
+
+  dt {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .totals-grand {
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+
+    dt {
+      color: var(--ink);
+      font-weight: 800;
+    }
+  }
+}
+
+.totals-list--end {
+  max-width: 360px;
+  margin: 16px 0 0 auto;
+}
+
+// Record history (timeline): dot, event, time.
+.record-timeline {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-sm);
+  }
+
+  li:first-child {
+    border-top: 0;
+  }
+
+  i {
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+  }
+
+  small {
+    display: block;
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+  }
+
+  time {
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .budget-summary {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

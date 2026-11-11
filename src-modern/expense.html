@@ -134,10 +134,24 @@
                 >
                   <div class="card-body">
                     <p class="shell-eyebrow">PASO 2 DE 4</p>
-                    <h2 id="expense-add-title">Agrega comprobantes de ejemplo</h2>
+                    <h2 id="expense-add-title">+ Agregar gasto</h2>
                     <p class="workspace-caption">
                       Al elegir uno, aparecerá una propuesta de lectura simulada para que puedas
                       corregirla.
+                    </p>
+                    <div class="expense-capture" role="group" aria-label="Agregar gasto">
+                      <template x-for="source in captureSources" :key="source.id"
+                        ><button
+                          class="btn btn-outline-secondary expense-capture-button"
+                          type="button"
+                          @click="capture(source.id)"
+                        >
+                          <i class="bi" :class="source.icon" aria-hidden="true"></i
+                          ><span x-text="source.label"></span></button
+                      ></template>
+                    </div>
+                    <p class="workspace-caption expense-capture-note">
+                      O elige directamente un comprobante de ejemplo:
                     </p>
                     <div class="expense-example-grid">
                       <template x-for="example in examples" :key="example.id"

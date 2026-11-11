@@ -450,6 +450,8 @@ export function initShellActions(app) {
   const moduleId =
     document.body.dataset.page === 'home'
       ? 'dashboard'
+      : document.body.dataset.page === 'approvals'
+        ? 'approvals'
       : ['projects-list', 'project-detail'].includes(document.body.dataset.page)
         ? 'projects'
         : ['budgets-list', 'budget-detail'].includes(document.body.dataset.page)
