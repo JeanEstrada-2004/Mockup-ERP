@@ -243,6 +243,16 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
   pública sigue pendiente de `git push` y de comprobar GitHub Actions; ningún
   archivo se subió en esta entrega.
 
+### Revisión de la Entrega 7 (Claude, tras el trabajo de Codex)
+
+- Verificado: lint, `check:mock-data`, las tres variantes con `test:delivery10` y las 25
+  páginas de humo pasan; ApexCharts, Prism y las páginas Metis están retirados; favicon y
+  manifiesto por presentación; recorridos por variante (5 en SurTec, 4 en J&Y).
+- Ajustes: los pasos de cada recorrido se numeran (1 → 2 → 3) para leer el orden; los
+  logos de J&Y se sirven desde copias web reducidas (`assets/brands/jy/web/`, mismas
+  proporciones, sin redibujo): cada página baja de ~3,5 MB a ~0,6 MB de imágenes. Los
+  originales siguen en `assets/brands/jy/`.
+
 ## Decisiones confirmadas por el usuario (10/11/2026)
 
 1. **Estilo "Red de Integración"** aprobado tal como se ve en la referencia. Gana sobre
