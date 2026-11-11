@@ -1,5 +1,6 @@
 // Fictitious presentation data. Amounts are soles and dates are ISO internally;
 // the UI will format them as S/ and DD/MM/AAAA.
+/* @__NO_SIDE_EFFECTS__ */
 const operation = (id, projectId, type, amount, costSource, details = {}) => ({
   id,
   projectId,
@@ -9,6 +10,12 @@ const operation = (id, projectId, type, amount, costSource, details = {}) => ({
   documentId: `DOC-${id}`,
   ...details,
 });
+
+// Master-record helpers: contact and history entries of clients and suppliers.
+/* @__NO_SIDE_EFFECTS__ */
+const contact = (name, role, phone, email, primary = false) => ({ name, role, phone, email, primary });
+/* @__NO_SIDE_EFFECTS__ */
+const event = (date, user, action, note = '') => ({ date, user, action, note });
 
 // Portfolio projects that complete the dashboard totals of the specification:
 // 12 active projects (Activo + En riesgo) with S/ 1 245 000 budget and
@@ -97,17 +104,96 @@ const portfolioBudgets = portfolioProjects.map((project) => ({
 export const surtecData = {
   id: 'surtec',
   fictitious: true,
+  // Reference "today" of the scenario and the date used by sample receipts.
+  today: '2027-07-01',
+  exampleDate: '2027-04-03',
   clients: [
-    { id: 'CLI-001', name: 'Minera del Sur S.A.', ruc: '20512345678', sector: 'Minería' },
-    { id: 'CLI-002', name: 'Industrias Andinas S.A.C.', sector: 'Industria' },
-    { id: 'CLI-003', name: 'Clínica Regional del Sur', sector: 'Salud' },
-    { id: 'CLI-004', name: 'Corporación Logística Austral S.A.C.', sector: 'Logística' },
-    { id: 'CLI-005', name: 'Agroindustrial Valle Sur S.A.C.', sector: 'Agroindustria' },
+    {
+      id: 'CLI-001', name: 'Minera del Sur S.A.', tradeName: 'Minera del Sur', ruc: '20512345678',
+      sector: 'Minería', address: 'Av. Mariscal Castilla 812, Cayma, Arequipa', phone: '(054) 380 120',
+      email: 'proyectos@mineradelsur.pe', status: 'Activo', since: '2025-10-06',
+      contacts: [
+        contact('Jorge Rivera', 'Superintendente de TI', '989 100 101', 'jrivera@mineradelsur.pe', true),
+        contact('Milagros Ponce', 'Compras', '989 100 102', 'mponce@mineradelsur.pe'),
+      ],
+      history: [
+        event('2025-10-06', 'Carlos Mendoza', 'Registró el cliente'),
+        event('2026-12-14', 'Carlos Mendoza', 'Asoció el proyecto PR-2027-001'),
+      ],
+    },
+    {
+      id: 'CLI-002', name: 'Industrias Andinas S.A.C.', tradeName: 'Industrias Andinas', ruc: '20512345679',
+      sector: 'Industria', address: 'Parque Industrial Río Seco Mz. B Lt. 4, Cerro Colorado, Arequipa',
+      phone: '(054) 380 230', email: 'mantenimiento@industriasandinas.pe', status: 'Activo', since: '2026-01-19',
+      contacts: [contact('Raúl Chávez', 'Jefe de mantenimiento', '989 100 201', 'rchavez@industriasandinas.pe', true)],
+      history: [
+        event('2026-01-19', 'Ana Torres', 'Registró el cliente'),
+        event('2026-12-20', 'Ana Torres', 'Asoció el proyecto PR-2027-002'),
+      ],
+    },
+    {
+      id: 'CLI-003', name: 'Clínica Regional del Sur', tradeName: 'Clínica Regional del Sur', ruc: '20512345680',
+      sector: 'Salud', address: 'Av. Goyeneche 1050, Cercado, Arequipa', phone: '(054) 380 340',
+      email: 'sistemas@clinicaregionalsur.pe', status: 'Activo', since: '2026-03-02',
+      contacts: [contact('Verónica Ortiz', 'Jefa de sistemas', '989 100 301', 'vortiz@clinicaregionalsur.pe', true)],
+      history: [
+        event('2026-03-02', 'Luis Quispe', 'Registró el cliente'),
+        event('2027-01-28', 'Luis Quispe', 'Asoció el proyecto PR-2027-003'),
+      ],
+    },
+    {
+      id: 'CLI-004', name: 'Corporación Logística Austral S.A.C.', tradeName: 'Logística Austral', ruc: '20512345681',
+      sector: 'Logística', address: 'Av. Aviación 2205, Cerro Colorado, Arequipa', phone: '(054) 380 450',
+      email: 'ti@logisticaaustral.pe', status: 'Activo', since: '2026-07-21',
+      contacts: [contact('Fernando Lazo', 'Gerente de operaciones', '989 100 401', 'flazo@logisticaaustral.pe', true)],
+      history: [event('2026-07-21', 'Ana Torres', 'Registró el cliente')],
+    },
+    {
+      id: 'CLI-005', name: 'Agroindustrial Valle Sur S.A.C.', tradeName: 'Valle Sur', ruc: '20512345682',
+      sector: 'Agroindustria', address: 'Carretera Arequipa–Yura km 8, Cerro Colorado, Arequipa',
+      phone: '(054) 380 560', email: 'planta@agrovallesur.pe', status: 'Activo', since: '2026-09-08',
+      contacts: [contact('Sofía Medina', 'Jefa de planta', '989 100 501', 'smedina@agrovallesur.pe', true)],
+      history: [event('2026-09-08', 'Carlos Mendoza', 'Registró el cliente')],
+    },
   ],
   suppliers: [
-    { id: 'PROV-001', name: 'TechSupply Perú S.A.C.' },
-    { id: 'PROV-002', name: 'Redes Industriales del Sur S.A.C.' },
-    { id: 'PROV-003', name: 'ElectroData S.A.C.' },
+    {
+      id: 'PROV-001', name: 'TechSupply Perú S.A.C.', tradeName: 'TechSupply', ruc: '20600111201',
+      specialty: 'Cableado estructurado y redes', brands: ['Panduit', 'Cisco', 'Furukawa'],
+      categories: ['Cableado', 'Redes'], address: 'Av. Ejército 615, Yanahuara, Arequipa',
+      phone: '(054) 390 101', email: 'ventas@techsupply.pe', status: 'Activo', since: '2025-08-04',
+      contacts: [contact('Marcos Rojas', 'Ejecutivo corporativo', '989 200 101', 'mrojas@techsupply.pe', true)],
+      offerings: [
+        { name: 'Cable UTP Cat6', kind: 'Producto', brand: 'Furukawa', category: 'Cableado', unit: 'm' },
+        { name: 'Conector RJ45 Cat6', kind: 'Producto', brand: 'Panduit', category: 'Cableado', unit: 'und' },
+        { name: 'Switch administrable 48 puertos', kind: 'Producto', brand: 'Cisco', category: 'Redes', unit: 'und' },
+      ],
+      history: [event('2025-08-04', 'Ana Torres', 'Registró el proveedor')],
+    },
+    {
+      id: 'PROV-002', name: 'Redes Industriales del Sur S.A.C.', tradeName: 'Redes Industriales', ruc: '20600111202',
+      specialty: 'Equipos de seguridad electrónica', brands: ['Hikvision', 'Axis'],
+      categories: ['Videovigilancia', 'Control de accesos'], address: 'Calle San Juan de Dios 410, Cercado, Arequipa',
+      phone: '(054) 390 202', email: 'proyectos@redesindustriales.pe', status: 'Activo', since: '2025-11-17',
+      contacts: [contact('Karina Vela', 'Jefa comercial', '989 200 201', 'kvela@redesindustriales.pe', true)],
+      offerings: [
+        { name: 'Cámara IP domo 4 MP', kind: 'Producto', brand: 'Hikvision', category: 'Videovigilancia', unit: 'und' },
+        { name: 'Instalación y configuración de CCTV', kind: 'Servicio', brand: '—', category: 'Videovigilancia', unit: 'servicio' },
+      ],
+      history: [event('2025-11-17', 'Luis Quispe', 'Registró el proveedor')],
+    },
+    {
+      id: 'PROV-003', name: 'ElectroData S.A.C.', tradeName: 'ElectroData', ruc: '20600111203',
+      specialty: 'Servidores y energía', brands: ['Dell', 'APC', 'HPE'],
+      categories: ['Servidores', 'Energía'], address: 'Av. Dolores 230, José Luis Bustamante y Rivero, Arequipa',
+      phone: '(054) 390 303', email: 'empresas@electrodata.pe', status: 'Activo', since: '2026-02-09',
+      contacts: [contact('Hugo Salinas', 'Ventas de infraestructura', '989 200 301', 'hsalinas@electrodata.pe', true)],
+      offerings: [
+        { name: 'Servidor en rack 2U', kind: 'Producto', brand: 'Dell', category: 'Servidores', unit: 'und' },
+        { name: 'UPS en línea 6 kVA', kind: 'Producto', brand: 'APC', category: 'Energía', unit: 'und' },
+      ],
+      history: [event('2026-02-09', 'Carlos Mendoza', 'Registró el proveedor')],
+    },
   ],
   workers: [
     {

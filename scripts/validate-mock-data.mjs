@@ -60,6 +60,34 @@ for (const variantId of VARIANT_IDS) {
   const documents = getDocuments(data);
   uniqueIds(documents, `${variantId}.documents`);
 
+  // MAESTROS (R1): every client and supplier has a valid, unique RUC, a known
+  // status and one primary contact; projects and purchases point to them.
+  for (const key of ['clients', 'suppliers']) {
+    const rucs = data[key].map((item) => item.ruc);
+    assert.equal(new Set(rucs).size, rucs.length, `${variantId}.${key}: RUC duplicado`);
+    for (const item of data[key]) {
+      assert.match(item.ruc, /^(10|15|17|20)\d{9}$/, `${item.id}: RUC inválido`);
+      assert.ok(['Activo', 'Inactivo'].includes(item.status), `${item.id}: estado`);
+      assert.match(item.since, /^\d{4}-\d{2}-\d{2}$/);
+      assert.equal(item.contacts.filter((contact) => contact.primary).length, 1, `${item.id}: contacto`);
+      assert.ok(item.history.length >= 1, `${item.id}: historial`);
+    }
+  }
+  for (const supplier of data.suppliers) {
+    assert.ok(supplier.specialty && Array.isArray(supplier.categories) && Array.isArray(supplier.brands));
+    for (const offering of supplier.offerings) {
+      assert.ok(['Producto', 'Servicio'].includes(offering.kind), `${supplier.id}: tipo de oferta`);
+    }
+  }
+  for (const project of data.projects) {
+    assert.ok(data.clients.some((item) => item.id === project.clientId), `${project.id}: cliente`);
+  }
+  for (const operation of data.operations.filter((item) => item.type === 'purchase')) {
+    assert.ok(data.suppliers.some((item) => item.id === operation.supplierId), `${operation.id}: proveedor`);
+  }
+  assert.match(data.today, /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(data.exampleDate, /^\d{4}-\d{2}-\d{2}$/);
+
   const clients = new Set(data.clients.map((item) => item.id));
   const workers = new Set(data.workers.map((item) => item.id));
   const suppliers = new Set(data.suppliers.map((item) => item.id));
@@ -277,7 +305,8 @@ for (const variantId of VARIANT_IDS) {
 }
 
 assert.notEqual(getDataForVariant('surtec-peti'), getDataForVariant('jy-pmi'));
-assert.equal(getDataForVariant('jy-pmi'), getDataForVariant('jy-demo'));
+// R1: J&Y Demo has its own data set; PMI keeps its records unchanged.
+assert.notEqual(getDataForVariant('jy-pmi'), getDataForVariant('jy-demo'));
 assert.notEqual(
   variantStorageKey('current-project', getVariantConfig('jy-pmi')),
   variantStorageKey('current-project', getVariantConfig('jy-demo'))
@@ -317,11 +346,34 @@ assert.deepEqual(getCostBySource(surtec, 'PR-2027-001'), {
 assert.equal(getProjectFinancials(surtec, 'PR-2027-002').executedCost, 82500);
 assert.equal(getProjectFinancials(surtec, 'PR-2027-003').executedCost, 48200);
 
-const jy = getDataForVariant('jy-demo');
+const jy = getDataForVariant('jy-pmi');
 assert.deepEqual(getPortfolioFinancials(jy), {
   activeProjectCount: 2,
   budgetAmount: 250000,
   executedCost: 113500,
 });
+
+// J&Y Demo (R1): 2026 scenario, PY-AA-NNN project codes (PR is J&Y's budget
+// prefix) and budget codes PR + AAMM + correlative.
+const demo = getDataForVariant('jy-demo');
+assert.deepEqual(getPortfolioFinancials(demo), {
+  activeProjectCount: 3,
+  budgetAmount: 318000,
+  executedCost: 138950,
+});
+for (const project of demo.projects) {
+  assert.match(project.id, /^PY-26-\d{3}$/);
+  assert.match(project.budgetId, /^PR26\d{2}-\d{4}$/);
+  assert.ok(project.startDate.startsWith('2026'), `${project.id}: fecha 2026`);
+}
+for (const operation of demo.operations) {
+  assert.ok(operation.date.startsWith('2026'), `${operation.id}: fecha 2026`);
+}
+for (const worker of demo.workers) {
+  assert.ok(['Oficina', 'Campo', 'Temporal'].includes(worker.kind), `${worker.id}: tipo`);
+  assert.ok(['Planilla', 'RxH'].includes(worker.regime), `${worker.id}: régimen`);
+}
+assert.equal(demo.clients.length, 5);
+assert.equal(demo.suppliers.length, 6);
 
 console.log('Configuraciones, logos, referencias y cifras mock: correctos.');

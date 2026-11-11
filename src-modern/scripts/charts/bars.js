@@ -86,7 +86,7 @@ function drawVertical({ host, element, data, options, tokens, width, animate }) 
       .attr('text-anchor', 'middle')
       .attr('font-size', crowded ? 11 : 12)
       .attr('fill', tokens['--ink-3'])
-      .text(crowded ? category.replace(/^PR-\d{4}-/, '') : category);
+      .text(crowded ? category.replace(/^(PR-\d{4}|PY-\d{2})-/, '') : category);
   });
 
   data.series.forEach((serie, seriesIndex) => {

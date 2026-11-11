@@ -594,6 +594,11 @@ export function projectDetail() {
     backLabel: from === 'home' ? 'Volver al Panel General' : 'Volver a Proyectos',
     hasWarehouse: isModuleEnabled('warehouse'),
     hasBudgets: isModuleEnabled('budgets'),
+    get clientHref() {
+      return this.project && isModuleEnabled('clients')
+        ? moduleHref('clients', this.project.clientId)
+        : null;
+    },
     budget: data.budgets.find((item) => item.projectId === id) || null,
     formatMoney,
     formatDate,

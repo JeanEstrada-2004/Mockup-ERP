@@ -122,7 +122,7 @@ export function administrationWorkspace() {
       { label: 'Moneda de los importes mock', value: 'Sol peruano (PEN)' },
       { label: 'IGV + IPM del desglose visual', value: `${Math.round(TAX_RATE * 100)} %` },
       { label: 'Idioma de interfaz', value: 'Español' },
-      { label: 'Calendario de datos ficticios', value: 'Escenario 2027' },
+      { label: 'Calendario de datos ficticios', value: `Escenario ${data.today.slice(0, 4)}` },
       { label: 'Alerta de ejecución de presupuesto', value: 'Desde 80 %' },
       {
         label: 'Módulo de almacén',

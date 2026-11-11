@@ -1,7 +1,13 @@
 import { activeVariant, variantStorageKey } from '../config/variants.js';
+import { getDataForVariant } from './mock-data.js';
 
 const storageKey = variantStorageKey('expense-demos');
 const round = (value) => Math.round((Number(value) || 0) * 100) / 100;
+const shiftDate = (iso, days) => {
+  const date = new Date(`${iso}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
 
 export function expenseExamples(data) {
   return [
@@ -11,7 +17,7 @@ export function expenseExamples(data) {
       number: 'F001-000128',
       vendor: data.suppliers[0]?.name || 'Proveedor de ejemplo',
       ruc: '20100000001',
-      date: '2027-04-03',
+      date: data.exampleDate,
       description: 'Suministros para el proyecto',
       value: 100,
       igv: 18,
@@ -23,7 +29,7 @@ export function expenseExamples(data) {
       number: 'B001-000052',
       vendor: 'Movilidad de ejemplo',
       ruc: '20100000002',
-      date: '2027-04-04',
+      date: shiftDate(data.exampleDate, 1),
       description: 'Traslado al proyecto',
       value: 0,
       igv: 0,
@@ -35,7 +41,7 @@ export function expenseExamples(data) {
       number: 'F002-000034',
       vendor: data.suppliers[1]?.name || 'Servicio de ejemplo',
       ruc: '20100000003',
-      date: '2027-04-05',
+      date: shiftDate(data.exampleDate, 2),
       description: 'Servicio técnico',
       value: 200,
       igv: 36,
@@ -98,9 +104,10 @@ export function nextExpenseId() {
 }
 
 export function expenseEvent(label, note = '') {
-  // Keep local demonstration actions in the same fictional 2027 scenario as
-  // the projects and sample receipts; this is not a real audit timestamp.
-  return { label, note, at: '2027-07-01T12:00:00', simulated: true };
+  // Keep local demonstration actions in the same fictional scenario as the
+  // projects and sample receipts; this is not a real audit timestamp.
+  const today = getDataForVariant(activeVariant).today;
+  return { label, note, at: `${today}T12:00:00`, simulated: true };
 }
 
 export function demoCostId(expenseId) {

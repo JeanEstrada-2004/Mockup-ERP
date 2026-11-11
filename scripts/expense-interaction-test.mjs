@@ -182,8 +182,8 @@ try {
   await flow('jy-pmi', 'PR-JY-001');
   await page.goto(url('jy-demo', 'expenses.html'));
   await ready();
-  assert.equal(await page.locator('.expense-table tbody tr').count(), 2);
-  await flow('jy-demo', 'PR-JY-001');
+  assert.equal(await page.locator('.expense-table tbody tr').count(), 4);
+  await flow('jy-demo', 'PY-26-001');
 
   // Entrega 4: "Mis Rendiciones" is the phone entry point; desktop keeps the table.
   await page.setViewportSize({ width: 390, height: 844 });

@@ -13,7 +13,12 @@ Tres conceptos que la interfaz debe transmitir: **integración**, **trazabilidad
 |---|---|---|---|
 | `surtec-peti` | SurTec Ingeniería y Tecnología S.A.C. | Curso PETI, solución TO-BE 2027–2030 | Completo: incluye CRM, Almacén, Biometría, BI, Integraciones |
 | `jy-pmi` | J&Y Ingenieros Consultores S.A.C. | Curso PMI, ERP contractual (ejecutora Novacore Systems) | Sin CRM ni Almacén |
-| `jy-demo` | J&Y Ingenieros Consultores S.A.C. | Demostración a la empresa real | Proyectos, Compras, Rendiciones, Personal, Costos, Documentos |
+| `jy-demo` | J&Y Ingenieros Consultores S.A.C. | Propuesta del futuro ERP interno de J&Y (realineamiento R1–R6) | Proyectos, Clientes, Proveedores, Compras, Rendiciones, Personal, Costos, Documentos; crece por fases |
+
+Clientes y Proveedores (MAESTROS) existen en las tres presentaciones. J&Y Demo tiene datos
+propios (escenario 2026) y distingue lo **confirmado (AS-IS)**, lo **propuesto (TO-BE)** y lo
+**por validar** con marcas que el presentador muestra desde el menú de usuario o con
+Alt + Shift + V. Ver `docs/realineamiento-jy-demo.md`.
 
 ## Usuarios
 - **Gerencia:** ve el estado del portafolio y decide. Necesita cifras confiables y rastreables.

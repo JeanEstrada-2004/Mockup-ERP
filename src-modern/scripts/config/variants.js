@@ -6,6 +6,8 @@ const surtecModules = [
   'dashboard',
   'projects',
   'approvals',
+  'clients',
+  'suppliers',
   'crm',
   'budgets',
   'purchases',
@@ -27,6 +29,8 @@ const jyPmiModules = [
   'dashboard',
   'projects',
   'approvals',
+  'clients',
+  'suppliers',
   'budgets',
   'purchases',
   'expenses',
@@ -39,10 +43,13 @@ const jyPmiModules = [
   'administration',
 ];
 
+// J&Y Demo grows phase by phase (docs/realineamiento-jy-demo.md, R1–R6).
 const jyDemoModules = [
   'dashboard',
   'projects',
   'approvals',
+  'clients',
+  'suppliers',
   'purchases',
   'expenses',
   'personnel',
@@ -61,6 +68,14 @@ const LOGO_BOXES = {
   jyDark: [400, 35, 1411, 632, 2172, 724],
 };
 
+
+// Process rules that differ between presentations. Defaults reproduce the
+// SurTec/PMI behaviour; a variant only declares what it changes.
+export const DEFAULT_RULES = {
+  // Demo only: badges that tell a confirmed process (AS-IS) from a proposal
+  // (TO-BE) and from what is still to be validated with the company.
+  maturityTags: false,
+};
 
 // Fictitious signed-in user shown in the header (punto 3).
 const DEMO_USER = { name: 'Jean Estrada', role: 'Administrador', initials: 'JE' };
@@ -137,7 +152,8 @@ export const VARIANTS = {
   },
   'jy-demo': {
     id: 'jy-demo',
-    dataSet: 'jy',
+    // Own data set since R1: J&Y Demo no longer mirrors the PMI records.
+    dataSet: 'jy-demo',
     user: DEMO_USER,
     company: {
       name: 'J&Y Ingenieros Consultores S.A.C.',
@@ -152,6 +168,8 @@ export const VARIANTS = {
       logoRailBox: LOGO_BOXES.jyDark,
     },
     presentation: { code: 'Demo', label: 'Propuesta para J&Y' },
+    rules: { maturityTags: true },
+    labels: { purchases: 'Compras / OC' },
     theme: {
       primary: '#334155',
       accent: '#2563EB',
@@ -180,6 +198,10 @@ export const activeVariant = getVariantConfig(activeVariantId);
 
 export function isModuleEnabled(moduleId, variant = activeVariant) {
   return variant.enabledModules.includes(moduleId);
+}
+
+export function variantRule(key, variant = activeVariant) {
+  return { ...DEFAULT_RULES, ...variant.rules }[key];
 }
 
 export function brandAssetUrl(assetPath) {

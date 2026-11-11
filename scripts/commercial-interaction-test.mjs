@@ -232,7 +232,7 @@ try {
   await ready();
   assert.equal(await page.locator('.commercial-budget-alert.alert-warning:visible').count(), 1);
   await purchaseFlow('jy-pmi', 'OC-JY-003');
-  await purchaseFlow('jy-demo', 'OC-JY-003');
+  await purchaseFlow('jy-demo', 'OC-26-004');
 
   // Entrega 4: create flows (demonstration records, outside the totals).
   await page.goto(url('surtec-peti', 'budgets.html'));

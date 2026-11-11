@@ -1,4 +1,8 @@
-import { VARIANT_IDS, getVariantConfig } from '../src-modern/scripts/config/variants.js';
+import {
+  VARIANT_IDS,
+  getVariantConfig,
+  variantRule,
+} from '../src-modern/scripts/config/variants.js';
 import {
   MODULES,
   NAV_GROUPS,
@@ -133,6 +137,10 @@ function renderNotificationItem(item) {
 }
 
 function renderHeader(variant, data) {
+  // J&Y Demo: shows or hides the AS-IS / TO-BE / por validar badges.
+  const maturityItem = variantRule('maturityTags', variant)
+    ? '<li><button class="dropdown-item shell-maturity-toggle" type="button" data-maturity-toggle aria-pressed="false" title="Alt + Shift + V"><i class="bi bi-patch-check me-2" aria-hidden="true"></i>Estado de validación</button></li>'
+    : '';
   const notifications = getShellNotifications(data, variant);
   const approvals = getPendingApprovals(data, variant);
   const company = variant.company;
@@ -215,7 +223,7 @@ function renderHeader(variant, data) {
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><span class="dropdown-header">${escapeHtml(user.name)} · ${escapeHtml(user.role)}</span></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="profile"><i class="bi bi-person me-2" aria-hidden="true"></i>Perfil</button></li>
-                <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#demo-tours-modal"><i class="bi bi-diagram-3 me-2" aria-hidden="true"></i>Recorridos de demostración</button></li>
+                <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#demo-tours-modal"><i class="bi bi-diagram-3 me-2" aria-hidden="true"></i>Recorridos de demostración</button></li>${maturityItem}
                 <li><button class="dropdown-item" type="button" data-shell-action="settings"><i class="bi bi-gear me-2" aria-hidden="true"></i>Configuración</button></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><button class="dropdown-item" type="button" data-shell-action="logout"><i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Cerrar sesión</button></li>

@@ -20,14 +20,32 @@ const jyAssignments = [
   ['PER-JY-002', 'PR-JY-001', 50],
   ['PER-JY-002', 'PR-JY-002', 50],
 ];
+// R5 replaces these referential percentages with the payroll allocation set
+// by Contabilidad (docs/realineamiento-jy-demo.md › 5.5).
+const jyDemoAssignments = [
+  ['PER-JY-001', 'PY-26-001', 50],
+  ['PER-JY-001', 'PY-26-002', 30],
+  ['PER-JY-001', 'PY-26-003', 20],
+  ['PER-JY-002', 'PY-26-001', 100],
+  ['PER-JY-003', 'PY-26-001', 40],
+  ['PER-JY-003', 'PY-26-003', 60],
+  ['PER-JY-004', 'PY-26-001', 40],
+  ['PER-JY-004', 'PY-26-002', 60],
+  ['PER-JY-005', 'PY-26-001', 50],
+  ['PER-JY-005', 'PY-26-002', 30],
+  ['PER-JY-005', 'PY-26-003', 20],
+  ['PER-JY-006', 'PY-26-001', 100],
+];
 const personnelBuildMode =
   typeof __ACTIVE_VARIANT__ === 'undefined' ? undefined : __ACTIVE_VARIANT__;
 const assignmentFixtures =
   personnelBuildMode === 'surtec-peti'
     ? { surtec: surtecAssignments }
-    : personnelBuildMode === 'jy-pmi' || personnelBuildMode === 'jy-demo'
+    : personnelBuildMode === 'jy-pmi'
       ? { jy: jyAssignments }
-      : { surtec: surtecAssignments, jy: jyAssignments };
+      : personnelBuildMode === 'jy-demo'
+        ? { 'jy-demo': jyDemoAssignments }
+        : { surtec: surtecAssignments, jy: jyAssignments, 'jy-demo': jyDemoAssignments };
 
 const manualKey = variantStorageKey('manual-timesheets');
 const incidentKey = variantStorageKey('attendance-incidents');

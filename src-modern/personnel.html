@@ -258,7 +258,9 @@
               <div class="card-body">
                 <div class="shell-section-header">
                   <div>
-                    <h2 id="personnel-assignments-title">Asignaciones a proyectos</h2>
+                    <div class="master-title-row" data-maturity="validate" data-maturity-note="El porcentaje de dedicación no equivale a la imputación de planilla que define Contabilidad.">
+                      <h2 id="personnel-assignments-title">Asignaciones a proyectos</h2>
+                    </div>
                     <span class="workspace-caption">Porcentajes referenciales</span>
                   </div>
                   <button class="btn btn-outline-primary btn-sm" type="button" @click="openAssign()">
@@ -422,7 +424,9 @@
             >
               <div class="card-body">
                 <div class="shell-section-header">
-                  <h2 id="personnel-timesheet-title">Tareo por jornada</h2>
+                  <div class="master-title-row" data-maturity="to-be" data-maturity-note="Hoy el tareo de campo es una lista firmada; se propone registrarlo por proyecto en el sistema.">
+                    <h2 id="personnel-timesheet-title">Tareo por jornada</h2>
+                  </div>
                   <button
                     class="btn btn-primary personnel-primary-action"
                     type="button"
@@ -858,9 +862,10 @@
                     ></button>
                   </div>
                   <div class="modal-body">
-                    <p class="workspace-caption">
-                      Responsable: usuario de demostración. Fecha ficticia: 03/04/2027.
-                    </p>
+                    <p
+                      class="workspace-caption"
+                      x-text="`Responsable: usuario de demostración. Fecha ficticia: ${formatDate(exampleDate)}.`"
+                    ></p>
                     <div
                       class="alert alert-danger"
                       role="alert"

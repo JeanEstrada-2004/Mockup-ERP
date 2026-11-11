@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Proveedores: especialidad, marcas, productos, órdenes de compra y proyectos" />
+    <meta name="theme-color" content="#1A365D" />
+    <!-- APP_FAVICON -->
+    <title>Proveedor</title>
+  </head>
+  <body data-page="supplier-detail" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace master-workspace"
+            x-data="supplierDetail"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./suppliers.html">Proveedores</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="record?.name || 'No encontrado'"></li>
+              </ol>
+            </nav>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Proveedores no disponible</h1>
+                  <p>Este módulo no forma parte de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed && !record"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  <h1>Proveedor no encontrado</h1>
+                  <p>El código solicitado no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./suppliers.html">Ver proveedores</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed && record"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="project-code" x-text="`RUC ${record.ruc}`"></p>
+                    <h1 x-text="record.name"></h1>
+                    <div class="project-meta">
+                      <span x-text="record.tradeName || 'Proveedor'"></span><span>·</span
+                      ><span x-text="record.specialty || '—'"></span
+                      ><span class="badge" :class="$statusClass(record.status)" x-text="record.status"></span
+                      ><span class="badge text-bg-secondary" x-show="record.demo">Demostración</span
+                      ><span class="badge text-bg-light" x-show="record.edited">Editado</span>
+                    </div>
+                  </div>
+                  <div class="d9-actions">
+                    <button type="button" class="btn btn-primary" @click="openEdit(record)"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar</button>
+                    <a class="btn btn-outline-primary" href="./suppliers.html"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Proveedores</a>
+                  </div>
+                </div>
+                <section class="kpi-strip kpi-strip--4" aria-label="Resumen del proveedor">
+                  <button class="kpi" type="button" @click="setTab('compras')">
+                    <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Órdenes de compra</span
+                    ><span class="kpi-value" x-count="relations.purchases.length"></span
+                    ><span class="kpi-foot" x-text="`${relations.openCount} sin ejecutar`"></span>
+                  </button>
+                  <button class="kpi" type="button" @click="setTab('compras')">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Comprado</span
+                    ><span class="kpi-value" x-count.money="relations.purchasedAmount"></span
+                    ><span class="kpi-foot">OC ejecutadas, ya en costos</span>
+                  </button>
+                  <button class="kpi" type="button" @click="setTab('proyectos')">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Proyectos atendidos</span
+                    ><span class="kpi-value" x-count="relations.projects.length"></span
+                    ><span class="kpi-foot">Con al menos una OC</span>
+                  </button>
+                  <button class="kpi" type="button" @click="setTab('productos')">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Productos y servicios</span
+                    ><span class="kpi-value" x-count="record.offerings.length"></span
+                    ><span class="kpi-foot" x-text="record.brands.length ? record.brands.slice(0, 3).join(' · ') : 'Sin marcas registradas'"></span>
+                  </button>
+                </section>
+                <div class="d9-tabs" role="tablist" aria-label="Secciones de la ficha">
+                  <template x-for="[id, label] in tabs" :key="id"
+                    ><button type="button" role="tab" :class="{ active: tab === id }" :aria-selected="tab === id" @click="setTab(id)">
+                      <span x-text="label"></span
+                      ><span class="tab-count" x-show="tabCount(id) !== undefined && tabCount(id) !== null" x-text="tabCount(id)"></span>
+                    </button></template
+                  >
+                </div>
+                <section class="card" x-show="tab === 'general'" aria-labelledby="master-general-title">
+                  <div class="card-body">
+                    <div class="shell-section-header"><h2 id="master-general-title">Datos generales</h2></div>
+                    <div class="d9-facts">
+                      <div><small>Razón social</small><strong x-text="record.name"></strong></div>
+                      <div><small>Nombre comercial</small><strong x-text="record.tradeName || '—'"></strong></div>
+                      <div><small>RUC</small><strong x-text="record.ruc"></strong></div>
+                        <div><small>Especialidad</small><strong x-text="record.specialty || '—'"></strong></div>
+                        <div><small>Categorías</small><strong x-text="record.categories.join(' · ') || '—'"></strong></div>
+                        <div><small>Marcas</small><strong x-text="record.brands.join(' · ') || '—'"></strong></div>
+                      <div><small>Dirección</small><strong x-text="record.address || '—'"></strong></div>
+                      <div><small>Teléfono</small><strong x-text="record.phone || '—'"></strong></div>
+                      <div><small>Correo</small><strong x-text="record.email || '—'"></strong></div>
+                      <div><small>Proveedor desde</small><strong x-text="formatDate(record.since)"></strong></div>
+                      <div><small>Código interno</small><strong x-text="record.id"></strong></div>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'contactos'" aria-labelledby="master-contacts-title">
+                  <div class="card-body">
+                    <div class="shell-section-header"><h2 id="master-contacts-title">Contactos</h2></div>
+                    <div class="master-contacts" x-show="record.contacts.length">
+                      <template x-for="item in record.contacts" :key="item.name"
+                        ><article class="master-contact">
+                          <div class="d9-mobile-heading">
+                            <strong x-text="item.name"></strong
+                            ><span class="badge status-badge status-badge--info" x-show="item.primary">Principal</span>
+                          </div>
+                          <small x-text="item.role || 'Sin cargo registrado'"></small>
+                          <span><i class="bi bi-telephone me-1" aria-hidden="true"></i><span x-text="item.phone || '—'"></span></span>
+                          <span><i class="bi bi-envelope me-1" aria-hidden="true"></i><span x-text="item.email || '—'"></span></span>
+                        </article></template
+                      >
+                    </div>
+                    <div class="d9-empty" x-show="!record.contacts.length">
+                      <i class="bi bi-person" aria-hidden="true"></i>
+                      <p>No hay contactos registrados.</p>
+                      <button type="button" class="btn btn-outline-primary" @click="openEdit(record)">Agregar contacto principal</button>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'productos'" aria-labelledby="master-offerings-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Catálogo por proveedor propuesto; servirá para buscar precios y comparar cotizaciones.">
+                        <h2 id="master-offerings-title">Productos y servicios</h2>
+                      </div>
+                    </div>
+                    <div class="table-responsive" x-show="record.offerings.length">
+                      <table class="table align-middle mb-0 d9-table">
+                        <thead><tr><th scope="col">Producto o servicio</th><th scope="col">Tipo</th><th scope="col">Marca</th><th scope="col">Categoría</th><th scope="col">Unidad</th></tr></thead>
+                        <tbody>
+                          <template x-for="item in record.offerings" :key="item.name"
+                            ><tr>
+                              <td x-text="item.name"></td>
+                              <td x-text="item.kind"></td>
+                              <td x-text="item.brand"></td>
+                              <td x-text="item.category"></td>
+                              <td x-text="item.unit"></td>
+                            </tr></template
+                          >
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d9-empty" x-show="!record.offerings.length">
+                      <i class="bi bi-box" aria-hidden="true"></i>
+                      <p>Este proveedor todavía no tiene productos o servicios registrados.</p>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'compras'" aria-labelledby="master-purchases-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="master-purchases-title">Órdenes de compra</h2>
+                      <a class="btn btn-outline-primary btn-sm" x-show="purchaseHref('')" :href="`./purchases.html?supplier=${encodeURIComponent(record.id)}`">Ver en Compras</a>
+                    </div>
+                    <div class="table-responsive" x-show="relations.purchases.length">
+                      <table class="table align-middle mb-0 d9-table">
+                        <thead><tr><th scope="col">N.º OC</th><th scope="col">Proyecto</th><th scope="col">Fecha</th><th scope="col" class="text-end">Monto</th><th scope="col">Estado</th></tr></thead>
+                        <tbody>
+                          <template x-for="item in relations.purchases" :key="item.id"
+                            ><tr>
+                              <td>
+                                <a class="data-code" x-show="purchaseHref(item.id)" :href="purchaseHref(item.id)" x-text="item.id"></a
+                                ><span class="data-code" x-show="!purchaseHref(item.id)" x-text="item.id"></span>
+                              </td>
+                              <td><a :href="projectHref(item.projectId)" x-text="projectName(item.projectId)"></a></td>
+                              <td x-text="formatDate(item.date)"></td>
+                              <td class="text-end data-money" x-text="formatMoney(item.amount)"></td>
+                              <td><span class="badge" :class="$statusClass(item.status)" x-text="item.status"></span></td>
+                            </tr></template
+                          >
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d9-empty" x-show="!relations.purchases.length">
+                      <i class="bi bi-bag-check" aria-hidden="true"></i>
+                      <p>No hay órdenes de compra para este proveedor.</p>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'proyectos'" aria-labelledby="master-projects-title">
+                  <div class="card-body">
+                    <div class="shell-section-header"><h2 id="master-projects-title">Proyectos atendidos</h2></div>
+                    <div class="d9-link-list" x-show="relations.projects.length">
+                      <template x-for="item in relations.projects" :key="item.id"
+                        ><a :href="projectHref(item.id)">
+                          <span class="data-code" x-text="item.id"></span>
+                          <span><strong x-text="item.name"></strong><small class="d-block" x-text="item.status"></small></span>
+                        </a></template
+                      >
+                    </div>
+                    <div class="d9-empty" x-show="!relations.projects.length">
+                      <i class="bi bi-grid" aria-hidden="true"></i>
+                      <p>Este proveedor todavía no atendió proyectos.</p>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'documentos'" aria-labelledby="master-documents-title">
+                  <div class="card-body">
+                    <div class="shell-section-header"><h2 id="master-documents-title">Documentos</h2></div>
+                    <div class="d9-link-list" x-show="relations.documents.length">
+                      <template x-for="item in relations.documents" :key="item.id"
+                        ><a :href="documentHref(item.id)">
+                          <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                          <span><strong x-text="item.fileName"></strong><small class="d-block" x-text="`${item.type} · ${item.projectId} · ${formatDate(item.date)}`"></small></span>
+                        </a></template
+                      >
+                    </div>
+                    <div class="d9-empty" x-show="!relations.documents.length">
+                      <i class="bi bi-folder2-open" aria-hidden="true"></i>
+                      <p>No hay documentos relacionados.</p>
+                    </div>
+                  </div>
+                </section>
+                <section class="card" x-show="tab === 'historial'" aria-labelledby="master-history-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Cada cambio queda registrado con fecha, usuario y detalle.">
+                        <h2 id="master-history-title">Historial</h2>
+                      </div>
+                    </div>
+                    <div class="d9-history">
+                      <template x-for="(item, index) in history" :key="`${item.date}-${index}`"
+                        ><div>
+                          <i class="bi bi-clock-history" aria-hidden="true"></i>
+                          <div>
+                            <strong x-text="item.action"></strong
+                            ><small x-text="`${formatDate(item.date)} · ${item.user}${item.local ? ' · en esta demostración' : ''}`"></small
+                            ><small x-show="item.note" x-text="item.note"></small>
+                          </div>
+                        </div></template
+                      >
+                    </div>
+                  </div>
+                </section>
+              </div></template
+            >
+            <div class="modal fade" id="master-form-modal" tabindex="-1" aria-labelledby="master-form-title" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <form class="modal-content" novalidate @submit.prevent="saveForm()">
+                  <div class="modal-header">
+                    <h2 class="modal-title" id="master-form-title" x-text="form.id ? `Editar ${form.name}` : 'Nuevo proveedor'"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" x-show="formError" x-text="formError"></div>
+                    <h3 class="form-section-title">Datos generales</h3>
+                    <div class="row g-3">
+                      <div class="col-md-8">
+                        <label class="form-label" for="master-name">Razón social</label
+                        ><input id="master-name" class="form-control" maxlength="160" required x-model="form.name" :readonly="form.base" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="master-ruc">RUC</label
+                        ><input id="master-ruc" class="form-control" inputmode="numeric" maxlength="11" required x-model="form.ruc" :readonly="form.base" />
+                      </div>
+                      <p class="workspace-caption col-12 mt-1" x-show="form.base">
+                        La razón social y el RUC identifican al proveedor en proyectos y compras; no se editan.
+                      </p>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-trade">Nombre comercial</label
+                        ><input id="master-trade" class="form-control" maxlength="160" x-model="form.tradeName" />
+                      </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-specialty">Especialidad</label
+                      ><input id="master-specialty" class="form-control" maxlength="80" x-model="form.specialty" placeholder="Ejemplo: Materiales eléctricos" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-categories">Categorías</label
+                      ><input id="master-categories" class="form-control" maxlength="300" x-model="form.categories" placeholder="Separadas por comas" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-brands">Marcas</label
+                      ><input id="master-brands" class="form-control" maxlength="300" x-model="form.brands" placeholder="Separadas por comas" />
+                    </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-status">Estado</label
+                        ><select id="master-status" class="form-select" x-model="form.status">
+                          <template x-for="item in statuses" :key="item"><option :value="item" x-text="item" :selected="item === form.status"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label" for="master-address">Dirección</label
+                        ><input id="master-address" class="form-control" maxlength="160" x-model="form.address" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-phone">Teléfono</label
+                        ><input id="master-phone" class="form-control" type="tel" maxlength="40" x-model="form.phone" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-email">Correo</label
+                        ><input id="master-email" class="form-control" type="email" maxlength="120" x-model="form.email" />
+                      </div>
+                    </div>
+                    <h3 class="form-section-title">Contacto principal</h3>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-name">Nombre</label
+                        ><input id="master-contact-name" class="form-control" maxlength="80" x-model="form.contactName" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-role">Cargo</label
+                        ><input id="master-contact-role" class="form-control" maxlength="80" x-model="form.contactRole" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-phone">Teléfono</label
+                        ><input id="master-contact-phone" class="form-control" type="tel" maxlength="40" x-model="form.contactPhone" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-email">Correo</label
+                        ><input id="master-contact-email" class="form-control" type="email" maxlength="120" x-model="form.contactEmail" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" x-text="form.id ? 'Guardar cambios' : 'Registrar proveedor'"></button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>

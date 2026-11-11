@@ -132,8 +132,9 @@ async function checkVariant(variant) {
   const data = getDataForVariant(variant);
   const variantDir = path.join(dist, variant);
   const htmlPages = (await readdir(variantDir)).filter((file) => file.endsWith('.html'));
-  // 22 views + design-system (E2) + approvals (E4) + analytics (E6).
-  assert.equal(htmlPages.length, 25);
+  // 22 views + design-system (E2) + approvals (E4) + analytics (E6)
+  // + clientes y proveedores, lista y ficha (R1).
+  assert.equal(htmlPages.length, 29);
   const manifest = JSON.parse(await readFile(path.join(variantDir, 'manifest.json'), 'utf8'));
   assert.match(manifest.name, new RegExp(config.company.shortName.replace('&', '&')));
   assert.equal(manifest.start_url, './index.html');
@@ -157,13 +158,13 @@ async function checkVariant(variant) {
       jsFiles.map((file) => readFile(path.join(variantDir, 'assets', file), 'utf8'))
     )
   ).join('\n');
-  if (ownBrand === 'surtec') {
-    assert.ok(!jsContent.includes('OC-JY-001'));
-    assert.ok(!jsContent.includes('PR-JY-001'));
-  } else {
-    assert.ok(!jsContent.includes('OC-025'));
-    assert.ok(!jsContent.includes('PR-2027-001'));
-  }
+  // Each build ships only its own data set (R1: J&Y Demo no longer shares PMI's).
+  const foreignIds = {
+    'surtec-peti': ['OC-JY-001', 'PR-JY-001', 'OC-26-001', 'PY-26-001'],
+    'jy-pmi': ['OC-025', 'PR-2027-001', 'OC-26-001', 'PY-26-001'],
+    'jy-demo': ['OC-025', 'PR-2027-001', 'OC-JY-001', 'PR-JY-001'],
+  }[variant];
+  for (const id of foreignIds) assert.ok(!jsContent.includes(id), `${variant}: incluye ${id}`);
 
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const html of htmlPages) {
@@ -228,7 +229,7 @@ async function checkVariant(variant) {
     assert.ok(overflow <= 1, `Desbordamiento móvil ${overflow}px: ${variant}/${html}`);
   }
   console.log(
-    `${variant}: 25 vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
+    `${variant}: ${htmlPages.length} vistas, marca, alcance, enlaces, recursos, búsqueda, tema, accesibilidad y móvil correctos.`
   );
 }
 

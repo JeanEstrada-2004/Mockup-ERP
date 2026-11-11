@@ -477,6 +477,11 @@ export function purchaseDetail() {
     get projectHref() {
       return this.project ? moduleHref('projects', this.project.id) : null;
     },
+    get supplierHref() {
+      return this.purchase && isModuleEnabled('suppliers')
+        ? moduleHref('suppliers', this.purchase.supplierId)
+        : null;
+    },
     get budgetHref() {
       return this.project && isModuleEnabled('budgets')
         ? moduleHref('budgets', this.project.budgetId)

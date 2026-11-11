@@ -2,6 +2,7 @@
 // parent module and do not add 19 separate sidebar entries.
 export const NAV_GROUPS = [
   { label: 'GENERAL', modules: ['dashboard', 'projects', 'approvals'] },
+  { label: 'MAESTROS', modules: ['clients', 'suppliers'] },
   {
     label: 'GESTIÓN',
     modules: ['crm', 'budgets', 'purchases', 'expenses', 'personnel', 'warehouse'],
@@ -25,6 +26,16 @@ export const MODULES = {
     label: 'Proyectos',
     icon: 'bi-grid',
     description: 'Gestión integral de los proyectos de la empresa.',
+  },
+  clients: {
+    label: 'Clientes',
+    icon: 'bi-building',
+    description: 'Empresas para las que se ejecutan proyectos y presupuestos.',
+  },
+  suppliers: {
+    label: 'Proveedores',
+    icon: 'bi-truck',
+    description: 'Proveedores de productos y servicios, con sus compras.',
   },
   crm: {
     label: 'CRM',
@@ -90,13 +101,19 @@ export const MODULES = {
 
 export function moduleLabel(id, variant) {
   if (id === 'reports' && variant.enabledModules.includes('bi')) return 'Reportes y BI';
-  return MODULES[id]?.label || id;
+  return variant.labels?.[id] || MODULES[id]?.label || id;
 }
 
 export function moduleHref(id, recordId) {
   if (id === 'dashboard') return './index.html';
   if (id === 'approvals') {
     return recordId ? `./approvals.html?tab=${encodeURIComponent(recordId)}` : './approvals.html';
+  }
+  if (id === 'clients') {
+    return recordId ? `./client.html?id=${encodeURIComponent(recordId)}` : './clients.html';
+  }
+  if (id === 'suppliers') {
+    return recordId ? `./supplier.html?id=${encodeURIComponent(recordId)}` : './suppliers.html';
   }
   if (id === 'projects') {
     return recordId ? `./project.html?id=${encodeURIComponent(recordId)}` : './projects.html';
@@ -125,7 +142,9 @@ export function moduleHref(id, recordId) {
     if (recordId?.startsWith('COST-DEMO-'))
       return `./module-preview.html?module=costs&record=${encodeURIComponent(recordId)}`;
     if (recordId?.startsWith('COST-')) return `./costs.html?record=${encodeURIComponent(recordId)}`;
-    if (recordId?.startsWith('PR-')) return `./costs.html?project=${encodeURIComponent(recordId)}`;
+    // Project codes: PR-AAAA-NNN (SurTec, PMI) and PY-AA-NNN (J&Y Demo).
+    if (/^(PR|PY)-/.test(recordId || ''))
+      return `./costs.html?project=${encodeURIComponent(recordId)}`;
     return './costs.html';
   }
   if (id === 'documents') {

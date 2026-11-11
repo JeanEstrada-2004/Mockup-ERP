@@ -2,6 +2,7 @@
 import { activeVariant, getVariantConfig } from '../config/variants.js';
 import { surtecData } from './surtec.js';
 import { jyData } from './jy.js';
+import { jyDemoData } from './jy-demo.js';
 
 // During a variant build, Vite replaces MODE and removes the other data set
 // from the generated bundle. Node validation keeps both sets available.
@@ -9,9 +10,11 @@ const buildMode = typeof __ACTIVE_VARIANT__ === 'undefined' ? undefined : __ACTI
 const dataSets =
   buildMode === 'surtec-peti'
     ? { surtec: surtecData }
-    : buildMode === 'jy-pmi' || buildMode === 'jy-demo'
+    : buildMode === 'jy-pmi'
       ? { jy: jyData }
-      : { surtec: surtecData, jy: jyData };
+      : buildMode === 'jy-demo'
+        ? { 'jy-demo': jyDemoData }
+        : { surtec: surtecData, jy: jyData, 'jy-demo': jyDemoData };
 
 export function getDataForVariant(variant = activeVariant) {
   const config = typeof variant === 'string' ? getVariantConfig(variant) : variant;

@@ -88,7 +88,7 @@ async function openVariant(variant, expectedName, expectedProjects) {
       .locator('.sidebar-nav a')
       .evaluateAll((links) =>
         links.every((link) =>
-          /\/(index|projects|approvals|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
+          /\/(index|projects|approvals|clients|suppliers|crm|budgets|purchases|expenses|personnel|warehouse|costs|documents|reports|integrations|security|settings|module-preview)\.html(?:\?|$)/.test(
             link.href
           )
         )
@@ -340,8 +340,14 @@ try {
   assert.equal(await page.locator('.shell-page-heading h1').innerText(), 'OC-025');
   assert.equal(await page.locator('.sidebar-nav [data-module="purchases"].active').count(), 1);
   assert.equal(await page.locator('#global-project-select').inputValue(), 'PR-2027-001');
+  // R1: a supplier result opens its record; its purchases keep the Compras filter.
   await page.locator('#global-search').fill('TechSupply');
   await page.locator('.shell-search-result').first().click();
+  await page.waitForURL(/supplier\.html\?id=PROV-001/);
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.equal(await page.locator('.sidebar-nav [data-module="suppliers"].active').count(), 1);
+  await page.locator('.d9-tabs').getByRole('tab', { name: /Órdenes de compra/ }).click();
+  await page.getByRole('link', { name: 'Ver en Compras' }).click();
   await page.waitForURL(/purchases\.html\?supplier=PROV-001/);
   assert.equal(await page.locator('#purchases-supplier').inputValue(), 'PROV-001');
 
@@ -387,7 +393,7 @@ try {
 
   await verifyProjectFlow('surtec-peti', 'PR-2027-001');
   await verifyProjectFlow('jy-pmi', 'PR-JY-001');
-  await verifyProjectFlow('jy-demo', 'PR-JY-001');
+  await verifyProjectFlow('jy-demo', 'PY-26-001');
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await openVariant('jy-pmi', 'J&Y Ingenieros Consultores S.A.C.', 2);
@@ -397,7 +403,8 @@ try {
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 1);
   assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'light');
 
-  await openVariant('jy-demo', 'J&Y Ingenieros Consultores S.A.C.', 2);
+  // R1: own data set with four projects (PY-26-001…004).
+  await openVariant('jy-demo', 'J&Y Ingenieros Consultores S.A.C.', 4);
   await verifyDemoTours('jy-demo', 4);
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"]').count(), 0);
   assert.equal(await page.locator('.sidebar-nav [data-module="security"]').count(), 0);

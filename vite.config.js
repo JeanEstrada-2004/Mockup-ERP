@@ -28,6 +28,10 @@ export default defineConfig(({ mode }) => ({
       input: {
         main: resolve(__dirname, 'src-modern/index.html'),
         projects: resolve(__dirname, 'src-modern/projects.html'),
+        clients: resolve(__dirname, 'src-modern/clients.html'),
+        client: resolve(__dirname, 'src-modern/client.html'),
+        suppliers: resolve(__dirname, 'src-modern/suppliers.html'),
+        supplier: resolve(__dirname, 'src-modern/supplier.html'),
         project: resolve(__dirname, 'src-modern/project.html'),
         budgets: resolve(__dirname, 'src-modern/budgets.html'),
         budget: resolve(__dirname, 'src-modern/budget.html'),

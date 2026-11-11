@@ -119,7 +119,7 @@ async function variantFlow(variant, workerId, projectId) {
   await page.locator('.personnel-tabs').getByRole('button', { name: 'Tareo' }).click();
   assert.ok(
     (
-      await page.locator('#personnel-timesheet-title').locator('..').locator('..').innerText()
+      await page.locator('#personnel-timesheet-title').locator('xpath=ancestor::div[contains(@class, "card-body")][1]').innerText()
     ).includes(worker.name)
   );
   await page.goto(url(variant, `worker.html?id=${workerId}`));
@@ -148,7 +148,7 @@ async function variantFlow(variant, workerId, projectId) {
   await page.locator('#personnel-manual-modal .alert-danger').waitFor({ state: 'visible' });
   await page.locator('#manual-worker').selectOption(workerId);
   await page.locator('#manual-project').selectOption(projectId);
-  await page.locator('#manual-date').fill('2027-04-03');
+  await page.locator('#manual-date').fill(data.exampleDate);
   await page.locator('#manual-start').fill('08:00');
   await page.locator('#manual-end').fill('16:00');
   await page.locator('#manual-reason').fill('Jornada de campo demostrativa');
@@ -159,19 +159,19 @@ async function variantFlow(variant, workerId, projectId) {
   await page.locator('#personnel-manual-modal').waitFor({ state: 'hidden' });
   assert.ok(
     (
-      await page.locator('#personnel-timesheet-title').locator('..').locator('..').innerText()
+      await page.locator('#personnel-timesheet-title').locator('xpath=ancestor::div[contains(@class, "card-body")][1]').innerText()
     ).includes('TR-DEMO-001')
   );
   assert.ok(
     (
-      await page.locator('#personnel-timesheet-title').locator('..').locator('..').innerText()
+      await page.locator('#personnel-timesheet-title').locator('xpath=ancestor::div[contains(@class, "card-body")][1]').innerText()
     ).match(/Sin impacto|sin costo agregado/)
   );
   await page.reload();
   await ready();
   assert.ok(
     (
-      await page.locator('#personnel-timesheet-title').locator('..').locator('..').innerText()
+      await page.locator('#personnel-timesheet-title').locator('xpath=ancestor::div[contains(@class, "card-body")][1]').innerText()
     ).includes('TR-DEMO-001')
   );
   await page.locator('.personnel-tabs').getByRole('button', { name: 'Asistencia' }).click();
@@ -241,7 +241,7 @@ try {
     await page.locator('.personnel-cards').filter({ hasText: 'TR-DEMO-001' }).count(),
     0
   );
-  await variantFlow('jy-demo', 'PER-JY-002', 'PR-JY-001');
+  await variantFlow('jy-demo', 'PER-JY-002', 'PY-26-001');
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log(
     'Personal, asistencia, tareo, proyecto, costo y alcance biométrico: correctos en tres variantes.'

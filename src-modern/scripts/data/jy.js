@@ -1,5 +1,6 @@
 // Fictitious J&Y presentation data shared by the PMI and company-demo builds.
 // These are not real J&Y clients, workers, contracts, or financial figures.
+/* @__NO_SIDE_EFFECTS__ */
 const operation = (id, projectId, type, amount, costSource, details = {}) => ({
   id,
   projectId,
@@ -10,16 +11,64 @@ const operation = (id, projectId, type, amount, costSource, details = {}) => ({
   ...details,
 });
 
+// Master-record helpers: contact and history entries of clients and suppliers.
+/* @__NO_SIDE_EFFECTS__ */
+const contact = (name, role, phone, email, primary = false) => ({ name, role, phone, email, primary });
+/* @__NO_SIDE_EFFECTS__ */
+const event = (date, user, action, note = '') => ({ date, user, action, note });
+
 export const jyData = {
   id: 'jy',
   fictitious: true,
+  // Reference "today" of the scenario and the date used by sample receipts.
+  today: '2027-07-01',
+  exampleDate: '2027-04-03',
   clients: [
-    { id: 'CLI-JY-001', name: 'Consorcio Valle Sur S.A.C.', sector: 'Infraestructura' },
-    { id: 'CLI-JY-002', name: 'Constructora Horizonte S.A.C.', sector: 'Construcción' },
+    {
+      id: 'CLI-JY-001', name: 'Consorcio Valle Sur S.A.C.', tradeName: 'Consorcio Valle Sur', ruc: '20600222101',
+      sector: 'Infraestructura', address: 'Av. Independencia 940, Cercado, Arequipa', phone: '(054) 395 101',
+      email: 'obras@consorciovallesur.pe', status: 'Activo', since: '2026-11-09',
+      contacts: [contact('Alberto Núñez', 'Gerente de proyecto', '989 300 101', 'anunez@consorciovallesur.pe', true)],
+      history: [
+        event('2026-11-09', 'María Salazar', 'Registró el cliente'),
+        event('2027-01-20', 'María Salazar', 'Asoció el proyecto PR-JY-001'),
+      ],
+    },
+    {
+      id: 'CLI-JY-002', name: 'Constructora Horizonte S.A.C.', tradeName: 'Constructora Horizonte', ruc: '20600222102',
+      sector: 'Construcción', address: 'Urb. Los Pinos Mz. D Lt. 3, Paucarpata, Arequipa', phone: '(054) 395 202',
+      email: 'proyectos@constructorahorizonte.pe', status: 'Activo', since: '2027-01-11',
+      contacts: [contact('Teresa Gallegos', 'Coordinadora técnica', '989 300 201', 'tgallegos@constructorahorizonte.pe', true)],
+      history: [
+        event('2027-01-11', 'José Vargas', 'Registró el cliente'),
+        event('2027-03-18', 'José Vargas', 'Asoció el proyecto PR-JY-002'),
+      ],
+    },
   ],
   suppliers: [
-    { id: 'PROV-JY-001', name: 'Suministros Andinos S.A.C.' },
-    { id: 'PROV-JY-002', name: 'Equipos del Sur S.A.C.' },
+    {
+      id: 'PROV-JY-001', name: 'Suministros Andinos S.A.C.', tradeName: 'Suministros Andinos', ruc: '20600222201',
+      specialty: 'Materiales eléctricos y de obra', brands: ['Indeco', 'Schneider Electric'],
+      categories: ['Conductores', 'Tableros'], address: 'Av. Parra 205, Cercado, Arequipa',
+      phone: '(054) 396 101', email: 'ventas@suministrosandinos.pe', status: 'Activo', since: '2026-10-05',
+      contacts: [contact('Edwin Flores', 'Ventas', '989 400 101', 'eflores@suministrosandinos.pe', true)],
+      offerings: [
+        { name: 'Cable NH-80 4 mm²', kind: 'Producto', brand: 'Indeco', category: 'Conductores', unit: 'rollo' },
+        { name: 'Tablero de distribución', kind: 'Producto', brand: 'Schneider Electric', category: 'Tableros', unit: 'und' },
+      ],
+      history: [event('2026-10-05', 'María Salazar', 'Registró el proveedor')],
+    },
+    {
+      id: 'PROV-JY-002', name: 'Equipos del Sur S.A.C.', tradeName: 'Equipos del Sur', ruc: '20600222202',
+      specialty: 'Alquiler de equipos', brands: ['Leica', 'Bosch'],
+      categories: ['Alquiler de equipos'], address: 'Av. Aviación 1320, Cerro Colorado, Arequipa',
+      phone: '(054) 396 202', email: 'alquileres@equiposdelsur.pe', status: 'Activo', since: '2026-12-01',
+      contacts: [contact('Gabriela Tapia', 'Atención a empresas', '989 400 201', 'gtapia@equiposdelsur.pe', true)],
+      offerings: [
+        { name: 'Alquiler de estación total', kind: 'Servicio', brand: 'Leica', category: 'Alquiler de equipos', unit: 'día' },
+      ],
+      history: [event('2026-12-01', 'José Vargas', 'Registró el proveedor')],
+    },
   ],
   workers: [
     {

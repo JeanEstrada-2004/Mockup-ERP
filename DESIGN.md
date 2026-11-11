@@ -138,6 +138,8 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.doc-structure`, `.doc-folder` | Estructura documental por proyecto |
 | `.analytics-link` | Acceso destacado de Reportes a Inteligencia de Negocios |
 | `.kpi-strip--6` | Franja de seis KPI (cifras a 28 px) |
+| `.master-table`, `.master-contacts`, `.master-contact` | Listas y fichas de Clientes y Proveedores |
+| `.maturity`, `.maturity--as-is/--to-be/--validate` | Marca de madurez (solo J&Y Demo; texto + color, oculta hasta que el presentador la activa) |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema
 visual", fuera del menú; se abre por URL). Es la referencia para las Entregas 3–7.

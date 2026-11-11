@@ -293,3 +293,12 @@ paleta y gráficos), **Playwright** (capturas a 1440 y 390 px, claro y oscuro) y
 - Mientras convivan D3 y ApexCharts (Entregas 2–6), los colores de ApexCharts deben leer
   los mismos tokens para no verse distintos.
 - Las cifras nuevas deben pasar `check:mock-data` antes de usarse en vistas.
+
+## Siguiente etapa: realineamiento de J&Y Demo (11/11/2026)
+
+El usuario decidió que J&Y Demo deje de ser una copia reducida de PMI y represente la
+propuesta del futuro ERP interno de J&Y, con cada pieza marcada como AS-IS confirmado,
+propuesta TO-BE o por validar. La auditoría, la matriz de alineamiento, la arquitectura de
+vistas y el plan por fases (R1–R6) están en
+[realineamiento-jy-demo.md](realineamiento-jy-demo.md). SurTec PETI y J&Y PMI conservan su comportamiento; solo suman Clientes y Proveedores. Antes
+de R1 se resolvieron las decisiones D1–D5. **R1 terminada** (11/11/2026): datos propios del Demo, Clientes y Proveedores en las tres presentaciones y marcas de madurez; notas en la sección 10 de ese documento. Siguiente: R2 (Rendiciones J&Y).

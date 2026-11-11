@@ -246,7 +246,7 @@ try {
   assert.equal(await page.locator('html').getAttribute('data-bs-theme'), 'dark');
   await page.locator('#cost-budget-chart .chart-svg rect').first().waitFor();
   await checkVariant('jy-pmi', 'PR-JY-001');
-  await checkVariant('jy-demo', 'PR-JY-001');
+  await checkVariant('jy-demo', 'PY-26-001');
   assert.deepEqual(errors, []);
   console.log(
     'Costos: cifras, fuentes, compromisos, Proyecto → operación → documento, BI y móvil correctos.'

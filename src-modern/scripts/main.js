@@ -40,6 +40,13 @@ import { designSystemView } from './components/design-system-view.js';
 import { initPresentationSwitcher } from './components/presentation-switcher.js';
 import { approvalsView, syncApprovalCounters } from './components/approvals-view.js';
 import { budgetCreate, purchaseCreate } from './components/commercial-forms.js';
+import {
+  clientsList,
+  clientDetail,
+  suppliersList,
+  supplierDetail,
+} from './components/master-views.js';
+import { initMaturityTags } from './utils/maturity.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -107,6 +114,9 @@ class AdminApp {
 
       // Hidden presentation switcher: triple click on the rail label or Alt+Shift+P.
       this.stopPresentationSwitcher = initPresentationSwitcher();
+
+      // J&Y Demo: AS-IS / TO-BE / por validar badges (user menu or Alt+Shift+V).
+      this.stopMaturityTags = initMaturityTags();
 
       // Header and rail counters reflect local approval decisions (Entrega 4).
       syncApprovalCounters();
@@ -264,6 +274,10 @@ class AdminApp {
     Alpine.data('integrationsWorkspace', integrationsWorkspace);
     Alpine.data('securityWorkspace', securityWorkspace);
     Alpine.data('administrationWorkspace', administrationWorkspace);
+    Alpine.data('clientsList', clientsList);
+    Alpine.data('clientDetail', clientDetail);
+    Alpine.data('suppliersList', suppliersList);
+    Alpine.data('supplierDetail', supplierDetail);
 
     Alpine.data('themeSwitch', () => ({
       currentTheme: 'light',
@@ -287,6 +301,7 @@ class AdminApp {
   destroy() {
     this.stopHeroNetworks?.();
     this.stopPresentationSwitcher?.();
+    this.stopMaturityTags?.();
     this.isInitialized = false;
   }
 }

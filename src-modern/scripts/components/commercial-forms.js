@@ -283,7 +283,7 @@ export function purchaseCreate() {
       const project = getProject(data, this.form.projectId);
       if (!project) return;
       this.form.managerId = project.managerId;
-      this.form.costCenter = `CC-${project.id.replace(/^PR-/, '')}`;
+      this.form.costCenter = `CC-${project.id.replace(/^(PR|PY)-/, '')}`;
       this.form.quotation = project.budgetId || '';
     },
     addLine() {

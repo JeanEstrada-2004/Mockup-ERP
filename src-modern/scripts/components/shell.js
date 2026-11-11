@@ -68,11 +68,19 @@ function searchItems() {
     push('Proyecto', `${project.id} · ${project.name}`, 'Proyecto', 'projects', project.id);
   }
   for (const client of data.clients) {
+    if (isModuleEnabled('clients')) {
+      push('Cliente', client.name, `RUC ${client.ruc} · ${client.sector}`, 'clients', client.id);
+      continue;
+    }
     const project = data.projects.find((item) => item.clientId === client.id);
     if (project)
       push('Cliente', client.name, 'Cliente relacionado a proyectos', 'projects', project.id);
   }
   for (const supplier of data.suppliers) {
+    if (isModuleEnabled('suppliers')) {
+      push('Proveedor', supplier.name, `RUC ${supplier.ruc} · ${supplier.specialty}`, 'suppliers', supplier.id);
+      continue;
+    }
     push(
       'Proveedor',
       supplier.name,
@@ -452,6 +460,10 @@ export function initShellActions(app) {
       ? 'dashboard'
       : document.body.dataset.page === 'approvals'
         ? 'approvals'
+      : ['clients-list', 'client-detail'].includes(document.body.dataset.page)
+        ? 'clients'
+      : ['suppliers-list', 'supplier-detail'].includes(document.body.dataset.page)
+        ? 'suppliers'
       : ['projects-list', 'project-detail'].includes(document.body.dataset.page)
         ? 'projects'
         : ['budgets-list', 'budget-detail'].includes(document.body.dataset.page)

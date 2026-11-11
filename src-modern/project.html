@@ -213,7 +213,11 @@
                         </div>
                         <div class="workspace-summary-grid">
                           <div>
-                            <span>Cliente</span><strong x-text="projectClient(project)"></strong>
+                            <span>Cliente</span
+                            ><strong
+                              ><a x-show="clientHref" :href="clientHref" x-text="projectClient(project)"></a
+                              ><span x-show="!clientHref" x-text="projectClient(project)"></span
+                            ></strong>
                           </div>
                           <div><span>Responsable</span><strong x-text="managerName"></strong></div>
                           <div>

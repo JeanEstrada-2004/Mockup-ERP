@@ -453,3 +453,9 @@ tres variantes bajo la subruta de Pages.
   conjunto económico base.
 - Los favicon y manifiestos de cada build usan la marca de la variante. Las
   capturas de la revisión están en `screenshots/entregas/entrega-7-despues/`.
+
+## Realineamiento de J&Y Demo — R1: base de la variante y maestros (11/11/2026)
+
+- J&Y Demo tiene datos propios (escenario 2026, proyectos `PY-26-NNN`) y deja de reflejar a PMI.
+- Clientes y Proveedores con lista, filtros, alta, edición y ficha en las tres presentaciones.
+- Marcas AS-IS / TO-BE / por validar en el Demo, activables por el presentador.

@@ -83,10 +83,11 @@ export function personnelWorkspace() {
     periodFilter: params.get('period') || '',
     statusFilter: params.get('status') || '',
     sourceOperationFilter: params.get('record') || '',
+    exampleDate: data.exampleDate,
     form: {
       workerId: '',
       projectId: '',
-      date: '2027-04-03',
+      date: data.exampleDate,
       start: '08:00',
       end: '16:00',
       reason: '',
@@ -249,7 +250,7 @@ export function personnelWorkspace() {
       this.form = {
         workerId: this.workerFilter || '',
         projectId: '',
-        date: '2027-04-03',
+        date: data.exampleDate,
         start: '08:00',
         end: '16:00',
         reason: '',

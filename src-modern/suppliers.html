@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Proveedores: especialidad, marcas, productos, órdenes de compra y proyectos" />
+    <meta name="theme-color" content="#1A365D" />
+    <!-- APP_FAVICON -->
+    <title>Proveedores</title>
+  </head>
+  <body data-page="suppliers-list" class="admin-layout">
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+    <div class="admin-app">
+      <div class="admin-wrapper" id="admin-wrapper">
+        <!-- APP_HEADER --><!-- APP_SIDEBAR -->
+        <div class="sidebar-backdrop" aria-hidden="true"></div>
+        <main id="main-content" class="admin-main">
+          <div
+            class="container-fluid shell-page project-workspace delivery-nine-workspace master-workspace"
+            x-data="suppliersList"
+          >
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Proveedores</li>
+              </ol>
+            </nav>
+            <template x-if="!allowed"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <h1>Proveedores no disponible</h1>
+                  <p>Este módulo no forma parte de esta presentación.</p>
+                  <a class="btn btn-primary" href="./index.html">Volver al inicio</a>
+                </div>
+              </div></template
+            >
+            <template x-if="allowed"
+              ><div>
+                <div class="shell-page-heading">
+                  <div>
+                    <h1>Proveedores</h1>
+                    <p class="shell-page-subtitle">Proveedores de productos y servicios, con sus órdenes de compra y proyectos.</p>
+                  </div>
+                  <button class="btn btn-primary" type="button" @click="openCreate()">+ Nuevo proveedor</button>
+                </div>
+                <section class="kpi-strip kpi-strip--4" aria-label="Resumen de proveedores">
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Registrados</span>
+                    <span class="kpi-value" x-count="records.length"></span>
+                    <span class="kpi-foot" x-text="`${activeCount} activos`"></span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Con órdenes de compra</span>
+                    <span class="kpi-value" x-count="withProjectsCount"></span>
+                    <span class="kpi-foot">Al menos una OC emitida</span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Órdenes de compra</span>
+                    <span class="kpi-value" x-count="relatedCount"></span>
+                    <span class="kpi-foot">Emitidas y pendientes</span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Comprado</span>
+                    <span class="kpi-value" x-count.money="relatedTotal"></span>
+                    <span class="kpi-foot">OC ejecutadas, ya en costos</span>
+                  </div>
+                </section>
+                <section class="card" aria-labelledby="master-list-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Registro de proveedores propuesto; se conecta con compras y, más adelante, con precios y cotizaciones.">
+                        <h2 id="master-list-title">Proveedores registrados</h2>
+                      </div>
+                      <span class="workspace-caption" aria-live="polite" x-text="`${filtered.length} de ${records.length}`"></span>
+                    </div>
+                    <div class="d9-filters mb-3">
+                      <div>
+                        <label class="form-label" for="master-search">Buscar</label
+                        ><input id="master-search" class="form-control" type="search" placeholder="RUC, razón social, marca o contacto" x-model="search" @input="updateUrl()" />
+                      </div>
+                      <div>
+                        <label class="form-label" for="master-group">Categoría</label
+                        ><select id="master-group" class="form-select" x-model="groupFilter" @change="updateUrl()">
+                          <option value="">Todas las categorías</option>
+                          <template x-for="item in groups" :key="item"><option :value="item" x-text="item" :selected="item === groupFilter"></option></template>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="form-label" for="master-status-filter">Estado</label
+                        ><select id="master-status-filter" class="form-select" x-model="statusFilter" @change="updateUrl()">
+                          <option value="">Todos</option>
+                          <template x-for="item in statuses" :key="item"><option :value="item" x-text="item" :selected="item === statusFilter"></option></template>
+                        </select>
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary" x-show="search || groupFilter || statusFilter" @click="clearFilters()">Limpiar</button>
+                    </div>
+                    <div class="table-responsive d-none d-lg-block" x-show="filtered.length">
+                      <table class="table table-hover align-middle mb-0 d9-table master-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">RUC</th>
+                            <th scope="col">Razón social</th>
+                            <th scope="col">Especialidad</th>
+                            <th scope="col">Contacto principal</th>
+                            <th scope="col" class="text-end">OC</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col" class="data-actions-col"><span class="visually-hidden">Acciones</span></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="record in filtered" :key="record.id"
+                            ><tr>
+                              <td class="data-code" x-text="record.ruc"></td>
+                              <td>
+                                <a class="data-primary" :href="detailHref(record.id)" x-text="record.name"></a
+                                ><small class="d-block" x-text="record.tradeName"></small
+                                ><span class="badge text-bg-secondary" x-show="record.demo">Demostración</span
+                                ><span class="badge text-bg-light" x-show="record.edited">Editado</span>
+                              </td>
+                              <td><span x-text="record.specialty || '—'"></span><small class="d-block" x-text="record.categories.join(' · ')"></small></td>
+                              <td>
+                                <span x-text="primaryContact(record)?.name || '—'"></span
+                                ><small class="d-block" x-text="primaryContact(record)?.phone || ''"></small>
+                              </td>
+                              <td class="text-end" x-text="record.relations.purchases.length"></td>
+                              <td><span class="badge" :class="$statusClass(record.status)" x-text="record.status"></span></td>
+                              <td class="data-actions-col">
+                                <div class="dropdown">
+                                  <button class="btn data-row-menu" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" :aria-label="`Acciones de ${record.name}`">
+                                    <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                                  </button>
+                                  <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" :href="detailHref(record.id)"><i class="bi bi-eye" aria-hidden="true"></i> Ver ficha</a></li>
+                                    <li><button class="dropdown-item" type="button" @click="openEdit(record)"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button></li>
+                                    <li x-show="purchaseHref('')"><a class="dropdown-item" :href="purchasesListHref(record)"><i class="bi bi-bag-check" aria-hidden="true"></i> Ver órdenes de compra</a></li>
+                                  </ul>
+                                </div>
+                              </td>
+                            </tr></template
+                          >
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="d9-mobile-list d-lg-none">
+                      <template x-for="record in filtered" :key="record.id"
+                        ><article class="d9-mobile-card">
+                          <div class="d9-mobile-heading">
+                            <strong x-text="record.name"></strong
+                            ><span class="badge" :class="$statusClass(record.status)" x-text="record.status"></span>
+                          </div>
+                          <small x-text="`RUC ${record.ruc}`"></small
+                          ><span x-text="record.specialty || 'Sin especialidad'"></span
+                          ><small x-text="primaryContact(record) ? `${primaryContact(record).name} · ${primaryContact(record).phone}` : 'Sin contacto registrado'"></small
+                          ><a class="btn btn-outline-primary" :href="detailHref(record.id)">Ver ficha</a>
+                        </article></template
+                      >
+                    </div>
+                    <div class="d9-empty" x-show="filtered.length === 0">
+                      <i class="bi bi-truck" aria-hidden="true"></i>
+                      <p>No hay proveedores con estos filtros.</p>
+                      <button type="button" class="btn btn-outline-primary" @click="clearFilters()">Ver todos</button>
+                    </div>
+                  </div>
+                </section>
+              </div></template
+            >
+            <div class="modal fade" id="master-form-modal" tabindex="-1" aria-labelledby="master-form-title" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <form class="modal-content" novalidate @submit.prevent="saveForm()">
+                  <div class="modal-header">
+                    <h2 class="modal-title" id="master-form-title" x-text="form.id ? `Editar ${form.name}` : 'Nuevo proveedor'"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" x-show="formError" x-text="formError"></div>
+                    <h3 class="form-section-title">Datos generales</h3>
+                    <div class="row g-3">
+                      <div class="col-md-8">
+                        <label class="form-label" for="master-name">Razón social</label
+                        ><input id="master-name" class="form-control" maxlength="160" required x-model="form.name" :readonly="form.base" />
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label" for="master-ruc">RUC</label
+                        ><input id="master-ruc" class="form-control" inputmode="numeric" maxlength="11" required x-model="form.ruc" :readonly="form.base" />
+                      </div>
+                      <p class="workspace-caption col-12 mt-1" x-show="form.base">
+                        La razón social y el RUC identifican al proveedor en proyectos y compras; no se editan.
+                      </p>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-trade">Nombre comercial</label
+                        ><input id="master-trade" class="form-control" maxlength="160" x-model="form.tradeName" />
+                      </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-specialty">Especialidad</label
+                      ><input id="master-specialty" class="form-control" maxlength="80" x-model="form.specialty" placeholder="Ejemplo: Materiales eléctricos" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-categories">Categorías</label
+                      ><input id="master-categories" class="form-control" maxlength="300" x-model="form.categories" placeholder="Separadas por comas" />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="master-brands">Marcas</label
+                      ><input id="master-brands" class="form-control" maxlength="300" x-model="form.brands" placeholder="Separadas por comas" />
+                    </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-status">Estado</label
+                        ><select id="master-status" class="form-select" x-model="form.status">
+                          <template x-for="item in statuses" :key="item"><option :value="item" x-text="item" :selected="item === form.status"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label" for="master-address">Dirección</label
+                        ><input id="master-address" class="form-control" maxlength="160" x-model="form.address" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-phone">Teléfono</label
+                        ><input id="master-phone" class="form-control" type="tel" maxlength="40" x-model="form.phone" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-email">Correo</label
+                        ><input id="master-email" class="form-control" type="email" maxlength="120" x-model="form.email" />
+                      </div>
+                    </div>
+                    <h3 class="form-section-title">Contacto principal</h3>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-name">Nombre</label
+                        ><input id="master-contact-name" class="form-control" maxlength="80" x-model="form.contactName" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-role">Cargo</label
+                        ><input id="master-contact-role" class="form-control" maxlength="80" x-model="form.contactRole" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-phone">Teléfono</label
+                        ><input id="master-contact-phone" class="form-control" type="tel" maxlength="40" x-model="form.contactPhone" />
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label" for="master-contact-email">Correo</label
+                        ><input id="master-contact-email" class="form-control" type="email" maxlength="120" x-model="form.contactEmail" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" x-text="form.id ? 'Guardar cambios' : 'Registrar proveedor'"></button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- APP_FOOTER -->
+      </div>
+    </div>
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>
