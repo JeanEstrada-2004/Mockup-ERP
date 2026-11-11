@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src-modern/projects.html"
+        ],
+        "createdAt": "2026-11-10T18:56:30.151Z",
+        "reason": "Claude triage: rendered scale is h1 28px / section h2 18px / table 14px (1.56x, 1.29x) via --fs-* CSS variables the static scan cannot resolve; see DESIGN.md"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src-modern/design-system.html"
+        ],
+        "createdAt": "2026-11-10T20:46:53.793Z",
+        "reason": "Claude triage: sizes come from _design-system.scss tokens (page 30px, panel 18px, body 15px, KPI 32px, hero 52px; 30/18 = 1.67x), not visible to the static HTML scan"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src-modern/approvals.html"
+        ],
+        "createdAt": "2026-11-11T00:10:01.796Z",
+        "reason": "Claude triage: sizes come from _design-system.scss tokens (page title 30px, panel title 18px, KPI 32px, body 15px; 30/18 = 1.67x), not visible to the static HTML scan"
+      }
+    ]
+  }
+}
