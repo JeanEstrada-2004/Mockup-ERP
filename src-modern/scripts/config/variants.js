@@ -61,13 +61,6 @@ const LOGO_BOXES = {
   jyDark: [400, 35, 1411, 632, 2172, 724],
 };
 
-// Background of each supplied logo file. The rail shows the logo on a plate
-// of exactly this colour, so the file is displayed unaltered and its edges
-// never show as a box.
-const LOGO_PLATES = {
-  surtec: { light: '#ffffff', dark: '#000000' },
-  jy: { light: '#fefefe', dark: '#020a1c' },
-};
 
 // Fictitious signed-in user shown in the header (punto 3).
 const DEMO_USER = { name: 'Jean Estrada', role: 'Administrador', initials: 'JE' };
@@ -86,7 +79,9 @@ export const VARIANTS = {
       logoCompactSize: '588x588',
       logoLightBox: LOGO_BOXES.surtecLight,
       logoDarkBox: LOGO_BOXES.surtecDark,
-      logoPlate: LOGO_PLATES.surtec,
+      // White, background-free copy of the official logo for the dark rail.
+      logoRail: 'assets/brands/surtec/web/logo-rail.png',
+      logoRailBox: LOGO_BOXES.surtecDark,
       // Fictitious company of the PETI course.
       legal: {
         ruc: '20605123478',
@@ -124,7 +119,8 @@ export const VARIANTS = {
       logoCompactSize: '1254x1254',
       logoLightBox: LOGO_BOXES.jyLight,
       logoDarkBox: LOGO_BOXES.jyDark,
-      logoPlate: LOGO_PLATES.jy,
+      logoRail: 'assets/brands/jy/web/logo-rail.png',
+      logoRailBox: LOGO_BOXES.jyDark,
     },
     presentation: { code: 'PMI', label: 'ERP contractual' },
     // Neutral UI colors until a formal J&Y digital palette is supplied:
@@ -152,7 +148,8 @@ export const VARIANTS = {
       logoCompactSize: '1254x1254',
       logoLightBox: LOGO_BOXES.jyLight,
       logoDarkBox: LOGO_BOXES.jyDark,
-      logoPlate: LOGO_PLATES.jy,
+      logoRail: 'assets/brands/jy/web/logo-rail.png',
+      logoRailBox: LOGO_BOXES.jyDark,
     },
     presentation: { code: 'Demo', label: 'Propuesta para J&Y' },
     theme: {

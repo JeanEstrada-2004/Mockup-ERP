@@ -445,7 +445,7 @@ a {
 // 2. Shell: rail (navigation)
 // --------------------------------------------------------------------------
 // Full-height deep rail. The brand block sits at the top; the logo file is
-// shown unaltered on a plate of its own background colour (--logo-plate).
+// shown as a white, background-free copy (company.logoRail) straight on the rail.
 .admin-sidebar {
   top: 0;
   height: 100vh;
@@ -478,21 +478,19 @@ a {
 }
 
 .shell-brand {
-  --logo-h: 62px;
+  --logo-h: 70px;
   display: block;
   border-radius: 12px;
   text-decoration: none;
   outline-offset: 3px;
 
+  // White logo straight on the rail, no plate (user request, 10/11/2026).
   .shell-logo-plate {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 80px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: var(--logo-plate);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    padding: 4px 8px;
     transition: transform var(--motion-fast) var(--ease-out);
   }
 

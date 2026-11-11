@@ -92,9 +92,7 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 ## Composición
 - **Pantalla completa:** sin ancho máximo centrado; márgenes laterales `--gutter`
   28 px (16 px en móvil). `_metis-restoration.scss` se eliminó.
-- **Riel** de 232 px a la izquierda, a toda la altura (76 px contraído). Arriba, el logo
-  oficial sin alterar sobre una placa del color de fondo de su archivo (`--logo-plate`:
-  blanco en claro, negro / azul noche en oscuro) y la etiqueta de presentación
+- **Riel** de 232 px a la izquierda, a toda la altura (76 px contraído). Arriba, el logo oficial en una copia **blanca y sin fondo** (`company.logoRail`, generada desde el archivo oficial sin redibujar; igual en claro y oscuro porque el riel siempre es oscuro) y la etiqueta de presentación
   (`variants.js` › `presentation`: **PETI** · TO-BE 2027–2030, **PMI** · ERP contractual,
   **Demo** · Propuesta para J&Y). Contraído: isotipo + código. En móvil el riel es un
   panel deslizable y el header muestra isotipo + nombre corto + código

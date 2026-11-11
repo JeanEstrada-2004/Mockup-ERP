@@ -115,10 +115,8 @@ function logoTokens(company) {
     `.shell-brand .shell-logo-frame--${theme}{width:calc(var(--logo-h) * ${(width / height).toFixed(4)})}` +
     `.shell-brand .shell-logo-frame .shell-logo--${theme}{width:calc(var(--logo-h) * ${(imageWidth / height).toFixed(4)});height:auto;max-width:none;` +
     `left:calc(var(--logo-h) * -${(x / height).toFixed(4)});top:calc(var(--logo-h) * -${(y / height).toFixed(4)})}`;
-  const plates =
-    `html:root{--logo-plate:${company.logoPlate.light}}` +
-    `html[data-bs-theme="dark"]{--logo-plate:${company.logoPlate.dark}}`;
-  return rule('light', company.logoLightBox) + rule('dark', company.logoDarkBox) + plates;
+  // The rail is dark in both themes: both frames show the white rail logo.
+  return rule('light', company.logoRailBox) + rule('dark', company.logoRailBox);
 }
 
 const NOTIFICATION_ICONS = {
@@ -253,8 +251,8 @@ function renderSidebar(variant, data) {
     <div class="shell-rail-brand">
       <a class="shell-brand" href="./index.html" aria-label="${escapeHtml(company.name)}: ir al Panel General">
         <span class="shell-logo-plate">
-          <span class="shell-logo-frame shell-logo-frame--light"><img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoLight)}" alt="Logo de ${escapeHtml(company.shortName)}"></span>
-          <span class="shell-logo-frame shell-logo-frame--dark"><img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoDark)}" alt="" aria-hidden="true"></span>
+          <span class="shell-logo-frame shell-logo-frame--light"><img class="shell-logo shell-logo--light" src="./${escapeHtml(company.logoRail)}" alt="Logo de ${escapeHtml(company.shortName)}"></span>
+          <span class="shell-logo-frame shell-logo-frame--dark"><img class="shell-logo shell-logo--dark" src="./${escapeHtml(company.logoRail)}" alt="" aria-hidden="true"></span>
         </span>
         <img class="shell-logo-compact" src="./${escapeHtml(company.logoCompact)}" alt="" aria-hidden="true">
       </a>
