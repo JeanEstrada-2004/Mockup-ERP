@@ -48,7 +48,7 @@ const ICONS = new Map([
   ['bookmark', 'bi-bookmark'],
   ['share', 'bi-share'],
   ['copy', 'bi-clipboard'],
-  ['link', 'bi-link'],
+  ['link', 'analytics-link'],
   ['external', 'bi-box-arrow-up-right'],
   ['refresh', 'bi-arrow-clockwise'],
   ['filter', 'bi-funnel'],

@@ -9,6 +9,26 @@ const tabs = [
   ['empresa', 'Empresa'],
   ['catalogos', 'Catálogos'],
   ['parametros', 'Parámetros'],
+  ['notificaciones', 'Notificaciones'],
+  ['apariencia', 'Apariencia'],
+  ['general', 'Configuración general'],
+];
+// Punto 106: notification categories and their channels (local demo state).
+const NOTIFICATION_RULES = [
+  { id: 'info', label: 'Información', example: 'Proyecto actualizado', app: true, mail: false },
+  { id: 'warning', label: 'Advertencia', example: 'Proyecto supera 80 % del presupuesto', app: true, mail: true },
+  { id: 'error', label: 'Error', example: 'Error de sincronización biométrica', app: true, mail: true },
+  { id: 'approval', label: 'Aprobación', example: 'Rendición pendiente de revisión', app: true, mail: true },
+  { id: 'system', label: 'Sistema', example: 'Backup completado', app: true, mail: false },
+];
+const GENERAL_SETTINGS = [
+  ['Idioma', 'Español (Perú)'],
+  ['Formato de fecha', 'DD/MM/AAAA'],
+  ['Moneda', 'Soles (S/)'],
+  ['Zona horaria', 'America/Lima (UTC−5)'],
+  ['IGV', '18 %'],
+  ['Cierre de sesión por inactividad', '30 minutos'],
+  ['MFA para aprobaciones', 'Obligatorio'],
 ];
 const catalogs = [
   {
@@ -18,17 +38,17 @@ const catalogs = [
   },
   {
     id: 'clients',
-    label: 'Clientes ficticios',
+    label: 'Clientes',
     entries: data.clients.map((item) => ({ id: item.id, label: item.name })),
   },
   {
     id: 'suppliers',
-    label: 'Proveedores ficticios',
+    label: 'Proveedores',
     entries: data.suppliers.map((item) => ({ id: item.id, label: item.name })),
   },
   {
     id: 'workers',
-    label: 'Trabajadores ficticios',
+    label: 'Trabajadores',
     entries: data.workers.map((item) => ({ id: item.id, label: item.name })),
   },
   {
@@ -75,6 +95,20 @@ export function administrationWorkspace() {
   return {
     allowed,
     tabs,
+    notificationRules: NOTIFICATION_RULES.map((item) => ({ ...item })),
+    generalSettings: GENERAL_SETTINGS,
+    presentationCode: activeVariant.presentation.code,
+    get legal() {
+      return activeVariant.company.legal || null;
+    },
+    saveNotifications() {
+      window.AdminApp?.notificationManager?.success('Preferencias de notificación guardadas.');
+    },
+    setTheme(theme) {
+      if (document.documentElement.dataset.bsTheme !== theme) {
+        document.querySelector('[title="Cambiar tema"]')?.click();
+      }
+    },
     company: activeVariant.company,
     logo: brandAssetUrl(activeVariant.company.logoLight),
     logoDark: brandAssetUrl(activeVariant.company.logoDark),

@@ -1,4 +1,48 @@
 import { activeVariant, isModuleEnabled } from '../config/variants.js';
+import { BIOMETRIC_DEVICE } from '../data/personnel-data.js';
+import { BACKUP } from '../data/security-data.js';
+
+// Credible simulated states (punto 90, decision 3). Biometría and Backup reuse
+// the same records shown in Personal and Seguridad so the screens agree.
+const lastSync = (iso) =>
+  `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)} ${iso.slice(11, 16)}`;
+const STATES = {
+  biometria: {
+    status: BIOMETRIC_DEVICE.status,
+    tone: 'success',
+    last: lastSync(BIOMETRIC_DEVICE.lastSync),
+    records: BIOMETRIC_DEVICE.records,
+    result: 'Con observaciones',
+  },
+  contabilidad: {
+    status: 'Sincronización pendiente',
+    tone: 'warning',
+    last: '08/11/2026 17:00',
+    records: 27,
+    result: 'Correcto',
+  },
+  correo: {
+    status: 'Activo',
+    tone: 'success',
+    last: '08/11/2026 17:42',
+    records: 64,
+    result: 'Correcto',
+  },
+  almacenamiento: {
+    status: 'Activo',
+    tone: 'success',
+    last: '08/11/2026 16:30',
+    records: 112,
+    result: 'Correcto',
+  },
+  backup: {
+    status: BACKUP.status,
+    tone: 'success',
+    last: lastSync(BACKUP.last),
+    records: 1,
+    result: 'Correcto',
+  },
+};
 
 const catalog = [
   {
@@ -7,8 +51,9 @@ const catalog = [
     icon: 'bi-fingerprint',
     category: 'Operaciones',
     scope: 'Marcaciones de asistencia asociadas a trabajador y proyecto.',
-    input: 'Identificador de trabajador y hora de ejemplo',
-    output: 'Asistencia e incidencia de demostración',
+    device: BIOMETRIC_DEVICE.name,
+    input: 'Marcaciones del equipo ZKTeco',
+    output: 'Asistencia, tareo e incidencias',
     next: './personnel.html?tab=incidencias',
   },
   {
@@ -18,7 +63,7 @@ const catalog = [
     category: 'Finanzas',
     scope: 'Resumen de operaciones aprobadas para una eventual conciliación.',
     input: 'Compras, rendiciones y costos aprobados',
-    output: 'Asiento propuesto para revisión, sin envío',
+    output: 'Asientos para conciliación contable',
     next: './costs.html',
   },
   {
@@ -27,8 +72,8 @@ const catalog = [
     icon: 'bi-envelope',
     category: 'Comunicación',
     scope: 'Avisos de aprobación, observación y vencimiento.',
-    input: 'Evento y destinatario de ejemplo',
-    output: 'Notificación propuesta, sin mensaje enviado',
+    input: 'Eventos de aprobación y vencimiento',
+    output: 'Notificaciones a responsables',
     next: './documents.html',
   },
   {
@@ -36,19 +81,19 @@ const catalog = [
     name: 'Almacenamiento',
     icon: 'bi-folder2-open',
     category: 'Documentos',
-    scope: 'Resguardo futuro de archivos asociados a sus metadatos.',
-    input: 'Referencia documental ficticia',
-    output: 'Ficha documental sin archivo cargado',
+    scope: 'Resguardo de los archivos asociados a cada ficha documental.',
+    input: 'Documentos cargados y generados',
+    output: 'Archivo versionado por proyecto',
     next: './documents.html',
   },
   {
     id: 'backup',
-    name: 'Respaldo',
+    name: 'Backup',
     icon: 'bi-hdd',
     category: 'Sistema',
-    scope: 'Copia prevista del sistema y verificación de restauración.',
-    input: 'Configuración futura de respaldo',
-    output: 'Plan visual; no existe copia creada',
+    scope: 'Copia diaria del sistema y verificación de restauración.',
+    input: 'Base de datos y archivos',
+    output: 'Copia automática 02:00',
     next: './security.html?tab=backups',
   },
 ];
@@ -58,7 +103,16 @@ export function integrationsWorkspace() {
   const allowed = isModuleEnabled('integrations');
   return {
     allowed,
-    catalog: allowed ? catalog : [],
+    catalog: allowed ? catalog.map((item) => ({ ...item, ...STATES[item.id] })) : [],
+    get history() {
+      return this.catalog.map((item) => ({
+        id: item.id,
+        name: item.name,
+        last: item.last,
+        records: item.records,
+        result: item.result,
+      }));
+    },
     categoryFilter: ['Operaciones', 'Finanzas', 'Comunicación', 'Documentos', 'Sistema'].includes(
       params.get('category')
     )
@@ -90,7 +144,7 @@ export function integrationsWorkspace() {
       this.updateUrl();
     },
     init() {
-      if (allowed) document.title = `Integraciones previstas · ${activeVariant.company.shortName}`;
+      if (allowed) document.title = `Integraciones · ${activeVariant.company.shortName}`;
     },
   };
 }

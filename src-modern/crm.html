@@ -38,35 +38,35 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-<h1>CRM</h1>
+<h1>Gestión Comercial</h1>
                     <p class="shell-page-subtitle">
                       Oportunidades vinculadas a presupuestos y proyectos.
                     </p>
                   </div>
+                  <a class="btn btn-primary" href="./budgets.html?new=1">+ Generar presupuesto</a>
                 </div>
-                <div class="alert alert-info" role="note">
-                  Este recorrido comercial es una muestra fija. No envía mensajes, crea clientes ni
-                  modifica oportunidades reales.
-                </div>
-                <div class="d9-kpis">
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Oportunidades de ejemplo</small
-                      ><strong x-text="opportunities.length"></strong>
-                    </div>
+                <section class="kpi-strip kpi-strip--4 d9-kpis" aria-label="Indicadores comerciales">
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Oportunidades</span>
+                    <span class="kpi-value" x-count="opportunities.length"></span>
+                    <span class="kpi-foot">En el pipeline comercial</span>
                   </div>
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Ganadas en la muestra</small><strong x-text="wonCount"></strong>
-                    </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Pipeline abierto</span>
+                    <span class="kpi-value" x-count.money="pipelineAmount"></span>
+                    <span class="kpi-foot" x-text="`Ponderado ${formatMoney(weightedAmount)}`"></span>
                   </div>
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Con presupuesto y proyecto</small
-                      ><strong x-text="linkedCount"></strong>
-                    </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Ganadas</span>
+                    <span class="kpi-value" x-count="wonCount"></span>
+                    <span class="kpi-foot">Convertidas en proyecto</span>
                   </div>
-                </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Con presupuesto y proyecto</span>
+                    <span class="kpi-value" x-count="linkedCount"></span>
+                    <span class="kpi-foot">Oportunidad → Presupuesto → Proyecto</span>
+                  </div>
+                </section>
                 <section class="card mb-3" aria-label="Filtros de oportunidades">
                   <div class="card-body crm-filters">
                     <div>
@@ -103,17 +103,37 @@
                         @change="updateUrl()"
                       >
                         <option value="">Todos</option>
-                        <option value="Prospección">Prospección</option>
-                        <option value="Propuesta">Propuesta</option>
-                        <option value="Negociación">Negociación</option>
-                        <option value="Ganado">Ganado</option>
-                        <option value="Perdido">Perdido</option>
+                        <template x-for="stage in stages" :key="stage"
+                          ><option :value="stage" x-text="stage" :selected="stage === statusFilter"></option
+                        ></template>
                       </select>
                     </div>
                     <button type="button" class="btn btn-outline-secondary" @click="clearFilters()">
                       Limpiar
                     </button>
                   </div>
+                </section>
+                <section class="crm-board mb-3" aria-labelledby="crm-board-title">
+                  <h2 id="crm-board-title" class="visually-hidden">Pipeline comercial</h2>
+                  <template x-for="stage in stages" :key="stage">
+                    <div class="crm-column" :aria-label="`Etapa ${stage}`">
+                      <header>
+                        <strong x-text="stage"></strong>
+                        <span x-text="columnItems(stage).length"></span>
+                      </header>
+                      <small class="crm-column-total" x-text="formatMoney(columnTotal(stage))"></small>
+                      <template x-for="item in columnItems(stage)" :key="item.id">
+                        <button type="button" class="crm-card" :class="selected?.id === item.id ? 'is-selected' : ''" @click="select(item.id)">
+                          <span class="crm-card-client" x-text="clientName(item.clientId)"></span>
+                          <strong x-text="item.name"></strong>
+                          <span class="crm-card-figures"><b x-text="formatMoney(item.estimatedAmount)"></b><span x-text="`${item.probability} %`"></span></span>
+                          <small x-text="workerName(item.ownerId)"></small>
+                          <small class="crm-card-next"><i class="bi bi-arrow-return-right" aria-hidden="true"></i><span x-text="item.nextAction"></span></small>
+                        </button>
+                      </template>
+                      <p class="crm-column-empty" x-show="!columnItems(stage).length">Sin oportunidades</p>
+                    </div>
+                  </template>
                 </section>
                 <div class="row g-3">
                   <div class="col-xl-7">
@@ -210,7 +230,13 @@
                                 <small>Oportunidad</small><strong x-text="selected.id"></strong>
                               </div>
                               <div>
-                                <small>Estado</small><strong x-text="selected.status"></strong>
+                                <small>Etapa</small><strong x-text="stageOf(selected)"></strong>
+                              </div>
+                              <div>
+                                <small>Probabilidad</small><strong x-text="`${selected.probability} %`"></strong>
+                              </div>
+                              <div>
+                                <small>Próxima acción</small><strong x-text="selected.nextAction"></strong>
                               </div>
                               <div>
                                 <small>Cliente</small
@@ -221,11 +247,11 @@
                                 ><strong x-text="workerName(selected.ownerId)"></strong>
                               </div>
                               <div>
-                                <small>Fecha de ejemplo</small
+                                <small>Cierre estimado</small
                                 ><strong x-text="formatDate(selected.date)"></strong>
                               </div>
                               <div>
-                                <small>Estimación mock</small
+                                <small>Monto estimado</small
                                 ><strong x-text="formatMoney(selected.estimatedAmount)"></strong>
                               </div>
                             </div>
@@ -262,10 +288,18 @@
                             <div class="d9-actions">
                               <a
                                 class="btn btn-outline-primary"
+                                x-show="selected.budgetId"
                                 :href="budgetHref(selected.budgetId)"
                                 >Abrir presupuesto</a
-                              ><a class="btn btn-primary" :href="projectHref(selected.projectId)"
+                              ><a class="btn btn-primary" x-show="selected.projectId" :href="projectHref(selected.projectId)"
                                 >Abrir proyecto</a
+                              ><a class="btn btn-outline-primary" x-show="!selected.budgetId" href="./budgets.html?new=1"
+                                >Generar presupuesto</a
+                              ><button type="button" class="btn btn-outline-secondary" @click="logActivity(selected)">Registrar actividad</button
+                              ><button type="button" class="btn btn-outline-secondary" x-show="!['Ganado', 'Perdido'].includes(stageOf(selected))" @click="markStage(selected, 'Ganado')">Marcar como ganado</button
+                              ><button type="button" class="btn btn-outline-danger" x-show="!['Ganado', 'Perdido'].includes(stageOf(selected))" @click="markStage(selected, 'Perdido')">Marcar como perdido</button
+                              ><a class="btn btn-primary" x-show="stageOf(selected) === 'Ganado' && !selected.projectId" href="./projects.html?new=1"
+                                >Convertir en proyecto</a
                               >
                             </div>
                           </div></template

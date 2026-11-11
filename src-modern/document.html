@@ -50,9 +50,13 @@
                 </div>
                 <div class="d9-actions mb-3">
                   <button type="button" class="btn btn-primary" @click="openPreview()">
-                    Vista previa de metadatos</button
+                    <i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa</button
+                  ><button type="button" class="btn btn-outline-secondary" @click="download()">
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar</button
                   ><button type="button" class="btn btn-outline-primary" @click="openVersion()">
-                    Nueva versión visual</button
+                    <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Nueva versión</button
+                  ><a class="btn btn-outline-secondary" href="#historial"
+                    ><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Historial</a
                   ><a class="btn btn-outline-secondary" :href="originHref"
                     >Abrir operación de origen</a
                   ><a class="btn btn-outline-secondary" :href="projectHref">Abrir proyecto</a>
@@ -102,7 +106,7 @@
                     </section>
                   </div>
                   <div class="col-xl-5">
-                    <section class="card h-100" aria-labelledby="document-history-title">
+                    <section class="card h-100" id="historial" aria-labelledby="document-history-title">
                       <div class="card-body">
                         <div class="shell-section-header">
                           <h2 id="document-history-title">Historial de versiones</h2>

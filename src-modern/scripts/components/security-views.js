@@ -2,6 +2,33 @@ import { activeVariant, isModuleEnabled } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
 import { formatDate } from './project-views.js';
+import {
+  AUDIT_ACTIONS,
+  BACKUP,
+  MFA,
+  PERMISSIONS,
+  PERMISSION_ROLES,
+  ROLES,
+  SESSION_DEVICES,
+  WORKER_ROLES,
+} from '../data/security-data.js';
+
+const moduleLabels = {
+  purchases: 'Compras',
+  expenses: 'Rendiciones',
+  personnel: 'Personal',
+  warehouse: 'Almacén',
+  costs: 'Costos',
+};
+// "Carlos Mendoza" → "cmendoza"
+const alias = (name) => {
+  const parts = String(name)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/\s+/);
+  return `${parts[0]?.[0] || ''}${parts[1] || parts[0] || ''}`;
+};
 
 const data = getDataForVariant(activeVariant);
 const allowed = isModuleEnabled('security');
@@ -13,19 +40,6 @@ const tabs = [
   ['sesiones', 'Sesiones'],
   ['auditoria', 'Auditoría'],
   ['backups', 'Respaldos'],
-];
-const roleFixtures = [
-  { id: 'administrador', name: 'Administrador de ejemplo', scope: 'Parámetros y consulta general' },
-  { id: 'proyectos', name: 'Responsable de proyecto', scope: 'Proyectos, personal y costos' },
-  { id: 'logistica', name: 'Logística de ejemplo', scope: 'Compras y almacén según alcance' },
-  { id: 'colaborador', name: 'Colaborador de ejemplo', scope: 'Registro de gastos y tareo' },
-];
-const permissionRows = [
-  { action: 'Ver costos', values: ['Sí', 'Sí', 'Parcial', 'No'] },
-  { action: 'Crear orden de compra', values: ['Sí', 'No', 'Sí', 'No'] },
-  { action: 'Registrar rendición', values: ['Sí', 'Sí', 'Sí', 'Sí'] },
-  { action: 'Aprobar rendición', values: ['Sí', 'Sí', 'No', 'No'] },
-  { action: 'Consultar documentos', values: ['Sí', 'Sí', 'Sí', 'Parcial'] },
 ];
 function operationModule(item) {
   return {
@@ -54,10 +68,11 @@ export function securityWorkspace() {
     ? data.workers.map((item, index) => ({
         id: `USR-${item.id}`,
         name: item.name,
-        alias: `demo.usuario.${String(index + 1).padStart(2, '0')}`,
-        role: index === 0 ? 'Administrador de ejemplo' : 'Responsable de proyecto',
+        alias: alias(item.name),
+        role: WORKER_ROLES[index % WORKER_ROLES.length],
         area: item.area,
-        status: 'Perfil ficticio',
+        lastAccess: SESSION_DEVICES[index % SESSION_DEVICES.length].activity,
+        status: 'Activo',
         workerId: item.id,
       }))
     : [];
@@ -66,16 +81,18 @@ export function securityWorkspace() {
         .filter((item) => isModuleEnabled(operationModule(item)))
         .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id))
         .slice(0, 8)
-        .map((item) => ({
+        .map((item, index) => ({
           id: `AUD-${item.id}`,
           date: item.date,
           actor:
             data.workers.find(
               (worker) =>
                 worker.id === (item.workerId || getProject(data, item.projectId)?.managerId)
-            )?.name || 'Usuario ficticio',
-          action: 'Referencia de operación',
-          module: operationModule(item),
+            )?.name || 'Sistema',
+          time: `${String(8 + (index % 9)).padStart(2, '0')}:${String((index * 17) % 60).padStart(2, '0')}`,
+          action: AUDIT_ACTIONS[item.type] || 'Registró',
+          module: moduleLabels[operationModule(item)] || operationModule(item),
+          result: 'Correcto',
           operationId: item.id,
           projectId: item.projectId,
           href: operationHref(item),
@@ -87,10 +104,20 @@ export function securityWorkspace() {
     tab: tabs.some(([id]) => id === params.get('tab')) ? params.get('tab') : 'usuarios',
     users,
     audit,
-    roles: roleFixtures,
-    permissionRows,
+    roles: ROLES,
+    permissionRows: PERMISSIONS,
+    permissionRoles: PERMISSION_ROLES,
+    roleNames: [...new Set(WORKER_ROLES)],
+    mfa: MFA,
+    backup: BACKUP,
+    sessions: users.map((user, index) => ({
+      ...SESSION_DEVICES[index % SESSION_DEVICES.length],
+      user: user.name,
+      id: `SES-${index + 1}`,
+    })),
+    formatDateTime: (value) => `${formatDate(value.slice(0, 10))} ${value.slice(11, 16)}`,
     search: (params.get('search') || '').slice(0, 120),
-    roleFilter: ['Administrador de ejemplo', 'Responsable de proyecto'].includes(params.get('role'))
+    roleFilter: WORKER_ROLES.includes(params.get('role'))
       ? params.get('role')
       : '',
     formatDate,

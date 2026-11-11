@@ -20,7 +20,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 | 3. Panel General, Proyectos y Ficha Integral | **Terminada** (10/11/2026) | `Entrega 3: panel, proyectos y ficha integral` | Ver "Notas de la Entrega 3" |
 | 4. Aprobaciones, Rendiciones, Presupuestos, Compras | **Terminada** (10/11/2026) | `Entrega 4: aprobaciones, rendiciones, presupuestos y compras` | Ver "Notas de la Entrega 4" |
 | 5. Personal, Almacén y Costos | **Terminada** (10/11/2026) | `Entrega 5: personal, almacén y costos` | Ver "Notas de la Entrega 5" |
-| 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | Pendiente | — | — |
+| 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | **Terminada** (10/11/2026) | `Entrega 6: documentos, BI, CRM, seguridad, integraciones, reportes y administración` | Ver "Notas de la Entrega 6" |
 | 7. Cierre: quitar ApexCharts y Metis, recorridos, verificación final | Pendiente | — | — |
 
 | Entrega | Qué se ve al terminar |
@@ -179,6 +179,48 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 - **Pruebas cambiadas (intencional):** `personnel` (dispositivo, 2 incidencias,
   asignación), `warehouse` (7 pestañas, modal), `costs` (conteo animado, coma decimal,
   flujo), `validate-mock-data` (2 incidencias en PETI).
+
+### Notas de la Entrega 6 (para la siguiente)
+
+- **Documentos:** estructura por proyecto (Contratos, Presupuestos, Compras, Rendiciones,
+  Personal, Planos, Informes, Entregables) con conteos y filtro por carpeta, filtro de
+  responsable e indicador "Generados por el sistema". Ficha: Vista previa, Descargar
+  (simulado), Nueva versión e Historial.
+- **BI** en página propia `analytics.html` ("Inteligencia de Negocios", solo PETI; en PMI y
+  Demo muestra "no disponible"). Usa el mismo `reportsWorkspace` (bandera `biPage`) y los
+  mismos filtros que Reportes (+ Responsable); el enlace entre ambas conserva los filtros.
+  6 KPI (rentabilidad estimada, presupuesto, costo, desviación promedio, en riesgo,
+  rendiciones pendientes), margen estimado por proyecto (barras con negativos en rojo),
+  presupuesto vs. costo, costos por fuente, evolución mensual (área) y tabla gerencial con
+  desviación. Reportes conserva el catálogo de 8 reportes con "Exportar".
+  Margen estimado = presupuesto − costo proyectado al cierre (ejecutado ÷ avance físico).
+- **CRM** ("Gestión Comercial"): pipeline kanban de 6 etapas con OP-001…OP-006 (datos en
+  `surtec.js`; solo la ganada tiene presupuesto y proyecto), KPI de pipeline ponderado,
+  ficha con probabilidad y próxima acción, y acciones Generar presupuesto, Registrar
+  actividad, Marcar como ganado/perdido (`crm-stages` local) y Convertir en proyecto.
+- **Seguridad** ("Seguridad y Control de Acceso", `data/security-data.js`): 8 roles del
+  punto 95, matriz Sí/Parcial/No, MFA Activado, sesiones con dispositivo/IP/ubicación,
+  auditoría con acción y resultado, respaldos Correcto con historial.
+- **Integraciones:** estados del punto 90 (ZKTeco Conectado y Backup Correcto salen de
+  `BIOMETRIC_DEVICE` y `BACKUP`, igual que en Personal y Seguridad), historial de
+  sincronización y el aviso del punto 92 con "Revisar incidencias".
+- **Administración del Sistema:** 6 pestañas (Empresa con razón social, RUC, dirección,
+  teléfono, correo, moneda y zona horaria; Catálogos; Parámetros; Notificaciones por
+  categoría y canal; Apariencia con tema; Configuración general). SurTec tiene datos
+  legales ficticios en `variants.js` › `company.legal`; J&Y (empresa real) muestra "Por
+  completar con la empresa".
+- **Kit D3:** `bars.js` horizontal admite valores negativos; `format.money` escribe
+  "−S/ 4 610".
+- **Trampa:** no usar ids ni clases que empiecen por `bi-` (el generador de íconos los toma
+  como íconos de Bootstrap); por eso la página es `analytics-workspace`.
+- **Para la Entrega 7:** la página vieja de Metis `analytics` ya no existe como plantilla
+  (se reutilizó el nombre); el resto de páginas Metis siguen fuera del build. Pendientes
+  anotados: formato `S/ 1,250.00` de Rendiciones y estado de registros tras aprobar en la
+  bandeja; J&Y Demo con el alcance de PMI (decisión del usuario: después).
+- **Pruebas cambiadas (intencional):** `delivery-nine` (documentos, BI en su página, CRM
+  kanban, seguridad e integraciones con estados creíbles, 6 pestañas de administración),
+  `shell` (analytics.html deja de ser página legada), `cost` (BI en `analytics.html`),
+  `final-audit` (25 páginas), `validate-mock-data` (oportunidades sin proyecto).
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 

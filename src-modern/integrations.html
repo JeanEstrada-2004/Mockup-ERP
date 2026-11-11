@@ -40,9 +40,14 @@
                   <div>
 <h1>Integraciones</h1>
                     <p class="shell-page-subtitle">
-                      Posibles conexiones y datos relacionados con el proyecto.
+                      Conexiones del sistema con equipos y servicios externos.
                     </p>
                   </div>
+                </div>
+                <div class="alert alert-warning d-flex align-items-center gap-2" role="status">
+                  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                  <span class="flex-grow-1">2 registros biométricos no pudieron asociarse con trabajadores.</span>
+                  <a class="btn btn-outline-secondary btn-sm" href="./personnel.html?tab=incidencias">Revisar incidencias</a>
                 </div>
                 <section class="card mb-3" aria-label="Filtro de integración">
                   <div class="card-body integration-filters">
@@ -71,7 +76,7 @@
                   <section class="card" aria-labelledby="integration-list-title">
                     <div class="card-body">
                       <div class="shell-section-header">
-                        <h2 id="integration-list-title">Conexiones propuestas</h2>
+                        <h2 id="integration-list-title">Conexiones</h2>
                         <span
                           class="workspace-caption"
                           x-text="`${filtered.length} opciones`"
@@ -88,7 +93,7 @@
                             ><span
                               ><strong x-text="item.name"></strong
                               ><small x-text="item.category"></small></span
-                            ><span class="badge text-bg-secondary">No configurada</span>
+                            ><span class="badge status-badge" :class="`status-badge--${item.tone}`" x-text="item.status"></span>
                           </button></template
                         >
                       </div>
@@ -107,33 +112,27 @@
                   <section class="card" aria-labelledby="integration-detail-title">
                     <div class="card-body">
                       <h2 id="integration-detail-title" class="workspace-subheading mt-0">
-                        Flujo previsto
+                        Detalle de la integración
                       </h2>
                       <template x-if="selected"
                         ><div>
                           <p class="fs-5 fw-semibold" x-text="selected.name"></p>
                           <p x-text="selected.scope"></p>
                           <div class="d9-facts">
-                            <div><small>Estado</small><strong>No configurada · demo</strong></div>
+                            <div><small>Estado</small><strong><span class="badge status-badge" :class="`status-badge--${selected.tone}`" x-text="selected.status"></span></strong></div>
+                            <div><small>Última ejecución</small><strong x-text="selected.last"></strong></div>
+                            <div><small>Registros</small><strong x-text="selected.records"></strong></div>
                             <div>
                               <small>Área</small><strong x-text="selected.category"></strong>
                             </div>
                             <div>
-                              <small>Entrada propuesta</small
+                              <small>Entrada</small
                               ><strong x-text="selected.input"></strong>
                             </div>
                             <div>
-                              <small>Resultado propuesto</small
+                              <small>Salida</small
                               ><strong x-text="selected.output"></strong>
                             </div>
-                          </div>
-                          <div class="integration-flow-note mt-3">
-                            <strong>Escenario de ejemplo</strong>
-                            <p>
-                              Se revisaría la identidad del registro, su proyecto y el resultado
-                              antes de cualquier envío. Esta pantalla no ejecuta conexiones ni
-                              conserva historial de sincronización.
-                            </p>
                           </div>
                           <a class="btn btn-outline-primary mt-3" :href="selected.next"
                             >Ver módulo relacionado →</a
@@ -141,11 +140,40 @@
                         </div></template
                       >
                       <p class="workspace-caption" x-show="!selected">
-                        Selecciona una integración para ver el flujo previsto.
+                        Selecciona una integración para ver su detalle.
                       </p>
                     </div>
                   </section>
                 </div>
+                <section class="card mt-3" aria-labelledby="integration-history-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="integration-history-title">Historial de sincronización</h2>
+                    </div>
+                    <div class="table-responsive data-table">
+                      <table class="table align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th scope="col">Integración</th>
+                            <th scope="col">Última ejecución</th>
+                            <th scope="col" class="text-end">Registros</th>
+                            <th scope="col">Resultado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="item in history" :key="item.id">
+                            <tr>
+                              <td x-text="item.name"></td>
+                              <td x-text="item.last"></td>
+                              <td class="text-end" x-text="item.records"></td>
+                              <td><span class="badge status-badge" :class="item.result === 'Correcto' ? 'status-badge--success' : 'status-badge--warning'" x-text="item.result"></span></td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
               </div></template
             >
           </div>

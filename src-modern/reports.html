@@ -38,7 +38,7 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-<h1 x-text="hasBI ? 'Reportes y BI' : 'Reportes'"></h1>
+<h1>Reportes</h1>
                     <p class="shell-page-subtitle">
                       Indicadores calculados desde las operaciones de cada proyecto.
                     </p>
@@ -49,24 +49,11 @@
                   acumulados; el filtro de período limita movimientos y la vista mensual, sin
                   cambiar esos totales.
                 </div>
-                <nav class="d9-tabs" aria-label="Secciones de Reportes">
-                  <button
-                    type="button"
-                    :class="tab === 'reports' ? 'active' : ''"
-                    :aria-current="tab === 'reports' ? 'page' : null"
-                    @click="setTab('reports')"
-                  >
-                    Reportes</button
-                  ><button
-                    type="button"
-                    x-show="hasBI"
-                    :class="tab === 'bi' ? 'active' : ''"
-                    :aria-current="tab === 'bi' ? 'page' : null"
-                    @click="setTab('bi')"
-                  >
-                    BI gerencial
-                  </button>
-                </nav>
+                <a class="analytics-link" :href="biHref" x-show="hasBI">
+                  <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+                  <span><strong>Inteligencia de Negocios</strong><small>Rentabilidad, desviación y evolución del portafolio con los mismos filtros</small></span>
+                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
                 <section class="card mb-3" aria-label="Filtros de reportes">
                   <div class="card-body reports-filters">
                     <div>
@@ -94,6 +81,20 @@
                         <option value="">Todos</option>
                         <template x-for="item in clients" :key="item.id"
                           ><option :value="item.id" x-text="item.name"></option
+                        ></template>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label" for="reports-manager">Responsable</label
+                      ><select
+                        id="reports-manager"
+                        class="form-select"
+                        x-model="managerFilter"
+                        @change="updateFilters()"
+                      >
+                        <option value="">Todos</option>
+                        <template x-for="item in managers" :key="item.id"
+                          ><option :value="item.id" x-text="item.name" :selected="item.id === managerFilter"></option
                         ></template>
                       </select>
                     </div>
@@ -133,7 +134,7 @@
                     </button>
                   </div>
                 </section>
-                <section x-show="tab === 'reports'" aria-label="Catálogo de reportes">
+                <section aria-label="Catálogo de reportes">
                   <div class="reports-catalog">
                     <template x-for="report in reportDefs" :key="report.id"
                       ><button
@@ -155,6 +156,9 @@
                       <div class="shell-section-header">
                         <div>
                           <h2 id="reports-result-title" x-text="`Reporte de ${reportTitle}`"></h2>
+                          <button type="button" class="btn btn-outline-secondary btn-sm" @click="exportReport()">
+                            <i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Exportar
+                          </button>
                           <p class="workspace-caption">
                             Registros del conjunto mock; cada fila abre su origen.
                           </p>
@@ -231,172 +235,6 @@
                       </div>
                     </div>
                   </section>
-                </section>
-                <section x-show="tab === 'bi' && hasBI" aria-label="Indicadores gerenciales">
-                  <div class="d9-kpis">
-                    <div class="card">
-                      <div class="card-body">
-                        <small>Proyectos en alcance</small
-                        ><strong x-text="scopeFinancials.projects"></strong>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <small>Presupuesto acumulado</small
-                        ><strong x-text="formatMoney(scopeFinancials.budget)"></strong>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <small>Costo ejecutado acumulado</small
-                        ><strong x-text="formatMoney(scopeFinancials.executed)"></strong>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <small>Proyectos en riesgo</small
-                        ><strong x-text="scopeFinancials.risk"></strong>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row g-3 mb-3">
-                    <div class="col-xl-7">
-                      <section class="card h-100" aria-labelledby="reports-budget-title">
-                        <div class="card-body">
-                          <div class="shell-section-header">
-                            <h2 id="reports-budget-title">Presupuesto vs. ejecutado</h2>
-                            <span class="workspace-caption">Por proyecto · acumulado</span>
-                          </div>
-                          <div
-                            id="reports-budget-chart"
-                            role="img"
-                            aria-label="Gráfico de presupuesto y costo ejecutado por proyecto"
-                          ></div>
-                          <div class="reports-chart-values">
-                            <template x-for="item in scopedProjects" :key="item.id"
-                              ><a :href="moduleHref('projects', item.id)"
-                                ><strong x-text="item.id"></strong
-                                ><span
-                                  x-text="`Presupuesto ${formatMoney(item.budgetAmount)} · Ejecutado ${formatMoney(getProjectFinancials(item.id).executedCost)}`"
-                                ></span></a
-                            ></template>
-                          </div>
-                        </div>
-                      </section>
-                    </div>
-                    <div class="col-xl-5">
-                      <section class="card h-100" aria-labelledby="reports-sources-title">
-                        <div class="card-body">
-                          <div class="shell-section-header">
-                            <h2 id="reports-sources-title">Costos por fuente</h2>
-                            <span class="workspace-caption">Selecciona para desglosar</span>
-                          </div>
-                          <div
-                            id="reports-source-chart"
-                            role="img"
-                            aria-label="Distribución del costo ejecutado por fuente"
-                          ></div>
-                          <div class="reports-source-list">
-                            <template x-for="source in sourceRows" :key="source.id"
-                              ><button
-                                type="button"
-                                :class="selectedSource === source.id ? 'active' : ''"
-                                @click="setSource(source.id)"
-                              >
-                                <span x-text="source.label"></span
-                                ><strong x-text="formatMoney(source.amount)"></strong></button
-                            ></template>
-                          </div>
-                          <div class="reports-source-detail" x-show="selectedSource">
-                            <strong
-                              x-text="`Fuente: ${sourceRows.find(item => item.id === selectedSource)?.label || ''}`"
-                            ></strong
-                            ><template x-for="item in sourceProjects" :key="item.projectId"
-                              ><a
-                                :href="`./costs.html?project=${encodeURIComponent(item.projectId)}&source=${encodeURIComponent(selectedSource)}`"
-                                ><span x-text="item.projectId"></span
-                                ><span x-text="formatMoney(item.amount)"></span></a
-                            ></template>
-                            <p class="workspace-caption" x-show="sourceProjects.length === 0">
-                              Sin operaciones ejecutadas en esta fuente.
-                            </p>
-                          </div>
-                        </div>
-                      </section>
-                    </div>
-                  </div>
-                  <div class="row g-3 mb-3">
-                    <div class="col-xl-5">
-                      <section class="card h-100" aria-labelledby="reports-monthly-title">
-                        <div class="card-body">
-                          <h2 class="workspace-subheading mt-0" id="reports-monthly-title">
-                            Costo por mes
-                          </h2>
-                          <p class="workspace-caption">
-                            Solo operaciones ejecutadas del período seleccionado.
-                          </p>
-                          <div class="d9-link-list">
-                            <template x-for="item in monthlyCosts" :key="item.month"
-                              ><div>
-                                <span x-text="item.month"></span
-                                ><strong x-text="formatMoney(item.amount)"></strong></div
-                            ></template>
-                          </div>
-                          <p class="workspace-caption" x-show="monthlyCosts.length === 0">
-                            No hay movimientos en ese mes.
-                          </p>
-                        </div>
-                      </section>
-                    </div>
-                    <div class="col-xl-7">
-                      <section class="card h-100" aria-labelledby="reports-manager-title">
-                        <div class="card-body">
-                          <div class="shell-section-header">
-                            <h2 id="reports-manager-title">Proyectos e indicadores</h2>
-                            <span class="workspace-caption">Ir a ficha o fuente</span>
-                          </div>
-                          <div class="table-responsive">
-                            <table class="table align-middle reports-manager-table">
-                              <thead>
-                                <tr>
-                                  <th scope="col">Proyecto</th>
-                                  <th scope="col">Avance</th>
-                                  <th scope="col">Presupuesto</th>
-                                  <th scope="col">Ejecutado</th>
-                                  <th scope="col">Estado</th>
-                                  <th scope="col">Costos</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <template x-for="item in scopedProjects" :key="item.id"
-                                  ><tr>
-                                    <td>
-                                      <a
-                                        :href="moduleHref('projects', item.id)"
-                                        x-text="item.id"
-                                      ></a>
-                                    </td>
-                                    <td x-text="`${item.progressPercent} %`"></td>
-                                    <td x-text="formatMoney(item.budgetAmount)"></td>
-                                    <td
-                                      x-text="formatMoney(getProjectFinancials(item.id).executedCost)"
-                                    ></td>
-                                    <td x-text="item.status"></td>
-                                    <td>
-                                      <a :href="moduleHref('costs', item.id)">Ver fuentes →</a>
-                                    </td>
-                                  </tr></template
-                                >
-                              </tbody>
-                            </table>
-                          </div>
-                          <p class="workspace-caption" x-show="scopedProjects.length === 0">
-                            No hay proyectos con estos filtros.
-                          </p>
-                        </div>
-                      </section>
-                    </div>
-                  </div>
                 </section>
               </div></template
             >

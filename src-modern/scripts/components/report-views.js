@@ -55,7 +55,10 @@ export function reportsWorkspace() {
     clients: data.clients,
     reportDefs,
     months,
-    tab: hasBI && params.get('tab') === 'bi' ? 'bi' : 'reports',
+    // analytics.html (Inteligencia de Negocios) is the BI page; reports.html
+    // keeps the operational catalogue (Entrega 6).
+    biPage: document.body.dataset.page === 'analytics-workspace',
+    tab: document.body.dataset.page === 'analytics-workspace' && hasBI ? 'bi' : 'reports',
     reportId: reportDefs.some((item) => item.id === params.get('report'))
       ? params.get('report')
       : 'projects',
@@ -65,6 +68,13 @@ export function reportsWorkspace() {
     clientFilter: data.clients.some((item) => item.id === params.get('client'))
       ? params.get('client')
       : '',
+    managerFilter: data.workers.some((item) => item.id === params.get('manager'))
+      ? params.get('manager')
+      : '',
+    get managers() {
+      const ids = [...new Set(data.projects.map((item) => item.managerId))];
+      return data.workers.filter((item) => ids.includes(item.id));
+    },
     // Default scope = projects in execution, the same set the Panel General sums.
     statusFilter: [...REPORT_STATUSES, 'todos'].includes(params.get('status'))
       ? params.get('status')
@@ -83,6 +93,7 @@ export function reportsWorkspace() {
         (item) =>
           (!this.projectFilter || item.id === this.projectFilter) &&
           (!this.clientFilter || item.clientId === this.clientFilter) &&
+          (!this.managerFilter || item.managerId === this.managerFilter) &&
           (this.statusFilter === 'todos' ||
             (this.statusFilter === 'ejecucion'
               ? IN_EXECUTION.includes(item.status)
@@ -225,8 +236,13 @@ export function reportsWorkspace() {
     },
     setReport(id) {
       this.reportId = id;
-      this.tab = 'reports';
+      if (!this.biPage) this.tab = 'reports';
       this.updateUrl();
+    },
+    exportReport() {
+      window.AdminApp?.notificationManager?.success(
+        `Reporte de ${this.reportTitle} exportado a Excel (simulado).`
+      );
     },
     setSource(id) {
       this.selectedSource = id;
@@ -240,23 +256,72 @@ export function reportsWorkspace() {
     clearFilters() {
       this.projectFilter = '';
       this.clientFilter = '';
+      this.managerFilter = '';
       this.statusFilter = 'ejecucion';
       this.periodFilter = '';
       this.updateFilters();
     },
     updateUrl() {
+      const query = this.filterQuery();
+      if (!this.biPage && this.reportId !== 'projects') query.set('report', this.reportId);
+      const page = this.biPage ? './analytics.html' : './reports.html';
+      history.replaceState(null, '', `${page}${query.size ? `?${query}` : ''}`);
+    },
+    filterQuery() {
       const query = new URLSearchParams();
-      if (this.tab === 'bi') query.set('tab', 'bi');
-      if (this.tab === 'reports' && this.reportId !== 'projects')
-        query.set('report', this.reportId);
       for (const [key, value] of [
         ['project', this.projectFilter],
         ['client', this.clientFilter],
+        ['manager', this.managerFilter],
         ['status', this.statusFilter === 'ejecucion' ? '' : this.statusFilter],
         ['period', this.periodFilter],
       ])
         if (value) query.set(key, value);
-      history.replaceState(null, '', `./reports.html${query.size ? `?${query}` : ''}`);
+      return query;
+    },
+    // Link between the two pages keeps the same filters.
+    get biHref() {
+      const query = this.filterQuery();
+      return `./analytics.html${query.size ? `?${query}` : ''}`;
+    },
+    get reportsHref() {
+      const query = this.filterQuery();
+      return `./reports.html${query.size ? `?${query}` : ''}`;
+    },
+    // ---- BI indicators (punto 85) -----------------------------------------
+    // Estimated margin: budget minus the cost projected to completion
+    // (executed ÷ physical progress). A projection, labelled as such.
+    projectMargin(project) {
+      const financials = getProjectFinancials(data, project.id);
+      const progress = Math.max(project.progressPercent, 1) / 100;
+      const projected = Math.min(financials.executedCost / progress, financials.budgetAmount * 2);
+      return {
+        projected,
+        margin: financials.budgetAmount - projected,
+        percent: financials.budgetAmount
+          ? ((financials.budgetAmount - projected) / financials.budgetAmount) * 100
+          : 0,
+      };
+    },
+    // Deviation: executed % of budget minus physical progress %.
+    projectDeviation(project) {
+      const financials = getProjectFinancials(data, project.id);
+      return Math.round((financials.executionPercent - project.progressPercent) * 10) / 10;
+    },
+    get biIndicators() {
+      const rows = this.scopedProjects;
+      const budget = rows.reduce((sum, item) => sum + item.budgetAmount, 0);
+      const margin = rows.reduce((sum, item) => sum + this.projectMargin(item).margin, 0);
+      const deviation = rows.length
+        ? rows.reduce((sum, item) => sum + this.projectDeviation(item), 0) / rows.length
+        : 0;
+      return {
+        marginPercent: budget ? (margin / budget) * 100 : 0,
+        deviation: Math.round(deviation * 10) / 10,
+      };
+    },
+    pct(value) {
+      return `${(Math.round(value * 10) / 10).toFixed(1).replace('.', ',')} %`;
     },
     async renderCharts() {
       if (!hasBI || this.tab !== 'bi') return;
@@ -300,6 +365,43 @@ export function reportsWorkspace() {
           table: false,
         });
       }
+      const marginData = {
+        categories: this.scopedProjects.map((item) => item.id),
+        series: [
+          {
+            label: 'Margen estimado',
+            color: '--s2',
+            values: this.scopedProjects.map((item) => Math.round(this.projectMargin(item).margin)),
+          },
+        ],
+      };
+      const monthlyData = this.monthlyTrend;
+      const marginElement = document.getElementById('analytics-margin-chart');
+      const monthlyElement = document.getElementById('analytics-monthly-chart');
+      const [{ render: renderArea }] = await Promise.all([import('../charts/area.js')]);
+      if (marginElement) {
+        if (this.marginChart?.update) this.marginChart.update(marginData);
+        else {
+          marginElement.replaceChildren();
+          this.marginChart = renderBars(marginElement, marginData, {
+            orientation: 'horizontal',
+            labelWidth: 110,
+            label: 'Margen estimado por proyecto en soles',
+            table: false,
+          });
+        }
+      }
+      if (monthlyElement && monthlyData.length) {
+        if (this.monthlyChart?.update) this.monthlyChart.update(monthlyData);
+        else {
+          monthlyElement.replaceChildren();
+          this.monthlyChart = renderArea(monthlyElement, monthlyData, {
+            label: 'Costo ejecutado por mes del alcance seleccionado',
+            valueLabel: 'ejecutados',
+            table: false,
+          });
+        }
+      }
       if (this.sourceChart?.update) this.sourceChart.update(sourceData);
       else {
         sourceElement.replaceChildren();
@@ -312,9 +414,39 @@ export function reportsWorkspace() {
         });
       }
     },
+    get monthlyTrend() {
+      const names = [
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Set',
+        'Oct',
+        'Nov',
+        'Dic',
+      ];
+      const totals = new Map();
+      data.operations
+        .filter((item) => item.costSource && item.date && this.projectIds.has(item.projectId))
+        .forEach((item) => {
+          const key = item.date.slice(0, 7);
+          totals.set(key, (totals.get(key) || 0) + item.amount);
+        });
+      return [...totals.keys()].sort().map((key) => ({
+        label: names[Number(key.slice(5, 7)) - 1],
+        title: key,
+        value: totals.get(key),
+      }));
+    },
     destroy() {
       this.budgetChart?.destroy?.();
       this.sourceChart?.destroy?.();
+      this.marginChart?.destroy?.();
+      this.monthlyChart?.destroy?.();
     },
   };
 }

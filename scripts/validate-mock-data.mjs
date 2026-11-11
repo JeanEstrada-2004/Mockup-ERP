@@ -70,10 +70,16 @@ for (const variantId of VARIANT_IDS) {
   for (const opportunity of data.opportunities) {
     assert.ok(clients.has(opportunity.clientId));
     assert.ok(workers.has(opportunity.ownerId));
-    assert.ok(projects.has(opportunity.projectId));
-    assert.equal(budgets.get(opportunity.budgetId)?.projectId, opportunity.projectId);
-    assert.equal(budgets.get(opportunity.budgetId)?.clientId, opportunity.clientId);
-    assert.equal(budgets.get(opportunity.budgetId)?.amount, opportunity.estimatedAmount);
+    // Only won opportunities are converted into a project (punto 22).
+    if (opportunity.status === 'Ganado') assert.ok(projects.has(opportunity.projectId));
+    else assert.equal(opportunity.projectId, undefined);
+    // Opportunities without a quotation yet carry no budgetId.
+    if (opportunity.budgetId) {
+      assert.equal(budgets.get(opportunity.budgetId)?.projectId, opportunity.projectId);
+      assert.equal(budgets.get(opportunity.budgetId)?.clientId, opportunity.clientId);
+      assert.equal(budgets.get(opportunity.budgetId)?.amount, opportunity.estimatedAmount);
+    }
+    assert.ok(opportunity.probability >= 0 && opportunity.probability <= 100);
   }
 
   const stockMovements = warehouseMovements(data);

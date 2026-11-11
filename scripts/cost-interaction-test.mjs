@@ -171,7 +171,7 @@ async function checkVariant(variant, projectId) {
       url(
         variant,
         variant === 'surtec-peti'
-          ? `reports.html?tab=bi&project=${projectId}`
+          ? `analytics.html?project=${projectId}`
           : `reports.html?report=costs&project=${projectId}`
       )
     );

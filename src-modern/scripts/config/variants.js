@@ -86,6 +86,13 @@ export const VARIANTS = {
       logoLightBox: LOGO_BOXES.surtecLight,
       logoDarkBox: LOGO_BOXES.surtecDark,
       logoPlate: LOGO_PLATES.surtec,
+      // Fictitious company of the PETI course.
+      legal: {
+        ruc: '20605123478',
+        address: 'Av. Ejército 1020, Yanahuara, Arequipa',
+        phone: '(054) 412 380',
+        email: 'contacto@surtec.pe',
+      },
     },
     // Which presentation this build is, shown under the logo in the rail.
     presentation: { code: 'PETI', label: 'TO-BE 2027–2030' },

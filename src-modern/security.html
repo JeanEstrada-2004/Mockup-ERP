@@ -38,9 +38,9 @@
               ><div>
                 <div class="shell-page-heading">
                   <div>
-<h1>Seguridad</h1>
+<h1>Seguridad y Control de Acceso</h1>
                     <p class="shell-page-subtitle">
-                      Perfiles, permisos y trazas de ejemplo para revisar el diseño.
+                      Usuarios, roles, permisos, sesiones, auditoría y respaldos.
                     </p>
                   </div>
                 </div>
@@ -68,7 +68,7 @@
                       <div>
                         <h2 id="security-users-title">Usuarios</h2>
                         <p class="workspace-caption">
-                          Los nombres provienen de trabajadores de ejemplo, sin cuentas activas.
+                          Cuentas de acceso del personal de los proyectos.
                         </p>
                       </div>
                       <span
@@ -97,8 +97,9 @@
                           @change="updateUrl()"
                         >
                           <option value="">Todos</option>
-                          <option value="Administrador de ejemplo">Administrador de ejemplo</option>
-                          <option value="Responsable de proyecto">Responsable de proyecto</option>
+                          <template x-for="role in roleNames" :key="role"
+                            ><option :value="role" x-text="role" :selected="role === roleFilter"></option
+                          ></template>
                         </select>
                       </div>
                       <button
@@ -113,27 +114,23 @@
                       <table class="table align-middle d9-table">
                         <thead>
                           <tr>
-                            <th scope="col">Código</th>
-                            <th scope="col">Nombre</th>
                             <th scope="col">Usuario</th>
-                            <th scope="col">Rol propuesto</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Rol</th>
                             <th scope="col">Área</th>
+                            <th scope="col">Último acceso</th>
                             <th scope="col">Estado</th>
-                            <th scope="col">Trabajador</th>
                           </tr>
                         </thead>
                         <tbody>
                           <template x-for="item in filteredUsers" :key="item.id"
                             ><tr>
-                              <td x-text="item.id"></td>
-                              <td x-text="item.name"></td>
-                              <td x-text="item.alias"></td>
+                              <td class="data-code" x-text="item.alias"></td>
+                              <td><a :href="workerHref(item.workerId)" x-text="item.name"></a></td>
                               <td x-text="item.role"></td>
                               <td x-text="item.area"></td>
-                              <td>
-                                <span class="badge text-bg-secondary" x-text="item.status"></span>
-                              </td>
-                              <td><a :href="workerHref(item.workerId)">Ver ficha →</a></td>
+                              <td x-text="item.lastAccess"></td>
+                              <td><span class="badge status-badge status-badge--success" x-text="item.status"></span></td>
                             </tr></template
                           >
                         </tbody>
@@ -177,7 +174,7 @@
                         ><article>
                           <strong x-text="item.name"></strong>
                           <p x-text="item.scope"></p>
-                          <span class="badge text-bg-secondary">Ejemplo</span>
+                          <small class="text-muted" x-text="`${item.users} ${item.users === 1 ? 'usuario' : 'usuarios'}`"></small>
                         </article></template
                       >
                     </div>
@@ -191,21 +188,14 @@
                   <div class="card-body">
                     <div class="shell-section-header">
                       <h2 id="security-permissions-title">Matriz de permisos</h2>
-                      <span class="workspace-caption">No restringe la navegación</span>
+                      <span class="workspace-caption">Sí · Parcial · No</span>
                     </div>
-                    <p class="workspace-caption">
-                      Esta matriz sirve para discutir responsabilidades. Los enlaces del mockup
-                      siguen abiertos.
-                    </p>
                     <div class="table-responsive">
                       <table class="table align-middle security-permissions-table">
                         <thead>
                           <tr>
                             <th scope="col">Acción</th>
-                            <th scope="col">Administrador</th>
-                            <th scope="col">Proyectos</th>
-                            <th scope="col">Logística</th>
-                            <th scope="col">Colaborador</th>
+                            <template x-for="role in permissionRoles" :key="role"><th scope="col" x-text="role"></th></template>
                           </tr>
                         </thead>
                         <tbody>
@@ -213,7 +203,7 @@
                             ><tr>
                               <th scope="row" x-text="item.action"></th>
                               <template x-for="(value, index) in item.values" :key="index"
-                                ><td x-text="value"></td
+                                ><td><span class="badge status-badge" :class="value === 'Sí' ? 'status-badge--success' : value === 'Parcial' ? 'status-badge--warning' : ''" x-text="value"></span></td
                               ></template></tr
                           ></template>
                         </tbody>
@@ -224,23 +214,14 @@
                 <section x-show="tab === 'mfa'" class="card" aria-labelledby="security-mfa-title">
                   <div class="card-body">
                     <h2 id="security-mfa-title" class="workspace-subheading mt-0">
-                      Autenticación multifactor prevista
+                      Autenticación multifactor
                     </h2>
                     <div class="d9-facts">
-                      <div><small>Estado real</small><strong>No implementada</strong></div>
-                      <div>
-                        <small>Métodos considerados</small
-                        ><strong>Aplicación autenticadora o correo</strong>
-                      </div>
-                      <div>
-                        <small>Alcance propuesto</small
-                        ><strong>Acceso de usuarios y aprobaciones sensibles</strong>
-                      </div>
-                      <div><small>Demostración</small><strong>Solo diseño de interfaz</strong></div>
+                      <div><small>Estado</small><strong><span class="badge status-badge status-badge--success" x-text="mfa.status"></span></strong></div>
+                      <div><small>Métodos</small><strong x-text="mfa.methods"></strong></div>
+                      <div><small>Alcance</small><strong x-text="mfa.coverage"></strong></div>
+                      <div><small>Usuarios inscritos</small><strong x-text="mfa.enrolled"></strong></div>
                     </div>
-                    <p class="workspace-caption mt-3">
-                      No se genera código, se envía correo ni se verifica un segundo factor.
-                    </p>
                   </div>
                 </section>
                 <section
@@ -250,12 +231,31 @@
                 >
                   <div class="card-body">
                     <h2 id="security-sessions-title" class="workspace-subheading mt-0">Sesiones</h2>
-                    <div class="d9-empty">
-                      <i class="bi bi-laptop" aria-hidden="true"></i>
-                      <p>
-                        Este frontend no crea ni registra sesiones. No hay dispositivos o
-                        direcciones IP de usuarios que mostrar.
-                      </p>
+                    <div class="table-responsive data-table">
+                      <table class="table align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th scope="col">Usuario</th>
+                            <th scope="col">Dispositivo</th>
+                            <th scope="col">IP</th>
+                            <th scope="col">Ubicación</th>
+                            <th scope="col">Última actividad</th>
+                            <th scope="col">Estado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="item in sessions" :key="item.id">
+                            <tr>
+                              <td x-text="item.user"></td>
+                              <td x-text="item.device"></td>
+                              <td class="data-money" x-text="item.ip"></td>
+                              <td x-text="item.location"></td>
+                              <td x-text="item.activity"></td>
+                              <td><span class="badge status-badge" :class="item.status === 'Activa' ? 'status-badge--success' : ''" x-text="item.status"></span></td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </section>
@@ -267,13 +267,10 @@
                   <div class="card-body">
                     <div class="shell-section-header">
                       <div>
-                        <h2 id="security-audit-title">Trazas de referencia</h2>
-                        <p class="workspace-caption">
-                          Ordenadas por la fecha ficticia de cada operación; no son un log de
-                          acciones.
-                        </p>
+                        <h2 id="security-audit-title">Auditoría</h2>
+                        <p class="workspace-caption">Últimas acciones sobre registros del sistema.</p>
                       </div>
-                      <span class="workspace-caption" x-text="`${audit.length} referencias`"></span>
+                      <span class="workspace-caption" x-text="`${audit.length} eventos`"></span>
                     </div>
                     <div class="table-responsive d-none d-lg-block">
                       <table class="table align-middle d9-table">
@@ -281,21 +278,21 @@
                           <tr>
                             <th scope="col">Fecha</th>
                             <th scope="col">Usuario</th>
-                            <th scope="col">Referencia</th>
+                            <th scope="col">Acción</th>
                             <th scope="col">Módulo</th>
                             <th scope="col">Registro</th>
-                            <th scope="col">Proyecto</th>
+                            <th scope="col">Resultado</th>
                           </tr>
                         </thead>
                         <tbody>
                           <template x-for="item in audit" :key="item.id"
                             ><tr>
-                              <td x-text="formatDate(item.date)"></td>
+                              <td x-text="`${formatDate(item.date)} ${item.time}`"></td>
                               <td x-text="item.actor"></td>
                               <td x-text="item.action"></td>
                               <td x-text="item.module"></td>
                               <td><a :href="item.href" x-text="item.operationId"></a></td>
-                              <td x-text="item.projectId"></td></tr
+                              <td><span class="badge status-badge status-badge--success" x-text="item.result"></span></td></tr
                           ></template>
                         </tbody>
                       </table>
@@ -322,26 +319,24 @@
                 >
                   <div class="card-body">
                     <h2 id="security-backups-title" class="workspace-subheading mt-0">
-                      Plan de respaldos
+                      Respaldos
                     </h2>
                     <div class="d9-facts">
-                      <div>
-                        <small>Frecuencia propuesta</small
-                        ><strong>Diaria, sujeta a definición</strong>
-                      </div>
-                      <div>
-                        <small>Verificación propuesta</small
-                        ><strong>Prueba periódica de restauración</strong>
-                      </div>
-                      <div>
-                        <small>Último respaldo real</small><strong>No existe en este mockup</strong>
-                      </div>
-                      <div><small>Historial</small><strong>Sin ejecuciones</strong></div>
+                      <div><small>Último respaldo</small><strong x-text="formatDateTime(backup.last)"></strong></div>
+                      <div><small>Estado</small><strong><span class="badge status-badge status-badge--success" x-text="backup.status"></span></strong></div>
+                      <div><small>Modo</small><strong x-text="backup.mode"></strong></div>
+                      <div><small>Próximo respaldo</small><strong x-text="formatDateTime(backup.next)"></strong></div>
                     </div>
-                    <div class="d9-empty">
-                      <i class="bi bi-hdd" aria-hidden="true"></i>
-                      <p>No hay copias ni historial de respaldos generados por esta aplicación.</p>
-                    </div>
+                    <h3 class="form-section-title">Historial</h3>
+                    <ol class="record-timeline">
+                      <template x-for="item in backup.history" :key="item.date">
+                        <li>
+                          <i aria-hidden="true"></i>
+                          <span><b x-text="formatDateTime(item.date)"></b><small x-text="`${item.size} · ${item.duration}`"></small></span>
+                          <span class="badge status-badge status-badge--success" x-text="item.status"></span>
+                        </li>
+                      </template>
+                    </ol>
                   </div>
                 </section>
               </div></template

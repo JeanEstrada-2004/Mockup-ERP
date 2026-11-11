@@ -438,3 +438,13 @@ tres variantes bajo la subruta de Pages.
   Biométrico → Asistencia → Tareo → Proyecto → Costo laboral.
 - **Almacén:** pestaña Almacenes y registro de entradas, salidas, devoluciones y
   transferencias de demostración que no alteran stock ni costos.
+
+## Mejoras — Entrega 6: documentos, BI, CRM, seguridad, integraciones, reportes y administración (10/11/2026)
+
+- **Documentos:** estructura documental por proyecto, filtros y documentos generados.
+- **Inteligencia de Negocios** (`analytics.html`): KPI gerenciales, margen estimado,
+  desviación, evolución mensual y drill-down a fuentes y operaciones.
+- **CRM:** pipeline kanban de seis etapas con acciones de seguimiento.
+- **Seguridad, Integraciones y Administración:** estados simulados creíbles (MFA Activado,
+  ZKTeco Conectado, Backup Correcto) coherentes entre módulos, y las seis secciones de
+  Administración del Sistema.

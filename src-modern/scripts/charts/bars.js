@@ -134,9 +134,13 @@ function drawHorizontal({ host, element, data, options, tokens, width, animate }
   legend(element, data, tokens);
   const svg = freshSvg(host, width, height);
   const values = data.series[0]?.values || [];
-  const top = niceTop(max(data.series.flatMap((serie) => serie.values)) || 0);
+  const all = data.series.flatMap((serie) => serie.values);
+  const top = niceTop(max(all) || 0);
+  // Negative values (e.g. a projected loss) extend left of the zero line.
+  const lowest = Math.min(0, ...all);
+  const bottom = lowest < 0 ? -niceTop(-lowest) : 0;
   const x = scaleLinear()
-    .domain([0, top])
+    .domain([bottom, top])
     .range([margin.left, width - margin.right]);
   const y = scaleBand()
     .domain(data.categories)
@@ -162,6 +166,15 @@ function drawHorizontal({ host, element, data, options, tokens, width, animate }
   });
 
   const rows = values.map((value, index) => ({ value, category: data.categories[index], index }));
+  if (bottom < 0) {
+    svg
+      .append('line')
+      .attr('x1', x(0))
+      .attr('x2', x(0))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom)
+      .attr('stroke', tokens['--ink-3']);
+  }
   svg
     .append('g')
     .selectAll('text')
@@ -179,31 +192,37 @@ function drawHorizontal({ host, element, data, options, tokens, width, animate }
     .selectAll('rect')
     .data(rows)
     .join('rect')
-    .attr('x', x(0))
+    .attr('x', (d) => x(Math.min(0, d.value)))
     .attr('y', (d) => y(d.category))
     .attr('height', y.bandwidth())
     .attr('rx', Math.min(y.bandwidth() / 2, 7))
-    .attr('fill', (d) => tokens.color(data.colors?.[d.index] || data.series[0].color))
-    .attr('width', (d) => Math.max(0, x(d.value) - x(0)))
+    .attr('fill', (d) =>
+      d.value < 0
+        ? tokens['--bad']
+        : tokens.color(data.colors?.[d.index] || data.series[0].color)
+    )
+    .attr('width', (d) => Math.abs(x(d.value) - x(0)))
     .on('mousemove', (event, d) =>
       showTip(event, { title: d.category, lines: [valueFormat(d.value)] })
     )
     .on('mouseleave', hideTip);
   if (animate) {
     bars
+      .attr('x', x(0))
       .attr('width', 0)
       .transition()
       .delay((d) => 80 + d.index * 70)
       .duration(700)
       .ease(ease)
-      .attr('width', (d) => Math.max(0, x(d.value) - x(0)));
+      .attr('x', (d) => x(Math.min(0, d.value)))
+      .attr('width', (d) => Math.abs(x(d.value) - x(0)));
   }
   svg
     .append('g')
     .selectAll('text')
     .data(rows)
     .join('text')
-    .attr('x', (d) => x(d.value) + 8)
+    .attr('x', (d) => x(Math.max(0, d.value)) + 8)
     .attr('y', (d) => y(d.category) + y.bandwidth() / 2)
     .attr('dominant-baseline', 'middle')
     .attr('font-size', 12.5)

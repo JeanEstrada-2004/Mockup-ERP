@@ -36,6 +36,35 @@
                 </p>
               </div>
             </div>
+            <section class="doc-structure mb-3" aria-labelledby="doc-structure-title">
+              <div class="doc-structure-head">
+                <h2 id="doc-structure-title" x-text="projectFilter ? `Estructura de ${projectFilter}` : 'Estructura documental'"></h2>
+                <button type="button" class="btn btn-link btn-sm" x-show="folderFilter" @click="selectFolder(folderFilter)">Ver todas las carpetas</button>
+              </div>
+              <div class="doc-folders" role="list">
+                <template x-for="folder in folders" :key="folder.id">
+                  <button
+                    type="button"
+                    class="doc-folder"
+                    role="listitem"
+                    :class="{ 'is-active': folderFilter === folder.id, 'is-empty': !folder.count }"
+                    :aria-pressed="String(folderFilter === folder.id)"
+                    @click="selectFolder(folder.id)"
+                  >
+                    <i class="bi" :class="folderFilter === folder.id ? 'bi-folder2-open' : 'bi-folder'" aria-hidden="true"></i>
+                    <span x-text="folder.label"></span>
+                    <b x-text="folder.count"></b>
+                  </button>
+                </template>
+              </div>
+              <p class="doc-generated">
+                <i class="bi bi-magic" aria-hidden="true"></i>
+                Generados por el sistema:
+                <template x-for="(item, index) in generated" :key="item.type"
+                  ><span><b x-text="item.count"></b> <span x-text="item.label"></span><span x-show="index < generated.length - 1"> · </span></span
+                ></template>
+              </p>
+            </section>
             <section class="card mb-3" aria-label="Filtros de documentos">
               <div class="card-body d9-filters">
                 <div>
@@ -75,6 +104,13 @@
                     <template x-for="item in modules" :key="item[0]"
                       ><option :value="item[0]" x-text="item[1]"></option
                     ></template>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="documents-responsible">Responsable</label>
+                  <select id="documents-responsible" class="form-select" x-model="responsibleFilter" @change="updateUrl()">
+                    <option value="">Todos</option>
+                    <template x-for="item in responsibles" :key="item.id"><option :value="item.id" x-text="item.name" :selected="item.id === responsibleFilter"></option></template>
                   </select>
                 </div>
                 <div>

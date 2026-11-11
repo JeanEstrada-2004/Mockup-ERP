@@ -383,8 +383,13 @@ try {
   assert.ok(await page.locator('[data-shell-action="profile"]').isVisible());
   await page.locator('[data-shell-action="profile"]').click();
   assert.ok(await page.locator('.toast').first().isVisible());
-  const legacyResponse = await page.request.get(pageUrl('jy-demo', 'analytics.html'));
+  // Legacy Metis pages stay out of the build; analytics.html is now the BI page
+  // (Entrega 6) and is unavailable where the BI module is not enabled.
+  const legacyResponse = await page.request.get(pageUrl('jy-demo', 'users.html'));
   assert.equal(legacyResponse.status(), 404);
+  await page.goto(pageUrl('jy-demo', 'analytics.html'));
+  await page.waitForFunction(() => window.AdminApp?.isInitialized);
+  assert.match(await page.locator('#main-content').innerText(), /no disponible/i);
 
   if (process.env.VISUAL === '1') {
     const out = path.join(root, 'tmp', 'shell-review');

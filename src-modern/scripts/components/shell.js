@@ -468,7 +468,7 @@ export function initShellActions(app) {
                     ? 'costs'
                     : ['documents-list', 'document-detail'].includes(document.body.dataset.page)
                       ? 'documents'
-                      : document.body.dataset.page === 'reports-workspace'
+                      : ['reports-workspace', 'analytics-workspace'].includes(document.body.dataset.page)
                         ? 'reports'
                         : document.body.dataset.page === 'crm-workspace'
                           ? 'crm'

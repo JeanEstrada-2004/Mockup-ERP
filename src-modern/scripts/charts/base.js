@@ -24,7 +24,8 @@ const group = (value) =>
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 export const format = {
-  money: (value) => `S/ ${group(value)}`,
+  // Negative amounts as −S/ 4 610 (minus sign before the currency).
+  money: (value) => (value < 0 ? `−S/ ${group(-value)}` : `S/ ${group(value)}`),
   thousands: (value) => (value === 0 ? '0' : `${group(value / 1000)} mil`),
   pct: (value) => `${(Math.round(value * 10) / 10).toFixed(1).replace('.', ',')} %`,
   int: (value) => group(value),

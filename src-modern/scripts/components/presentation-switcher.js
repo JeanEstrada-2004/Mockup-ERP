@@ -36,6 +36,7 @@ const PAGE_MODULE = {
   'documents.html': ['documents', 'documents.html'],
   'document.html': ['documents', 'documents.html'],
   'reports.html': ['reports', 'reports.html'],
+  'analytics.html': ['bi', 'analytics.html'],
   'crm.html': ['crm', 'crm.html'],
   'integrations.html': ['integrations', 'integrations.html'],
   'security.html': ['security', 'security.html'],

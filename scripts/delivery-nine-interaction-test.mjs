@@ -104,7 +104,7 @@ async function testDocuments() {
       await page.locator('#document-facts-title').locator('xpath=ancestor::section').innerText(),
       new RegExp(data.budgets[0].id)
     );
-    await page.getByRole('button', { name: 'Vista previa de metadatos' }).click();
+    await page.getByRole('button', { name: 'Vista previa' }).click();
     await page.locator('#document-preview-modal').waitFor({ state: 'visible' });
     assert.match(
       await page.locator('#document-preview-modal').innerText(),
@@ -116,7 +116,7 @@ async function testDocuments() {
       .last()
       .click();
     await page.locator('#document-preview-modal').waitFor({ state: 'hidden' });
-    await page.getByRole('button', { name: 'Nueva versión visual' }).click();
+    await page.getByRole('button', { name: 'Nueva versión', exact: true }).click();
     await page.locator('#document-version-modal').waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'Guardar versión visual' }).click();
     await page.locator('#document-version-modal .alert-danger').waitFor({ state: 'visible' });
@@ -165,7 +165,8 @@ async function testReports() {
   await page.goto(url('surtec-peti', 'reports.html'));
   await ready();
   assert.equal(await page.locator('.sidebar-nav [data-module="reports"].active').count(), 1);
-  assert.equal(await page.locator('.d9-tabs button:visible').count(), 2);
+  // Entrega 6: the catalogue page links to BI instead of a second tab.
+  assert.equal(await page.locator('.analytics-link:visible').count(), 1);
   assert.equal(await page.locator('.reports-catalog-card').count(), 8);
   assert.equal(
     await page
@@ -194,7 +195,12 @@ async function testReports() {
       .count(),
     scopedPurchases.filter((item) => item.date.startsWith('2027-03')).length
   );
-  await page.getByRole('button', { name: 'BI gerencial' }).click();
+  // Entrega 6: BI lives in analytics.html ("Inteligencia de Negocios"); the link keeps the filters.
+  await page.locator('.analytics-link').click();
+  await page.waitForURL(/analytics\.html\?.*period=2027-03/);
+  await ready();
+  assert.equal(await page.locator('.shell-page-heading h1').innerText(), 'Inteligencia de Negocios');
+  await page.locator('#analytics-margin-chart .chart-svg').waitFor();
   await page.locator('#reports-budget-chart .chart-svg rect').first().waitFor();
   const kpis = await page.locator('.d9-kpis').innerText();
   assert.ok(kpis.includes(String(totals.activeProjectCount)));
@@ -234,7 +240,8 @@ async function testReports() {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(url('jy-pmi', 'reports.html'));
   await ready();
-  assert.equal(await page.locator('.d9-tabs button:visible').count(), 1);
+  // PMI has no BI: no link, and analytics.html by URL shows "no disponible".
+  assert.equal(await page.locator('.analytics-link:visible').count(), 0);
   assert.equal(await page.locator('.reports-catalog-card').count(), 7);
   await page.locator('#reports-project').selectOption('PR-JY-001');
   assert.equal(
@@ -262,14 +269,24 @@ async function testCRM() {
   await page.goto(url('surtec-peti', 'crm.html'));
   await ready();
   assert.equal(await page.locator('.sidebar-nav [data-module="crm"].active').count(), 1);
+  // Entrega 6: six-stage pipeline (punto 20) with one opportunity per stage.
+  assert.equal(await page.locator('.crm-column').count(), 6);
+  assert.equal(await page.locator('.crm-card').count(), 6);
   assert.equal(
     await page
       .locator('#crm-list-title')
       .locator('xpath=ancestor::section[1]')
       .locator('table tbody tr')
       .count(),
-    1
+    6
   );
+  await page.locator('.crm-card').filter({ hasText: 'Radioenlaces de campamento' }).click();
+  assert.match(await page.locator('#crm-detail-title').locator('xpath=ancestor::section[1]').innerText(), /OP-005[\s\S]*Prospecto/);
+  await page.getByRole('button', { name: 'Marcar como ganado' }).click();
+  await page.locator('.crm-column').filter({ hasText: 'Ganado' }).filter({ hasText: 'Radioenlaces' }).waitFor();
+  await page.evaluate(() => localStorage.removeItem('mockup-erp:surtec-peti:crm-stages'));
+  await page.goto(url('surtec-peti', 'crm.html'));
+  await ready();
   assert.match(
     await page.locator('#crm-detail-title').locator('xpath=ancestor::section[1]').innerText(),
     /OP-001.*PRE-001.*PR-2027-001/s
@@ -321,8 +338,11 @@ async function testIntegrations() {
       .locator('#integration-detail-title')
       .locator('xpath=ancestor::section[1]')
       .innerText(),
-    /Biometría.*No configurada/s
+    /Biometría.*Conectado/s
   );
+  // Entrega 6: credible states, sync history and the punto 92 error.
+  assert.match(await page.locator('#main-content').innerText(), /2 registros biométricos no pudieron asociarse con trabajadores/);
+  assert.equal(await page.locator('#integration-history-title').locator('xpath=ancestor::section[1]').locator('tbody tr').count(), 5);
   await page.locator('#integration-category').selectOption('Finanzas');
   assert.equal(await page.locator('.integration-list button').count(), 1);
   assert.match(
@@ -372,13 +392,14 @@ async function testSecurity() {
     await page.locator('.d9-empty:visible').waitFor();
     await page.getByRole('button', { name: 'Ver todos' }).click();
     await page.locator('.d9-tabs').getByRole('button', { name: 'Roles' }).click();
-    assert.equal(await page.locator('.security-role-grid article').count(), 4);
+    // Entrega 6: roles of punto 95 and credible simulated states (decision 3).
+    assert.equal(await page.locator('.security-role-grid article').count(), 8);
     await page.locator('.d9-tabs').getByRole('button', { name: 'Permisos' }).click();
     assert.equal(await page.locator('.security-permissions-table tbody tr').count(), 5);
     await page.locator('.d9-tabs').getByRole('button', { name: 'MFA' }).click();
     assert.match(
       await page.locator('#security-mfa-title').locator('xpath=ancestor::section[1]').innerText(),
-      /No implementada/
+      /Activado/
     );
     await page.locator('.d9-tabs').getByRole('button', { name: 'Sesiones' }).click();
     assert.match(
@@ -386,7 +407,7 @@ async function testSecurity() {
         .locator('#security-sessions-title')
         .locator('xpath=ancestor::section[1]')
         .innerText(),
-      /no crea ni registra sesiones/
+      /Activa/
     );
     await page.locator('.d9-tabs').getByRole('button', { name: 'Auditoría' }).click();
     assert.ok(
@@ -402,7 +423,7 @@ async function testSecurity() {
         .locator('#security-backups-title')
         .locator('xpath=ancestor::section[1]')
         .innerText(),
-      /No existe en este mockup/
+      /08\/11\/2026 02:00[\s\S]*Correcto[\s\S]*Automático/
     );
     await page.setViewportSize({ width: 390, height: 844 });
     await noOverflow();
@@ -428,7 +449,8 @@ async function testAdministration() {
       1
     );
     assert.equal(await page.locator('.admin-company-brand img:visible').count(), 1);
-    assert.equal(await page.locator('.d9-tabs button').count(), 3);
+    // Entrega 6: six sections of punto 101.
+    assert.equal(await page.locator('.d9-tabs button').count(), 6);
     await page.locator('.d9-tabs').getByRole('tab', { name: 'Catálogos' }).click();
     assert.equal(
       await page.locator('.admin-catalog-menu button').count(),
@@ -443,7 +465,7 @@ async function testAdministration() {
     await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
     await page
       .locator('.admin-catalog-menu button')
-      .filter({ hasText: 'Clientes ficticios' })
+      .filter({ hasText: 'Clientes' })
       .click();
     assert.equal(
       await page.locator('.admin-catalog-layout table tbody tr').count(),

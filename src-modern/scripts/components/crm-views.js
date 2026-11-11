@@ -1,4 +1,4 @@
-import { activeVariant, isModuleEnabled } from '../config/variants.js';
+import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
 import { formatDate } from './project-views.js';
@@ -6,6 +6,8 @@ import { formatMoney, writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
 const allowed = isModuleEnabled('crm');
+// Pipeline (punto 20), in order.
+export const CRM_STAGES = ['Prospecto', 'Contactado', 'Propuesta', 'Negociación', 'Ganado', 'Perdido'];
 function normalize(value) {
   return String(value || '')
     .normalize('NFD')
@@ -29,11 +31,41 @@ export function crmWorkspace() {
     clientFilter: data.clients.some((item) => item.id === params.get('client'))
       ? params.get('client')
       : '',
-    statusFilter: ['Prospección', 'Propuesta', 'Negociación', 'Ganado', 'Perdido'].includes(
-      params.get('status')
-    )
-      ? params.get('status')
-      : '',
+    statusFilter: CRM_STAGES.includes(params.get('status')) ? params.get('status') : '',
+    stages: CRM_STAGES,
+    stageOverrides: {},
+    stageOf(item) {
+      return this.stageOverrides[item.id] || item.status;
+    },
+    columnItems(stage) {
+      return this.filtered.filter((item) => this.stageOf(item) === stage);
+    },
+    columnTotal(stage) {
+      return this.columnItems(stage).reduce((sum, item) => sum + item.estimatedAmount, 0);
+    },
+    get pipelineAmount() {
+      return this.opportunities
+        .filter((item) => !['Ganado', 'Perdido'].includes(this.stageOf(item)))
+        .reduce((sum, item) => sum + item.estimatedAmount, 0);
+    },
+    get weightedAmount() {
+      return this.opportunities
+        .filter((item) => !['Ganado', 'Perdido'].includes(this.stageOf(item)))
+        .reduce((sum, item) => sum + (item.estimatedAmount * (item.probability || 0)) / 100, 0);
+    },
+    // Local demo actions (punto 22); the base records do not change.
+    markStage(item, stage) {
+      this.stageOverrides = { ...this.stageOverrides, [item.id]: stage };
+      try {
+        localStorage.setItem(variantStorageKey('crm-stages'), JSON.stringify(this.stageOverrides));
+      } catch {
+        /* optional */
+      }
+      window.AdminApp?.notificationManager?.success(`${item.id} marcada como ${stage.toLowerCase()}.`);
+    },
+    logActivity(item) {
+      window.AdminApp?.notificationManager?.info(`Actividad registrada en ${item.id}: ${item.nextAction}.`);
+    },
     selectedId: data.opportunities.some((item) => item.id === params.get('id'))
       ? params.get('id')
       : data.opportunities[0]?.id || '',
@@ -48,14 +80,14 @@ export function crmWorkspace() {
           (!term ||
             normalize(`${item.id} ${item.name} ${clientName(item.clientId)}`).includes(term)) &&
           (!this.clientFilter || item.clientId === this.clientFilter) &&
-          (!this.statusFilter || item.status === this.statusFilter)
+          (!this.statusFilter || this.stageOf(item) === this.statusFilter)
       );
     },
     get selected() {
       return this.filtered.find((item) => item.id === this.selectedId) || this.filtered[0] || null;
     },
     get wonCount() {
-      return this.opportunities.filter((item) => item.status === 'Ganado').length;
+      return this.opportunities.filter((item) => this.stageOf(item) === 'Ganado').length;
     },
     get linkedCount() {
       return this.opportunities.filter((item) => item.budgetId && item.projectId).length;
@@ -91,6 +123,16 @@ export function crmWorkspace() {
     },
     init() {
       if (!allowed) return;
+      try {
+        const saved = JSON.parse(localStorage.getItem(variantStorageKey('crm-stages')) || '{}');
+        if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+          this.stageOverrides = Object.fromEntries(
+            Object.entries(saved).filter(([, stage]) => CRM_STAGES.includes(stage))
+          );
+        }
+      } catch {
+        /* optional */
+      }
       document.title = `CRM · ${activeVariant.company.shortName}`;
       if (this.selected?.projectId) writeProjectId(this.selected.projectId);
     },

@@ -1,5 +1,5 @@
 import { Modal } from 'bootstrap';
-import { activeVariant, variantStorageKey } from '../config/variants.js';
+import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getDocument, getDocuments, getProject } from '../data/mock-data.js';
 import { formatDate } from './project-views.js';
@@ -15,6 +15,28 @@ const moduleNames = {
   warehouse: 'Almacén',
   costs: 'Costos',
 };
+// Project folder structure (punto 76). Each folder lists the documents of
+// the modules that produce it; the rest are empty folders of the structure.
+const FOLDERS = [
+  { id: 'contratos', label: 'Contratos', modules: [] },
+  { id: 'presupuestos', label: 'Presupuestos', modules: ['budgets'] },
+  { id: 'compras', label: 'Compras', modules: ['purchases', 'warehouse'] },
+  { id: 'rendiciones', label: 'Rendiciones', modules: ['expenses'] },
+  { id: 'personal', label: 'Personal', modules: ['personnel'] },
+  { id: 'planos', label: 'Planos', modules: [] },
+  { id: 'informes', label: 'Informes', modules: ['costs'] },
+  { id: 'entregables', label: 'Entregables', modules: [] },
+];
+
+// Documents the system generates on its own (punto 80).
+const GENERATED = [
+  { type: 'Presupuesto', label: 'Cotización PDF', module: 'budgets' },
+  { type: 'Orden de compra', label: 'Orden de compra', module: 'purchases' },
+  { type: 'Rendición', label: 'Resumen de rendición', module: 'expenses' },
+  { type: 'Tareo', label: 'Reporte de tareo', module: 'personnel' },
+  { type: 'Ajuste de costo', label: 'Reporte de costos', module: 'costs' },
+];
+
 function normalize(value) {
   return String(value || '')
     .normalize('NFD')
@@ -79,6 +101,35 @@ export function documentsWorkspace() {
       : '',
     moduleFilter: moduleNames[params.get('module')] ? params.get('module') : '',
     typeFilter: (params.get('type') || '').slice(0, 80),
+    responsibleFilter: data.workers.some((item) => item.id === params.get('responsible'))
+      ? params.get('responsible')
+      : '',
+    folderFilter: FOLDERS.some((item) => item.id === params.get('folder'))
+      ? params.get('folder')
+      : '',
+    get responsibles() {
+      const ids = [...new Set(this.documents.map((item) => item.responsibleId).filter(Boolean))];
+      return ids.map((id) => ({ id, name: workerName(id) }));
+    },
+    get folders() {
+      const scoped = this.documents.filter(
+        (item) => !this.projectFilter || item.projectId === this.projectFilter
+      );
+      return FOLDERS.map((folder) => ({
+        ...folder,
+        count: scoped.filter((item) => folder.modules.includes(item.module)).length,
+      }));
+    },
+    get generated() {
+      return GENERATED.filter((item) => isModuleEnabled(item.module)).map((item) => ({
+        ...item,
+        count: this.documents.filter((doc) => doc.module === item.module).length,
+      }));
+    },
+    selectFolder(id) {
+      this.folderFilter = this.folderFilter === id ? '' : id;
+      this.updateUrl();
+    },
     formatDate,
     workerName,
     projectName,
@@ -95,6 +146,9 @@ export function documentsWorkspace() {
               ).includes(term)) &&
             (!this.projectFilter || item.projectId === this.projectFilter) &&
             (!this.moduleFilter || item.module === this.moduleFilter) &&
+            (!this.responsibleFilter || item.responsibleId === this.responsibleFilter) &&
+            (!this.folderFilter ||
+              FOLDERS.find((folder) => folder.id === this.folderFilter)?.modules.includes(item.module)) &&
             (!this.typeFilter || item.type === this.typeFilter)
         )
         .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
@@ -106,6 +160,8 @@ export function documentsWorkspace() {
           project: this.projectFilter,
           module: this.moduleFilter,
           type: this.typeFilter,
+          responsible: this.responsibleFilter,
+          folder: this.folderFilter,
         })
       );
       query.set('id', item.id);
@@ -127,6 +183,8 @@ export function documentsWorkspace() {
       this.projectFilter = '';
       this.moduleFilter = '';
       this.typeFilter = '';
+      this.responsibleFilter = '';
+      this.folderFilter = '';
       this.updateUrl();
     },
   };
@@ -189,6 +247,11 @@ export function documentDetail() {
       window.document.title = `${this.document.id} · Documento · ${activeVariant.company.shortName}`;
       writeProjectId(this.document.projectId);
       this.extras = loadVersions(this.document);
+    },
+    download() {
+      window.AdminApp?.notificationManager?.info(
+        `Descarga simulada de ${document.fileName}: en el sistema real se descargaría el archivo vigente.`
+      );
     },
     openPreview() {
       Modal.getOrCreateInstance(window.document.getElementById('document-preview-modal')).show();
