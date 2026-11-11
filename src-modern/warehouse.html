@@ -41,37 +41,40 @@
 <h1>Almacén y Materiales</h1>
                     <p class="shell-page-subtitle">Inventario, movimientos y Kardex de ejemplo.</p>
                   </div>
-                  <a class="btn btn-outline-primary" href="./purchases.html"
-                    >Ver órdenes de compra</a
-                  >
+                  <div class="workspace-heading-actions">
+                    <a class="btn btn-outline-secondary" href="./purchases.html">Ver órdenes de compra</a>
+                    <button class="btn btn-primary" type="button" @click="openRegister()">
+                      + Registrar movimiento
+                    </button>
+                  </div>
                 </div>
                 <div class="alert alert-info warehouse-note" role="note">
                   <i class="bi bi-info-circle" aria-hidden="true"></i>
                   Las OC de inventario registran recepción y stock; solo las salidas (SAL) se imputan como costo del proyecto. La devolución DEV-015 ya está
                   descontada del costo neto de SAL-015.
                 </div>
-                <div class="warehouse-kpis">
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Materiales</small><strong x-text="materials.length"></strong>
-                    </div>
+                <section class="kpi-strip kpi-strip--4 warehouse-kpis" aria-label="Indicadores de almacén">
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Materiales</span>
+                    <span class="kpi-value" x-count="materials.length"></span>
+                    <span class="kpi-foot" x-text="`${warehouses.length} almacenes`"></span>
                   </div>
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Entradas</small><strong x-text="entryCount"></strong>
-                    </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Entradas</span>
+                    <span class="kpi-value" x-count="entryCount"></span>
+                    <span class="kpi-foot">Desde OC recibidas</span>
                   </div>
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Salidas</small><strong x-text="issueCount"></strong>
-                    </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Salidas</span>
+                    <span class="kpi-value" x-count="issueCount"></span>
+                    <span class="kpi-foot">Imputadas a proyectos</span>
                   </div>
-                  <div class="card">
-                    <div class="card-body">
-                      <small>Stock bajo</small><strong x-text="lowCount"></strong>
-                    </div>
+                  <div class="kpi">
+                    <span class="kpi-label"><i class="kpi-dot" :class="lowCount ? 'kpi-dot--bad' : 'kpi-dot--s4'" aria-hidden="true"></i>Stock bajo</span>
+                    <span class="kpi-value" x-count="lowCount"></span>
+                    <span class="kpi-foot"><span class="pill" :class="lowCount ? 'pill-bad' : 'pill-good'" x-text="lowCount ? 'bajo el mínimo' : 'sin alertas'"></span></span>
                   </div>
-                </div>
+                </section>
                 <nav class="warehouse-tabs" aria-label="Secciones de almacén">
                   <template x-for="item in tabs" :key="item[0]"
                     ><button
@@ -184,6 +187,86 @@
                     </div>
                   </div>
                 </section>
+                <section class="card" x-show="tab === 'almacenes'" x-cloak aria-labelledby="warehouse-stores-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <h2 id="warehouse-stores-title">Almacenes</h2>
+                      <span class="workspace-caption" x-text="`${warehouses.length} almacenes`"></span>
+                    </div>
+                    <div class="table-responsive data-table">
+                      <table class="table align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Almacén</th>
+                            <th scope="col">Ubicación</th>
+                            <th scope="col">Responsable</th>
+                            <th scope="col" class="text-end">Materiales</th>
+                            <th scope="col">Estado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="store in warehouses" :key="store.id">
+                            <tr>
+                              <td class="data-code" x-text="store.id"></td>
+                              <td x-text="store.name"></td>
+                              <td x-text="store.location"></td>
+                              <td x-text="workerName(store.responsibleId)"></td>
+                              <td class="text-end" x-text="warehouseMaterials(store).length"></td>
+                              <td>
+                                <span
+                                  class="badge status-badge"
+                                  :class="warehouseMaterials(store).some((item) => item.stock < item.minimum) ? 'status-badge--warning' : 'status-badge--success'"
+                                  x-text="warehouseMaterials(store).some((item) => item.stock < item.minimum) ? 'Stock bajo' : 'Operativo'"
+                                ></span>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="card mb-3" x-show="tab === 'movimientos' && demoMovements.length" x-cloak aria-labelledby="warehouse-demo-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <h2 id="warehouse-demo-title">Registrados en esta demostración</h2>
+                        <p class="workspace-caption">No cambian el stock, el Kardex ni los costos del proyecto.</p>
+                      </div>
+                    </div>
+                    <div class="table-responsive data-table">
+                      <table class="table align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th scope="col">Documento</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Material</th>
+                            <th scope="col" class="text-end">Cantidad</th>
+                            <th scope="col">Origen / destino</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <template x-for="item in demoMovements" :key="item.id">
+                            <tr>
+                              <td class="data-code" x-text="item.id"></td>
+                              <td x-text="movementTypeLabel(item.type)"></td>
+                              <td x-text="formatDate(item.date)"></td>
+                              <td x-text="materialName(item.materialId)"></td>
+                              <td class="text-end" x-text="item.quantity"></td>
+                              <td
+                                x-text="item.type === 'transfer' ? `${warehouseName(item.fromWarehouse)} → ${warehouseName(item.toWarehouse)}` : item.type === 'entry' ? (item.purchaseId || supplierName(item.supplierId)) : item.projectId"
+                              ></td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
                 <section
                   class="card"
                   x-show="tab === 'inventario'"
@@ -401,6 +484,117 @@
                 </section>
               </div></template
             >
+            <div class="modal fade" id="warehouse-register-modal" tabindex="-1" aria-labelledby="warehouse-register-title" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <form class="modal-content" id="warehouse-register-form" @submit.prevent="saveMovement()" @input="movementError = ''">
+                  <div class="modal-header">
+                    <h2 class="modal-title" id="warehouse-register-title">Registrar movimiento</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="workspace-tabs" role="tablist" aria-label="Tipo de movimiento">
+                      <template x-for="kind in movementTypes" :key="kind.id">
+                        <button type="button" role="tab" :aria-selected="String(movementForm.type === kind.id)" :class="movementForm.type === kind.id ? 'active' : ''" @click="movementForm.type = kind.id" x-text="kind.label"></button>
+                      </template>
+                    </div>
+                    <div class="alert alert-danger" role="alert" x-show="movementError" x-cloak x-text="movementError"></div>
+                    <div class="row g-3">
+                      <div class="col-md-4">
+                        <label class="form-label" for="move-date">Fecha</label>
+                        <input id="move-date" class="form-control" type="date" x-model="movementForm.date" required />
+                      </div>
+                      <div class="col-md-5">
+                        <label class="form-label" for="move-material">Material</label>
+                        <select id="move-material" class="form-select" x-model="movementForm.materialId" required>
+                          <option value="">Seleccionar</option>
+                          <template x-for="item in materials" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${item.name} (${item.stock} ${item.unit})`"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label" for="move-quantity">Cantidad</label>
+                        <input id="move-quantity" class="form-control" type="number" min="1" step="1" x-model.number="movementForm.quantity" required />
+                      </div>
+
+                      <template x-if="movementForm.type === 'entry'">
+                        <div class="row g-3 m-0 p-0">
+                          <div class="col-md-5">
+                            <label class="form-label" for="move-purchase">OC recibida</label>
+                            <select id="move-purchase" class="form-select" x-model="movementForm.purchaseId" required>
+                              <option value="">Seleccionar</option>
+                              <template x-for="item in inventoryPurchases" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${supplierName(item.supplierId)}`"></option></template>
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <label class="form-label" for="move-cost">Costo unitario</label>
+                            <input id="move-cost" class="form-control" type="number" min="0" step="0.01" x-model.number="movementForm.unitCost" required />
+                          </div>
+                          <div class="col-md-4">
+                            <label class="form-label" for="move-document">Guía / documento</label>
+                            <input id="move-document" class="form-control" type="text" maxlength="40" x-model="movementForm.document" placeholder="GR-0001" />
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="movementForm.type === 'issue' || movementForm.type === 'return'">
+                        <div class="row g-3 m-0 p-0">
+                          <div class="col-md-6">
+                            <label class="form-label" for="move-project">Proyecto</label>
+                            <select id="move-project" class="form-select" x-model="movementForm.projectId" required>
+                              <option value="">Seleccionar</option>
+                              <template x-for="item in projects" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option></template>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label" for="move-reason">Motivo</label>
+                            <input id="move-reason" class="form-control" type="text" maxlength="120" x-model="movementForm.reason" required />
+                          </div>
+                          <div class="col-md-6" x-show="movementForm.type === 'return'">
+                            <label class="form-label" for="move-condition">Estado del material</label>
+                            <select id="move-condition" class="form-select" x-model="movementForm.condition">
+                              <option>Buen estado</option>
+                              <option>Dañado</option>
+                              <option>Para revisión</option>
+                            </select>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="movementForm.type === 'transfer'">
+                        <div class="row g-3 m-0 p-0">
+                          <div class="col-md-6">
+                            <label class="form-label" for="move-from">Almacén origen</label>
+                            <select id="move-from" class="form-select" x-model="movementForm.fromWarehouse">
+                              <template x-for="store in warehouses" :key="store.id"><option :value="store.id" x-text="store.name"></option></template>
+                            </select>
+                          </div>
+                          <div class="col-md-6">
+                            <label class="form-label" for="move-to">Almacén destino</label>
+                            <select id="move-to" class="form-select" x-model="movementForm.toWarehouse">
+                              <template x-for="store in warehouses" :key="store.id"><option :value="store.id" x-text="store.name"></option></template>
+                            </select>
+                          </div>
+                        </div>
+                      </template>
+
+                      <div class="col-md-6">
+                        <label class="form-label" for="move-responsible">Responsable</label>
+                        <select id="move-responsible" class="form-select" x-model="movementForm.responsibleId" required>
+                          <option value="">Seleccionar</option>
+                          <template x-for="item in workers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                        </select>
+                      </div>
+                    </div>
+                    <p class="workspace-caption mt-3" x-show="movementForm.type === 'issue'">
+                      En el sistema real la salida imputa el costo al proyecto. En esta demostración queda registrada sin cambiar los costos.
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
             <div
               class="modal fade"
               id="warehouse-movement-modal"

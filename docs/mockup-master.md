@@ -428,3 +428,13 @@ tres variantes bajo la subruta de Pages.
   costos, compromisos ni saldos.
 - **Rendiciones:** "Mis Rendiciones" en móvil, captura simulada (foto, imagen, PDF) y
   filtros de responsable y periodo.
+
+## Mejoras — Entrega 5: personal, almacén y costos (10/11/2026)
+
+- **Costos por Proyecto:** franja de KPI, trazabilidad del costo en grande y alertas de
+  ejecución frente al avance y por partida, calculadas desde los datos.
+- **Personal y Tareo:** biometría con estado simulado creíble (ZKTeco Conectado),
+  incidencia de marcación no identificada, asignación de trabajadores y el recorrido
+  Biométrico → Asistencia → Tareo → Proyecto → Costo laboral.
+- **Almacén:** pestaña Almacenes y registro de entradas, salidas, devoluciones y
+  transferencias de demostración que no alteran stock ni costos.

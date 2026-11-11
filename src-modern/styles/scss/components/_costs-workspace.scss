@@ -14,31 +14,6 @@
   .costs-project-selector .card-body > p {
     flex: 1 1 240px;
   }
-  .costs-kpis {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.7rem;
-    margin-bottom: 1rem;
-  }
-  .costs-kpis .card-body {
-    display: grid;
-    align-content: start;
-    gap: 0.35rem;
-    min-height: 145px;
-    padding: 1rem;
-  }
-  .costs-kpis small {
-    color: var(--bs-secondary-color);
-  }
-  .costs-kpis strong {
-    font-size: clamp(1.1rem, 1.5vw, 1.55rem);
-    overflow-wrap: anywhere;
-  }
-  .costs-kpis span {
-    color: var(--bs-secondary-color);
-    font-size: var(--fs-xs);
-    line-height: 1.4;
-  }
   .costs-commit-summary {
     display: flex;
     gap: 0.65rem;
@@ -188,9 +163,6 @@
 }
 
 @media (max-width: 1199.98px) {
-  .costs-workspace .costs-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .costs-workspace .costs-operation-facts {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -201,12 +173,6 @@
   }
   .costs-workspace .costs-project-selector .card-body > p {
     margin-top: 0.7rem;
-  }
-  .costs-workspace .costs-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .costs-workspace .costs-kpis .card-body {
-    min-height: 135px;
   }
   .costs-workspace .costs-operation-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -225,12 +191,6 @@
   }
 }
 @media (max-width: 479.98px) {
-  .costs-workspace .costs-kpis strong {
-    font-size: var(--fs-lg);
-  }
-  .costs-workspace .costs-kpis span {
-    font-size: var(--fs-xs);
-  }
   .costs-workspace .costs-operation-facts {
     grid-template-columns: 1fr 1fr;
   }

@@ -190,31 +190,43 @@ async function variantFlow(variant, workerId, projectId) {
 
 try {
   await variantFlow('surtec-peti', 'PER-002', 'PR-2027-001');
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(url('surtec-peti', 'personnel.html?tab=biometria'));
   await ready();
-  assert.ok(
-    (await page.locator('#personnel-biometrics-title').locator('..').innerText()).includes(
-      'No hay dispositivo conectado'
-    )
-  );
-  assert.ok(
-    !(await page.locator('#personnel-biometrics-title').locator('..').innerText()).includes(
-      'ZKTeco'
-    )
-  );
+  // Entrega 5 (decision 3): credible simulated device state instead of a disclaimer.
+  const biometrics = await page.locator('#personnel-biometrics-title').locator('..').innerText();
+  assert.match(biometrics, /ZKTeco · Oficina Principal/);
+  assert.match(biometrics, /Conectado/);
+  assert.match(biometrics, /08\/11\/2026 18:05/);
+  assert.match(biometrics, /Incompleto/);
+  await page.getByRole('button', { name: 'Sincronizar ahora' }).click();
+  await page.getByText('Sincronización completada.').first().waitFor();
   await page.locator('.personnel-tabs').getByRole('button', { name: 'Incidencias' }).click();
-  assert.equal(await page.locator('.personnel-incident').count(), 1);
-  await page.getByRole('button', { name: 'Justificar' }).click();
+  assert.equal(await page.locator('.personnel-incident').count(), 2);
+  assert.match(await page.locator('.personnel-incident').nth(1).innerText(), /No identificado/);
+  await page.getByRole('button', { name: 'Justificar' }).first().click();
   await page.locator('#personnel-incident-modal').waitFor({ state: 'visible' });
   await page.getByRole('button', { name: 'Guardar decisión' }).click();
   await page.locator('#personnel-incident-modal .alert-danger').waitFor({ state: 'visible' });
   await page.locator('#incident-reason').fill('Salida omitida en el escenario de ejemplo');
   await page.getByRole('button', { name: 'Guardar decisión' }).click();
   await page.locator('#personnel-incident-modal').waitFor({ state: 'hidden' });
-  assert.ok((await page.locator('.personnel-incident').innerText()).includes('Revisada'));
+  assert.ok((await page.locator('.personnel-incident').first().innerText()).includes('Revisada'));
   assert.ok(
-    (await page.locator('.personnel-incident').innerText()).includes('Usuario de demostración')
+    (await page.locator('.personnel-incident').first().innerText()).includes('Usuario de demostración')
   );
+  // Asignar trabajador (punto 50): local demo assignment appears in the table.
+  await page.locator('.personnel-tabs').getByRole('button', { name: 'Asignaciones' }).click();
+  await page.getByRole('button', { name: 'Asignar trabajador' }).click();
+  await page.locator('#personnel-assign-modal').waitFor({ state: 'visible' });
+  await page.selectOption('#assign-worker', 'PER-005');
+  await page.selectOption('#assign-project', 'PR-2027-003');
+  await page.fill('#assign-role', 'Supervisor de obra');
+  await page.fill('#assign-from', '2027-05-01');
+  await page.fill('#assign-to', '2027-06-30');
+  await page.locator('#personnel-assign-form').getByRole('button', { name: 'Asignar' }).click();
+  await page.locator('#personnel-assign-modal').waitFor({ state: 'hidden' });
+  await page.getByText('Supervisor de obra').first().waitFor();
   await variantFlow('jy-pmi', 'PER-JY-002', 'PR-JY-001');
   await page.goto(url('jy-demo', 'personnel.html'));
   await ready();

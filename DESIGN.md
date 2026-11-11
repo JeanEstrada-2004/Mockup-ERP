@@ -134,6 +134,8 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.form-section-title`, `.budget-chapter`, `.budget-summary`, `.totals-list` | Formularios largos y totales |
 | `.record-timeline` | Historial de un registro |
 | `.my-expenses`, `.expense-capture` | Rendiciones en móvil y captura simulada |
+| `.flow-steps` | Tira de proceso (Biométrico → … → Costo laboral) |
+| `.bio-device` | Estado de un dispositivo o integración |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema
 visual", fuera del menú; se abre por URL). Es la referencia para las Entregas 3–7.

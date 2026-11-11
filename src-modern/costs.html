@@ -55,43 +55,45 @@
                 </p>
               </div>
             </div>
-            <div class="costs-kpis">
-              <section class="card">
-                <div class="card-body">
-                  <small>Presupuesto total</small
-                  ><strong x-text="formatMoney(financials.budgetAmount)"></strong
-                  ><span>Importe aprobado de referencia del proyecto.</span>
-                </div>
-              </section>
-              <section class="card">
-                <div class="card-body">
-                  <small>Costo comprometido total</small
-                  ><strong x-text="formatMoney(financials.committedCost)"></strong
-                  ><span>Ejecutado + OC aprobadas aún abiertas; no se suman dos veces.</span>
-                </div>
-              </section>
-              <section class="card">
-                <div class="card-body">
-                  <small>Costo ejecutado</small
-                  ><strong x-text="formatMoney(financials.executedCost)"></strong
-                  ><span>Suma de las cinco fuentes con operación y documento.</span>
-                </div>
-              </section>
-              <section class="card">
-                <div class="card-body">
-                  <small>Saldo frente al ejecutado</small
-                  ><strong x-text="formatMoney(financials.availableAgainstExecuted)"></strong
-                  ><span>Presupuesto − ejecutado. Es el «Disponible» de la especificación.</span>
-                </div>
-              </section>
-              <section class="card">
-                <div class="card-body">
-                  <small>Ejecución presupuestal</small
-                  ><strong x-text="`${financials.executionPercent} %`"></strong
-                  ><span>Ejecutado ÷ presupuesto.</span>
-                </div>
-              </section>
-            </div>
+            <section class="kpi-strip kpi-strip--5 costs-kpis" aria-label="Indicadores de costo del proyecto">
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Presupuesto</span>
+                <span class="kpi-value" x-count.money="financials.budgetAmount"></span>
+                <span class="kpi-foot">Importe aprobado del proyecto</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label"
+                  ><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Comprometido
+                  <button
+                    class="help-tip"
+                    type="button"
+                    data-tip="Costo comprometido: Órdenes y obligaciones ya aprobadas que todavía pueden no haberse ejecutado."
+                    aria-label="Qué es el costo comprometido"
+                  >
+                    ?
+                  </button></span
+                >
+                <span class="kpi-value" x-count.money="financials.committedCost"></span>
+                <span class="kpi-foot">Ejecutado + OC aprobadas abiertas</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Ejecutado</span>
+                <span class="kpi-value" x-count.money="financials.executedCost"></span>
+                <span class="kpi-foot">Suma de las fuentes con operación</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Disponible</span>
+                <span class="kpi-value" x-count.money="financials.availableAgainstExecuted"></span>
+                <span class="kpi-foot">Presupuesto − ejecutado</span>
+              </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot" :class="executionAhead ? 'kpi-dot--bad' : ''" aria-hidden="true"></i>Ejecución</span>
+                <span class="kpi-value" x-count.pct="financials.executionPercent"></span>
+                <span class="kpi-foot"
+                  ><span class="pill" :class="executionAhead ? 'pill-bad' : 'pill-good'" x-text="`Avance físico ${project.progressPercent} %`"></span
+                ></span>
+              </div>
+            </section>
             <div class="costs-commit-summary alert alert-info" role="note">
               <i class="bi bi-info-circle" aria-hidden="true"></i>
               <span
@@ -116,6 +118,16 @@
                 ></div
               ></template>
             </div>
+            <section class="panel mb-4" aria-labelledby="cost-flow-title">
+              <div class="panel-head">
+                <div>
+                  <h2 id="cost-flow-title" x-text="`Trazabilidad del costo · ${projectId}`"></h2>
+                  <p>Cada sol ejecutado llega al proyecto desde una fuente y una operación identificables.</p>
+                </div>
+                <a :href="projectHref">Ver proyecto →</a>
+              </div>
+              <div id="cost-flow-chart"></div>
+            </section>
             <div class="row g-3 mb-3">
               <div class="col-xl-6">
                 <section class="card h-100" aria-labelledby="cost-chart-title">

@@ -1,10 +1,11 @@
 import { statusClass } from '../utils/status.js';
 import { Modal } from 'bootstrap';
-import { activeVariant } from '../config/variants.js';
+import { activeVariant, variantStorageKey } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
 import {
   addManualTimesheet,
+  BIOMETRIC_DEVICE,
   baseAttendance,
   baseTimesheets,
   hoursBetween,
@@ -40,6 +41,16 @@ const normalize = (value) =>
 const workerName = (id) => data.workers.find((item) => item.id === id)?.name || '—';
 const projectName = (id) => getProject(data, id)?.name || '—';
 const workerHref = (id) => moduleHref('personnel', id);
+const assignmentKey = variantStorageKey('demo-assignments');
+
+function loadDemoAssignments() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(assignmentKey) || '[]');
+    return Array.isArray(parsed) ? parsed.filter((item) => item?.workerId && item?.projectId) : [];
+  } catch {
+    return [];
+  }
+}
 const projectHref = (id) => moduleHref('projects', id);
 const costHref = (operationId) => moduleHref('costs', `COST-${operationId}`);
 const hoursLabel = (value) =>
@@ -62,7 +73,7 @@ export function personnelWorkspace() {
     hasBiometrics,
     workers: data.workers,
     projects: data.projects,
-    assignments: personnelAssignments(data),
+    assignments: [...personnelAssignments(data), ...loadDemoAssignments()],
     attendance: [],
     timesheets: [],
     incidents: [],
@@ -140,6 +151,53 @@ export function personnelWorkspace() {
         (item) =>
           this.matches(item) &&
           (!this.sourceOperationFilter || item.operationId === this.sourceOperationFilter)
+      );
+    },
+    device: BIOMETRIC_DEVICE,
+    assignForm: { workerId: '', projectId: '', role: '', from: '', to: '', percent: 50 },
+    get totalHours() {
+      return this.timesheets.reduce((sum, item) => sum + (Number(item.hours) || 0), 0);
+    },
+    get deviceErrors() {
+      return this.incidents.filter((item) => item.status === 'Pendiente').length;
+    },
+    bioHours(hours) {
+      if (hours === null || hours === undefined) return '—';
+      const whole = Math.floor(hours);
+      return `${whole}h ${String(Math.round((hours - whole) * 60)).padStart(2, '0')}m`;
+    },
+    bioStatus(item) {
+      return item.end ? 'Correcto' : 'Incompleto';
+    },
+    workerProjects(workerId) {
+      return [...new Set(this.assignments.filter((item) => item.workerId === workerId).map((item) => item.projectId))];
+    },
+    syncDevice() {
+      window.AdminApp?.notificationManager?.success('Sincronización completada.');
+    },
+    openAssign(workerId = '') {
+      this.assignForm = { workerId, projectId: '', role: '', from: '', to: '', percent: 50 };
+      Modal.getOrCreateInstance(document.getElementById('personnel-assign-modal')).show();
+    },
+    saveAssign() {
+      const element = document.getElementById('personnel-assign-form');
+      if (!element?.reportValidity()) return;
+      const entry = {
+        id: `ASG-DEMO-${Date.now()}`,
+        ...this.assignForm,
+        percent: Number(this.assignForm.percent) || 0,
+        demo: true,
+      };
+      const current = [...loadDemoAssignments(), entry];
+      try {
+        localStorage.setItem(assignmentKey, JSON.stringify(current));
+      } catch {
+        /* optional */
+      }
+      this.assignments = [...this.assignments.filter((item) => !item.demo), ...current];
+      Modal.getOrCreateInstance(document.getElementById('personnel-assign-modal')).hide();
+      window.AdminApp?.notificationManager?.success(
+        `${workerName(entry.workerId)} asignado a ${entry.projectId} (demostración).`
       );
     },
     get filteredIncidents() {

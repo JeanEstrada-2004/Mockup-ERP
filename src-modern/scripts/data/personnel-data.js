@@ -173,6 +173,15 @@ export function manualAttendance(data) {
   }));
 }
 
+// Biometric device shown in Personal › Biometría (punto 53). Simulated
+// state: "Conectado" is a credible demo status (decision 3), not a live link.
+export const BIOMETRIC_DEVICE = {
+  name: 'ZKTeco · Oficina Principal',
+  status: 'Conectado',
+  lastSync: '2026-11-08T18:05:00',
+  records: 43,
+};
+
 export function incidentRows(data, includeBiometrics = false) {
   if (!includeBiometrics) return [];
   const attendance = baseAttendance(data, true).find((item) => item.id === 'ASI-INC-001');
@@ -195,6 +204,22 @@ export function incidentRows(data, includeBiometrics = false) {
       action: actions['INC-001']?.action || null,
       responsible: actions['INC-001']?.responsible || null,
       actionDate: actions['INC-001']?.actionDate || null,
+      simulated: true,
+    },
+    {
+      // Punto 92: a fingerprint read the device could not match to a worker.
+      id: 'INC-002',
+      attendanceId: null,
+      workerId: null,
+      projectId: attendance.projectId,
+      date: attendance.date,
+      type: 'No identificado',
+      note: 'Marcación 07:58 con huella sin trabajador asociado.',
+      status: actions['INC-002']?.status || 'Pendiente',
+      reason: actions['INC-002']?.reason || '',
+      action: actions['INC-002']?.action || null,
+      responsible: actions['INC-002']?.responsible || null,
+      actionDate: actions['INC-002']?.actionDate || null,
       simulated: true,
     },
   ];

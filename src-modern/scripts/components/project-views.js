@@ -107,6 +107,51 @@ function recentActivity() {
     }));
 }
 
+/**
+ * Data for charts/flow.js (Trazabilidad del costo) of one project: sources →
+ * executed → budget (executed / committed / available). Shared by the Panel,
+ * Costos and the visual reference so the three always show the same figures.
+ */
+export function projectFlowData(projectId) {
+  const financials = getProjectFinancials(data, projectId);
+  if (!financials) return null;
+  const operations = getProjectOperations(data, projectId);
+  return {
+    sources: sourceRows(projectId).map((item) => ({
+      label: item.label,
+      value: item.amount,
+      color: COST_SOURCE_TOKENS[item.id],
+      detail: operations
+        .filter((operation) => operation.costSource === item.id)
+        .map((operation) => operation.id)
+        .slice(0, 4)
+        .join(', '),
+    })),
+    executed: financials.executedCost,
+    budget: financials.budgetAmount,
+    segments: [
+      {
+        label: 'Ejecutado',
+        value: financials.executedCost,
+        color: '--brand',
+        note: `${financials.executionPercent.toString().replace('.', ',')} % del presupuesto`,
+      },
+      {
+        label: 'Comprometido',
+        value: financials.outstandingCommitments,
+        color: '--s3',
+        note: 'Órdenes aprobadas aún sin recepción',
+      },
+      {
+        label: 'Disponible',
+        value: Math.max(0, financials.availableToCommit),
+        color: '--track',
+        note: 'Para nuevos compromisos',
+      },
+    ],
+  };
+}
+
 export function dashboardView() {
   const projects = data.projects.filter((project) =>
     ['Activo', 'En riesgo'].includes(project.status)
@@ -194,42 +239,7 @@ export function dashboardView() {
       return this.approvals.slice(0, 3);
     },
     get flowData() {
-      const financials = this.currentFinancials;
-      const operations = getProjectOperations(data, this.selectedProjectId);
-      return {
-        sources: this.sources.map((item) => ({
-          label: item.label,
-          value: item.amount,
-          color: COST_SOURCE_TOKENS[item.id],
-          detail: operations
-            .filter((operation) => operation.costSource === item.id)
-            .map((operation) => operation.id)
-            .slice(0, 4)
-            .join(', '),
-        })),
-        executed: financials.executedCost,
-        budget: financials.budgetAmount,
-        segments: [
-          {
-            label: 'Ejecutado',
-            value: financials.executedCost,
-            color: '--brand',
-            note: `${financials.executionPercent.toString().replace('.', ',')} % del presupuesto`,
-          },
-          {
-            label: 'Comprometido',
-            value: financials.outstandingCommitments,
-            color: '--s3',
-            note: 'Aprobado aún sin ejecutar',
-          },
-          {
-            label: 'Disponible',
-            value: Math.max(0, financials.availableToCommit),
-            color: '--track',
-            note: 'Para nuevos compromisos',
-          },
-        ],
-      };
+      return projectFlowData(this.selectedProjectId);
     },
     init() {
       const saved = document.querySelector('#global-project-select')?.value;

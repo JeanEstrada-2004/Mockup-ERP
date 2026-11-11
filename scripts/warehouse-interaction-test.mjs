@@ -75,7 +75,8 @@ try {
   await page.goto(url('surtec-peti', 'warehouse.html'));
   await ready();
   assert.equal(await page.locator('.sidebar-nav [data-module="warehouse"].active').count(), 1);
-  assert.equal(await page.locator('.warehouse-tabs button').count(), 6);
+  // Entrega 5: + Almacenes tab.
+  assert.equal(await page.locator('.warehouse-tabs button').count(), 7);
   const inventory = page.locator('#warehouse-inventory-title').locator('..').locator('..');
   assert.equal(await inventory.locator('table tbody tr').count(), 2);
   assert.match(
@@ -205,7 +206,31 @@ try {
       await screenshot('surtec-movement-mobile');
     }
   }
+  // Entrega 5: Almacenes tab and the register-movement modal (demonstration only).
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(url('surtec-peti', 'warehouse.html'));
+  await ready();
+  await page.evaluate(() => localStorage.removeItem('mockup-erp:surtec-peti:demo-movements'));
+  await page.reload();
+  await ready();
+  await page.locator('.warehouse-tabs').getByRole('button', { name: 'Almacenes' }).click();
+  assert.equal(await page.locator('#warehouse-stores-title').locator('xpath=ancestor::section').locator('tbody tr').count(), 2);
+  await page.getByRole('button', { name: '+ Registrar movimiento' }).click();
+  await page.locator('#warehouse-register-modal').waitFor({ state: 'visible' });
+  await page.locator('#warehouse-register-modal').getByRole('tab', { name: 'Salida' }).click();
+  await page.selectOption('#move-material', 'MAT-002');
+  await page.fill('#move-quantity', '500');
+  await page.selectOption('#move-project', 'PR-2027-001');
+  await page.fill('#move-reason', 'Instalación de puntos de red');
+  await page.selectOption('#move-responsible', { index: 1 });
+  await page.locator('#warehouse-register-form').getByRole('button', { name: 'Registrar' }).click();
+  await page.getByText(/La cantidad supera el stock disponible/).waitFor();
+  await page.fill('#move-quantity', '5');
+  await page.locator('#warehouse-register-form').getByRole('button', { name: 'Registrar' }).click();
+  await page.locator('#warehouse-register-modal').waitFor({ state: 'hidden' });
+  await page.locator('.warehouse-tabs').getByRole('button', { name: 'Movimientos' }).click();
+  assert.match(await page.locator('#warehouse-demo-title').locator('xpath=ancestor::section').innerText(), /SAL-DEMO-001/);
+
   for (const variant of ['jy-pmi', 'jy-demo']) {
     await page.goto(url(variant, 'index.html'));
     await ready();

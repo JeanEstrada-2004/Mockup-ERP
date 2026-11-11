@@ -133,3 +133,28 @@ export function warehouseStock(data, materialId) {
 export function warehouseMovement(data, movementId) {
   return warehouseMovements(data).find((item) => item.id === movementId) || null;
 }
+
+// Almacenes (punto 57). Only "Principal" holds stock in the mock data; the
+// project site store is the usual transfer destination. This module ships in
+// every build: no record ids or client names of one company here.
+export const WAREHOUSES = [
+  {
+    id: 'ALM-01',
+    name: 'Principal',
+    location: 'Sede central · Arequipa',
+    responsibleId: 'PER-004',
+  },
+  {
+    id: 'ALM-02',
+    name: 'Almacén de obra',
+    location: 'Campamento del proyecto en ejecución',
+    responsibleId: 'PER-001',
+  },
+];
+
+export const MOVEMENT_TYPES = [
+  { id: 'entry', label: 'Entrada' },
+  { id: 'issue', label: 'Salida' },
+  { id: 'return', label: 'Devolución' },
+  { id: 'transfer', label: 'Transferencia' },
+];

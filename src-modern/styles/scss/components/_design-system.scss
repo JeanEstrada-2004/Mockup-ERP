@@ -1551,9 +1551,19 @@ a.kpi:focus-visible {
   letter-spacing: -0.03em;
 }
 
-.costs-kpis span {
+.costs-kpis:not(.kpi-strip) span {
   color: var(--ink-3);
   font-size: var(--fs-xs);
+}
+
+// Module KPI rows converted to the strip: override their legacy grids.
+.kpi-strip.costs-kpis,
+.kpi-strip.personnel-kpis,
+.kpi-strip.warehouse-kpis {
+  display: grid;
+  grid-template-columns: repeat(var(--kpi-count, 4), minmax(0, 1fr));
+  gap: 0;
+  margin-bottom: 20px;
 }
 
 // --------------------------------------------------------------------------
@@ -3004,6 +3014,139 @@ button.kpi {
   }
 }
 
+// Compact process strip: Biométrico → Asistencia → Tareo → Proyecto → Costo.
+.flow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--ink-2);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+
+    i {
+      color: var(--accent);
+    }
+  }
+
+  li {
+    position: relative;
+  }
+
+  // Arrow between steps, outside the pills.
+  li + li {
+    margin-left: 18px;
+  }
+
+  li + li::before {
+    content: '→';
+    position: absolute;
+    left: -17px;
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+}
+
+// Biometric device status card (Personal › Biometría).
+.bio-device {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+
+  .pill i {
+    font-size: 0.5rem;
+  }
+}
+
+.bio-device-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--rail);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.bio-device-name {
+  min-width: 0;
+
+  strong,
+  small {
+    display: block;
+  }
+
+  small {
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+  }
+}
+
+.bio-device-figures {
+  display: flex;
+  gap: 18px;
+  margin: 0;
+
+  dt {
+    color: var(--ink-3);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.personnel-cards--phone {
+  display: none !important;
+}
+
+@media (max-width: 767.98px) {
+  .bio-device {
+    grid-template-columns: auto minmax(0, 1fr);
+
+    > .pill,
+    .bio-device-figures,
+    > .btn {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+  }
+
+  .personnel-cards--phone {
+    display: grid !important;
+  }
+
+  .personnel-cards--phone ~ * .data-table,
+  #personnel-biometrics-title ~ .data-table {
+    display: none;
+  }
+}
+
 // Hidden presentation switcher (components/presentation-switcher.js).
 .shell-presentation {
   cursor: default;
@@ -3426,9 +3569,25 @@ button.kpi {
   }
 }
 
+@media (max-width: 1199.98px) {
+  .kpi-strip.costs-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    .kpi:nth-child(4) {
+      border-left: 0;
+    }
+    .kpi:nth-child(n + 4) {
+      border-top: 1px solid var(--line);
+    }
+  }
+}
+
 @media (max-width: 767.98px) {
   .kpi-strip,
-  .kpi-strip:not(.kpi-strip--4) {
+  .kpi-strip:not(.kpi-strip--4),
+  .kpi-strip.costs-kpis,
+  .kpi-strip.personnel-kpis,
+  .kpi-strip.warehouse-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
     .kpi:nth-child(3n + 1) {

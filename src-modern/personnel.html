@@ -40,24 +40,35 @@
                 <i class="bi bi-plus-circle" aria-hidden="true"></i> Registrar tareo manual
               </button>
             </div>
-            <div class="personnel-kpis">
-              <div class="card">
-                <div class="card-body">
-                  <small>Trabajadores</small><strong x-text="workers.length"></strong>
-                </div>
+            <section class="kpi-strip kpi-strip--4 personnel-kpis" aria-label="Indicadores de personal">
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Trabajadores</span>
+                <span class="kpi-value" x-count="workers.length"></span>
+                <span class="kpi-foot">Personal de los proyectos</span>
               </div>
-              <div class="card">
-                <div class="card-body">
-                  <small>Asignaciones de ejemplo</small
-                  ><strong x-text="assignments.length"></strong>
-                </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Asignaciones</span>
+                <span class="kpi-value" x-count="assignments.length"></span>
+                <span class="kpi-foot">Trabajador · proyecto · rol</span>
               </div>
-              <div class="card">
-                <div class="card-body">
-                  <small>Jornadas mostradas</small><strong x-text="timesheets.length"></strong>
-                </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s3" aria-hidden="true"></i>Jornadas</span>
+                <span class="kpi-value" x-count="timesheets.length"></span>
+                <span class="kpi-foot" x-text="`${bioHours(totalHours)} registradas`"></span>
               </div>
-            </div>
+              <div class="kpi">
+                <span class="kpi-label"><i class="kpi-dot" :class="deviceErrors ? 'kpi-dot--bad' : 'kpi-dot--s4'" aria-hidden="true"></i>Incidencias</span>
+                <span class="kpi-value" x-count="deviceErrors"></span>
+                <span class="kpi-foot"><span class="pill" :class="deviceErrors ? 'pill-warn' : 'pill-good'" x-text="deviceErrors ? 'por revisar' : 'sin pendientes'"></span></span>
+              </div>
+            </section>
+            <ol class="flow-steps" aria-label="Del registro de asistencia al costo del proyecto">
+              <li x-show="hasBiometrics"><i class="bi bi-fingerprint" aria-hidden="true"></i>Biométrico</li>
+              <li><i class="bi bi-calendar-check" aria-hidden="true"></i>Asistencia</li>
+              <li><i class="bi bi-clock" aria-hidden="true"></i>Tareo</li>
+              <li><i class="bi bi-folder2-open" aria-hidden="true"></i>Proyecto</li>
+              <li><i class="bi bi-cash-coin" aria-hidden="true"></i>Costo laboral</li>
+            </ol>
             <nav class="personnel-tabs" aria-label="Secciones de Personal">
               <template x-for="item in tabs" :key="item[0]"
                 ><button
@@ -181,7 +192,8 @@
                         <th scope="col">Cargo</th>
                         <th scope="col">Área</th>
                         <th scope="col">Estado</th>
-                        <th scope="col">Ficha</th>
+                        <th scope="col">Proyectos</th>
+                        <th scope="col" class="data-actions-col"><span class="visually-hidden">Acciones</span></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -197,7 +209,24 @@
                           <td>
                             <span class="badge text-bg-success" x-text="worker.status"></span>
                           </td>
-                          <td><a :href="workerHref(worker.id)">Abrir →</a></td>
+                          <td>
+                            <template x-for="projectId in workerProjects(worker.id)" :key="projectId"
+                              ><a class="data-code d-block" :href="projectHref(projectId)" x-text="projectId"></a
+                            ></template>
+                            <span class="text-muted" x-show="!workerProjects(worker.id).length">—</span>
+                          </td>
+                          <td class="data-actions-col">
+                            <div class="dropdown">
+                              <button class="btn data-row-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false" :aria-label="`Acciones de ${worker.name}`">
+                                <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" :href="workerHref(worker.id)"><i class="bi bi-eye" aria-hidden="true"></i>Ver ficha</a></li>
+                                <li><button class="dropdown-item" type="button" @click="openAssign(worker.id)"><i class="bi bi-person-plus" aria-hidden="true"></i>Asignar a proyecto</button></li>
+                                <li><a class="dropdown-item" :href="`${workerHref(worker.id)}#tareo`"><i class="bi bi-clock-history" aria-hidden="true"></i>Historial de tareo</a></li>
+                              </ul>
+                            </div>
+                          </td>
                         </tr></template
                       >
                     </tbody>
@@ -228,8 +257,13 @@
             >
               <div class="card-body">
                 <div class="shell-section-header">
-                  <h2 id="personnel-assignments-title">Asignaciones a proyectos</h2>
-                  <span class="workspace-caption">Porcentajes referenciales</span>
+                  <div>
+                    <h2 id="personnel-assignments-title">Asignaciones a proyectos</h2>
+                    <span class="workspace-caption">Porcentajes referenciales</span>
+                  </div>
+                  <button class="btn btn-outline-primary btn-sm" type="button" @click="openAssign()">
+                    <i class="bi bi-person-plus" aria-hidden="true"></i> Asignar trabajador
+                  </button>
                 </div>
                 <div class="table-responsive personnel-data-table">
                   <table class="table table-hover align-middle mb-0">
@@ -363,7 +397,8 @@
                           x-text="item.status"
                         ></span></span
                       ><small x-text="item.id"></small
-                      ><a :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a
+                      ><a x-show="item.workerId" :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a
+                      ><span x-show="!item.workerId" class="text-muted" x-text="item.note"></span
                       ><a
                         :href="projectHref(item.projectId)"
                         x-text="projectName(item.projectId)"
@@ -496,29 +531,57 @@
               aria-labelledby="personnel-biometrics-title"
             >
               <div class="card-body">
-                <h2 id="personnel-biometrics-title">Sincronización biométrica</h2>
-                <div class="alert alert-warning" role="note">
-                  Escenario visual de marcaciones. No hay dispositivo conectado, sincronización,
-                  identificación biométrica ni captura real.
-                </div>
-                <div class="personnel-bio-summary">
-                  <div><small>Origen</small><strong>Marcaciones de ejemplo</strong></div>
-                  <div>
-                    <small>Registros visibles</small><strong x-text="biometricRows.length"></strong>
+                <h2 id="personnel-biometrics-title">Sincronización Biométrica</h2>
+                <div class="bio-device">
+                  <span class="bio-device-icon"><i class="bi bi-fingerprint" aria-hidden="true"></i></span>
+                  <div class="bio-device-name">
+                    <strong x-text="device.name"></strong>
+                    <small x-text="`Última sincronización ${formatDate(device.lastSync.slice(0, 10))} ${device.lastSync.slice(11, 16)}`"></small>
                   </div>
-                  <div>
-                    <small>Incidencias</small><strong x-text="filteredIncidents.length"></strong>
-                  </div>
+                  <span class="pill pill-good"><i class="bi bi-circle-fill" aria-hidden="true"></i><span x-text="device.status"></span></span>
+                  <dl class="bio-device-figures">
+                    <div><dt>Registros</dt><dd x-text="device.records"></dd></div>
+                    <div><dt>Errores</dt><dd x-text="deviceErrors"></dd></div>
+                  </dl>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" @click="syncDevice()">
+                    <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Sincronizar ahora
+                  </button>
                 </div>
-                <div class="personnel-cards personnel-cards--always">
+                <div class="table-responsive data-table mb-3">
+                  <table class="table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Trabajador</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Entrada</th>
+                        <th scope="col">Salida</th>
+                        <th scope="col" class="text-end">Horas</th>
+                        <th scope="col">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in biometricRows" :key="item.id">
+                        <tr>
+                          <td><a :href="workerHref(item.workerId)" x-text="workerName(item.workerId)"></a></td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td x-text="item.start"></td>
+                          <td x-text="item.end || '—'"></td>
+                          <td class="text-end" x-text="bioHours(item.hours)"></td>
+                          <td><span class="badge status-badge" :class="item.end ? 'status-badge--success' : 'status-badge--warning'" x-text="bioStatus(item)"></span></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="personnel-cards personnel-cards--phone">
                   <template x-for="item in biometricRows" :key="item.id"
                     ><div class="personnel-mobile-card">
                       <span
                         ><strong x-text="workerName(item.workerId)"></strong
                         ><span
                           class="badge"
-                          :class="statusClass(item.status)"
-                          x-text="item.status"
+                          :class="item.end ? 'status-badge status-badge--success' : 'status-badge status-badge--warning'"
+                          x-text="bioStatus(item)"
                         ></span></span
                       ><small
                         x-text="`${formatDate(item.date)} · ${item.start} – ${item.end || 'sin salida'}`"
@@ -593,6 +656,55 @@
                 </p>
               </div>
             </section>
+
+            <div class="modal fade" id="personnel-assign-modal" tabindex="-1" aria-labelledby="personnel-assign-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" id="personnel-assign-form" @submit.prevent="saveAssign()">
+                  <div class="modal-header">
+                    <h2 class="modal-title" id="personnel-assign-title">Asignar trabajador</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <label class="form-label" for="assign-worker">Trabajador</label>
+                        <select id="assign-worker" class="form-select" x-model="assignForm.workerId" required>
+                          <option value="">Seleccionar</option>
+                          <template x-for="item in workers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label" for="assign-project">Proyecto</label>
+                        <select id="assign-project" class="form-select" x-model="assignForm.projectId" required>
+                          <option value="">Seleccionar</option>
+                          <template x-for="item in projects" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option></template>
+                        </select>
+                      </div>
+                      <div class="col-sm-8">
+                        <label class="form-label" for="assign-role">Rol</label>
+                        <input id="assign-role" class="form-control" type="text" maxlength="60" x-model="assignForm.role" placeholder="Técnico de campo" required />
+                      </div>
+                      <div class="col-sm-4">
+                        <label class="form-label" for="assign-percent">% asignación</label>
+                        <input id="assign-percent" class="form-control" type="number" min="5" max="100" step="5" x-model.number="assignForm.percent" required />
+                      </div>
+                      <div class="col-sm-6">
+                        <label class="form-label" for="assign-from">Desde</label>
+                        <input id="assign-from" class="form-control" type="date" x-model="assignForm.from" required />
+                      </div>
+                      <div class="col-sm-6">
+                        <label class="form-label" for="assign-to">Hasta</label>
+                        <input id="assign-to" class="form-control" type="date" x-model="assignForm.to" :min="assignForm.from" required />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Asignar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
 
             <div
               class="modal fade"

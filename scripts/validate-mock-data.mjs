@@ -175,7 +175,8 @@ for (const variantId of VARIANT_IDS) {
   }
   assert.equal(
     incidentRows(data, config.enabledModules.includes('biometrics')).length,
-    config.enabledModules.includes('biometrics') ? 1 : 0
+    // Entrega 5: falta de salida (INC-001) + marcación no identificada (INC-002, punto 92).
+    config.enabledModules.includes('biometrics') ? 2 : 0
   );
   assert.equal(
     laborCostRows(data).length,

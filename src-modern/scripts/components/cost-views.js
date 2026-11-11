@@ -2,7 +2,7 @@ import { activeVariant, isModuleEnabled } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
 import { COST_SOURCES, projectCostModel } from '../data/cost-data.js';
-import { formatDate } from './project-views.js';
+import { formatDate, projectFlowData } from './project-views.js';
 import { formatMoney, writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
@@ -27,6 +27,7 @@ export function costWorkspace() {
     sourceFilter: initialSource,
     operationId: linkedOperation?.id || '',
     budgetChart: null,
+    flowChart: null,
     formatMoney,
     formatDate,
     sourcesCatalog: COST_SOURCES,
@@ -66,17 +67,23 @@ export function costWorkspace() {
         this.sources.find((item) => item.id === this.sourceFilter)?.label || 'Todas las fuentes'
       );
     },
+    // Spending more than 5 points ahead of physical progress (same rule as
+    // "Ejecución frente al avance" in the Panel).
+    get executionAhead() {
+      return this.financials.executionPercent > (this.project?.progressPercent ?? 100) + 5;
+    },
     get alerts() {
       const alerts = [];
-      if (this.financials.executionPercent >= 80)
+      const pct = (value) => `${(Math.round(value * 10) / 10).toString().replace('.', ',')} %`;
+      if (this.executionAhead || this.financials.executionPercent >= 80)
         alerts.push({
           level: 'warning',
-          text: `La ejecución alcanza ${this.financials.executionPercent} % del presupuesto de ${this.project.id}.`,
+          text: `${this.project.id} ha consumido ${pct(this.financials.executionPercent)} del presupuesto con ${this.project.progressPercent} % de avance.`,
         });
       for (const part of this.parts.filter((item) => item.executionPercent > 100))
         alerts.push({
           level: 'warning',
-          text: `${part.label} supera su asignación referencial en ${formatMoney(-part.variation)}.`,
+          text: `Partida ${part.label} supera el presupuesto referencial en ${pct(part.executionPercent - 100)} (${formatMoney(-part.variation)}).`,
         });
       if (this.financials.availableToCommit < 0)
         alerts.push({
@@ -174,7 +181,22 @@ export function costWorkspace() {
       if (this.operationId) next.searchParams.set('operation', this.operationId);
       history.replaceState(null, '', next);
     },
+    async renderFlow() {
+      const element = document.getElementById('cost-flow-chart');
+      const flowData = projectFlowData(this.projectId);
+      if (!element || !flowData) return;
+      if (this.flowChart) {
+        this.flowChart.update(flowData);
+        return;
+      }
+      const { render } = await import('../charts/flow.js');
+      this.flowChart = render(element, flowData, {
+        height: 300,
+        label: `Trazabilidad del costo de ${this.projectId}: fuentes, ejecutado y presupuesto`,
+      });
+    },
     async renderChart() {
+      this.renderFlow();
       const element = document.getElementById('cost-budget-chart');
       if (!element || !this.financials) return;
       const { render } = await import('../charts/bars.js');

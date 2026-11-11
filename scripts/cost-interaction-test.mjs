@@ -76,6 +76,8 @@ async function checkVariant(variant, projectId) {
   await ready();
   assert.equal(await page.locator('.sidebar-nav [data-module="costs"].active').count(), 1);
   assert.equal(await page.locator('#costs-project').inputValue(), projectId);
+  // Entrega 5: KPI figures count up (~650 ms) and percentages use a decimal comma.
+  await page.waitForTimeout(900);
   const kpis = await page.locator('.costs-kpis').innerText();
   for (const value of [
     financials.budgetAmount,
@@ -91,7 +93,8 @@ async function checkVariant(variant, projectId) {
       )
     );
   }
-  assert.ok(kpis.includes(`${financials.executionPercent} %`));
+  assert.ok(kpis.includes(`${financials.executionPercent.toFixed(1).replace('.', ',')} %`));
+  await page.locator('#cost-flow-chart .chart-svg').waitFor();
   await page.locator('#cost-budget-chart .chart-svg rect').first().waitFor();
   assert.equal(await page.locator('.costs-source-row').count(), 5);
   assert.equal(
@@ -221,10 +224,10 @@ try {
   assert.match(await page.locator('.costs-alerts').innerText(), /85.9 %/);
   await page.locator('#costs-project').selectOption('PR-2027-001');
   assert.equal(await page.locator('#costs-project').inputValue(), 'PR-2027-001');
-  assert.match(await page.locator('.costs-kpis').innerText(), /112 450/);
+  await page.waitForFunction(() => document.querySelector('.costs-kpis').innerText.includes('112 450'));
   assert.match(page.url(), /project=PR-2027-001/);
   await page.locator('#costs-project').selectOption('PR-2027-002');
-  assert.match(await page.locator('.costs-kpis').innerText(), /82 500/);
+  await page.waitForFunction(() => document.querySelector('.costs-kpis').innerText.includes('82 500'));
   await page.setViewportSize({ width: 768, height: 900 });
   await noOverflow();
   await page.setViewportSize({ width: 390, height: 844 });

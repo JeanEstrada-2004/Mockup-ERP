@@ -4,6 +4,8 @@ import { moduleHref } from '../config/modules.js';
 import { formatAmount } from '../data/commercial-data.js';
 import { getDataForVariant } from '../data/mock-data.js';
 import {
+  MOVEMENT_TYPES,
+  WAREHOUSES,
   movementNames,
   warehouseMovements,
   warehouseOpening,
@@ -11,6 +13,7 @@ import {
 } from '../data/warehouse-data.js';
 import { formatDate } from './project-views.js';
 import { writeProjectId } from './shell.js';
+import { variantStorageKey } from '../config/variants.js';
 
 const data = getDataForVariant(activeVariant);
 const allowed = isModuleEnabled('warehouse');
@@ -21,7 +24,37 @@ const tabs = [
   ['salidas', 'Salidas'],
   ['devoluciones', 'Devoluciones'],
   ['kardex', 'Kardex'],
+  ['almacenes', 'Almacenes'],
 ];
+const demoMovementKey = variantStorageKey('demo-movements');
+
+function loadDemoMovements() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(demoMovementKey) || '[]');
+    return Array.isArray(parsed) ? parsed.filter((item) => item?.id && item?.materialId) : [];
+  } catch {
+    return [];
+  }
+}
+
+function emptyMovement(type = 'entry') {
+  return {
+    type,
+    date: new Date().toISOString().slice(0, 10),
+    materialId: '',
+    quantity: 1,
+    unitCost: 0,
+    supplierId: '',
+    purchaseId: '',
+    projectId: '',
+    reason: '',
+    condition: 'Buen estado',
+    fromWarehouse: 'ALM-01',
+    toWarehouse: 'ALM-02',
+    document: '',
+    responsibleId: '',
+  };
+}
 const tabTypes = { entradas: 'entry', salidas: 'issue', devoluciones: 'return' };
 
 function normalize(value) {
@@ -72,6 +105,56 @@ export function warehouseWorkspace() {
       ? params.get('project')
       : '',
     lowOnly: params.get('low') === '1',
+    warehouses: WAREHOUSES,
+    movementTypes: MOVEMENT_TYPES,
+    suppliers: data.suppliers,
+    workers: data.workers,
+    demoMovements: allowed ? loadDemoMovements() : [],
+    movementForm: emptyMovement(),
+    movementError: '',
+    get inventoryPurchases() {
+      return data.operations.filter((item) => item.type === 'purchase' && item.inventoryLine);
+    },
+    warehouseName(id) {
+      return WAREHOUSES.find((item) => item.id === id)?.name || '—';
+    },
+    warehouseMaterials(warehouse) {
+      return this.materials.filter((item) => item.warehouse === warehouse.name);
+    },
+    movementTypeLabel(type) {
+      return MOVEMENT_TYPES.find((item) => item.id === type)?.label || type;
+    },
+    openRegister(type = 'entry') {
+      this.movementForm = emptyMovement(type);
+      this.movementError = '';
+      Modal.getOrCreateInstance(document.getElementById('warehouse-register-modal')).show();
+    },
+    saveMovement() {
+      const element = document.getElementById('warehouse-register-form');
+      if (!element?.reportValidity()) return;
+      const form = this.movementForm;
+      const material = this.materials.find((item) => item.id === form.materialId);
+      if (['issue', 'transfer'].includes(form.type) && material && form.quantity > material.stock) {
+        this.movementError = `La cantidad supera el stock disponible de ${material.name} (${material.stock} ${material.unit}).`;
+        return;
+      }
+      const prefix = { entry: 'ENT', issue: 'SAL', return: 'DEV', transfer: 'TRF' }[form.type];
+      const entry = {
+        ...JSON.parse(JSON.stringify(form)),
+        id: `${prefix}-DEMO-${String(this.demoMovements.length + 1).padStart(3, '0')}`,
+        demo: true,
+      };
+      this.demoMovements = [...this.demoMovements, entry];
+      try {
+        localStorage.setItem(demoMovementKey, JSON.stringify(this.demoMovements));
+      } catch {
+        /* optional */
+      }
+      Modal.getOrCreateInstance(document.getElementById('warehouse-register-modal')).hide();
+      window.AdminApp?.notificationManager?.success(
+        `${this.movementTypeLabel(form.type)} ${entry.id} registrada (demostración: no cambia stock ni costos).`
+      );
+    },
     spotlight: record,
     selectedMovement: null,
     formatDate,

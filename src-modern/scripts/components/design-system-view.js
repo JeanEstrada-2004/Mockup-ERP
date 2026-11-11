@@ -15,7 +15,7 @@ import {
   getProjectFinancials,
   projectShortName,
 } from '../data/mock-data.js';
-import { COST_SOURCE_TOKENS } from './project-views.js';
+import { COST_SOURCE_TOKENS, projectFlowData } from './project-views.js';
 import { formatMoney } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
@@ -84,47 +84,7 @@ export function designSystemView() {
       });
     },
     flowData() {
-      const financials = this.focusFinancials;
-      const bySource = getCostBySource(data, this.focusProjectId);
-      const operations = data.operations.filter(
-        (operation) => operation.projectId === this.focusProjectId && operation.costSource
-      );
-      return {
-        sources: Object.keys(SOURCE_NAMES)
-          .filter((id) => bySource[id])
-          .map((id) => ({
-            label: SOURCE_NAMES[id],
-            value: bySource[id],
-            color: COST_SOURCE_TOKENS[id],
-            detail: operations
-              .filter((operation) => operation.costSource === id)
-              .map((operation) => operation.id)
-              .slice(0, 4)
-              .join(', '),
-          })),
-        executed: financials.executedCost,
-        budget: financials.budgetAmount,
-        segments: [
-          {
-            label: 'Ejecutado',
-            value: financials.executedCost,
-            color: '--brand',
-            note: `${financials.executionPercent.toString().replace('.', ',')} % del presupuesto`,
-          },
-          {
-            label: 'Comprometido',
-            value: financials.outstandingCommitments,
-            color: '--s3',
-            note: 'Órdenes aprobadas aún sin recepción',
-          },
-          {
-            label: 'Disponible',
-            value: Math.max(0, financials.availableToCommit),
-            color: '--track',
-            note: 'Para nuevos compromisos',
-          },
-        ],
-      };
+      return projectFlowData(this.focusProjectId);
     },
     sourceData() {
       const bySource = getCostBySource(data, this.focusProjectId);

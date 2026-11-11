@@ -19,7 +19,7 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
 | 2. Sistema visual "Red de Integración" + kit D3 | **Terminada** (10/11/2026) | `Entrega 2: sistema visual Red de Integración y kit D3` | Ver "Notas de la Entrega 2" |
 | 3. Panel General, Proyectos y Ficha Integral | **Terminada** (10/11/2026) | `Entrega 3: panel, proyectos y ficha integral` | Ver "Notas de la Entrega 3" |
 | 4. Aprobaciones, Rendiciones, Presupuestos, Compras | **Terminada** (10/11/2026) | `Entrega 4: aprobaciones, rendiciones, presupuestos y compras` | Ver "Notas de la Entrega 4" |
-| 5. Personal, Almacén y Costos | Pendiente | — | — |
+| 5. Personal, Almacén y Costos | **Terminada** (10/11/2026) | `Entrega 5: personal, almacén y costos` | Ver "Notas de la Entrega 5" |
 | 6. Documentos, Reportes, BI, CRM, Integraciones, Seguridad, Administración | Pendiente | — | — |
 | 7. Cierre: quitar ApexCharts y Metis, recorridos, verificación final | Pendiente | — | — |
 
@@ -149,6 +149,36 @@ Los prompts están en `docs/prompts/` (protocolo común en `docs/prompts/README.
   tabla de Proyectos antes de que terminara de cerrarse el modal de alta (el fondo tapaba
   la tabla); ahora espera el cierre. Dos corridas completas seguidas pasan. Si reaparece el
   `deepEqual` intermitente de la auditoría, revisar esperas similares.
+
+### Notas de la Entrega 5 (para las siguientes)
+
+- **Costos:** franja de 5 KPI (Presupuesto, Comprometido con ayuda "?", Ejecutado,
+  Disponible, Ejecución con avance físico), flujo de trazabilidad grande
+  (`#cost-flow-chart`) y alertas derivadas: "PR-… ha consumido X % del presupuesto con
+  Y % de avance" y "Partida … supera el presupuesto referencial en Z %". Porcentajes con
+  coma decimal. Se retiraron las reglas de tarjetas de `_costs-workspace.scss`.
+- **Flujo compartido:** `projectFlowData(projectId)` en `project-views.js` alimenta Panel,
+  Costos y Sistema visual (antes había dos copias).
+- **Personal y Tareo:** franja de 4 KPI, tira Biométrico → Asistencia → Tareo → Proyecto →
+  Costo laboral (`.flow-steps`), columna Proyectos y menú ⋮, "Asignar trabajador"
+  (`demo-assignments`). Biometría con estado creíble (decisión 3): ZKTeco · Oficina
+  Principal, Conectado, 08/11/2026 18:05, 43 registros, errores = incidencias pendientes,
+  "Sincronizar ahora" y tabla Trabajador · Fecha · Entrada · Salida · Horas · Estado.
+  Nueva incidencia INC-002 "No identificado" (punto 92). Dispositivo en
+  `personnel-data.js` › `BIOMETRIC_DEVICE`.
+- **Almacén:** franja de KPI, pestaña Almacenes (`WAREHOUSES`) y modal "Registrar
+  movimiento" (entrada desde OC, salida a proyecto con control de stock, devolución con
+  estado del material, transferencia entre almacenes) guardado en `demo-movements`; no
+  cambia stock, Kardex ni costos.
+- **Para la Entrega 6:** Integraciones aún dice "Biometría · No configurada" mientras
+  Personal muestra "ZKTeco Conectado"; alinear con `BIOMETRIC_DEVICE` y el error del
+  punto 92 ("2 registros biométricos no pudieron asociarse…") con enlace a Incidencias.
+- **Regla de builds:** los módulos de `data/` que no son `surtec.js`/`jy.js` se incluyen en
+  todas las variantes; no escribir allí códigos ni nombres de una empresa (la auditoría
+  lo detecta).
+- **Pruebas cambiadas (intencional):** `personnel` (dispositivo, 2 incidencias,
+  asignación), `warehouse` (7 pestañas, modal), `costs` (conteo animado, coma decimal,
+  flujo), `validate-mock-data` (2 incidencias en PETI).
 
 ## Decisiones confirmadas por el usuario (10/11/2026)
 
