@@ -22,15 +22,18 @@
             <nav aria-label="Ubicación">
               <ol class="breadcrumb shell-breadcrumb">
                 <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Costos por Proyecto</li>
+                <li class="breadcrumb-item active" aria-current="page"><!-- IF costTreatment=true -->Costos y Control Contable<!-- ELSE -->Costos por Proyecto<!-- /IF --></li>
               </ol>
             </nav>
             <div class="shell-page-heading">
               <div>
-<h1>Costos por Proyecto</h1>
+<!-- IF costTreatment=true --><h1>Costos y Control Contable</h1>
+                <p class="shell-page-subtitle">
+                  Costo real por proyecto, su tratamiento formal y su origen en cada operación.
+                </p><!-- ELSE --><h1>Costos por Proyecto</h1>
                 <p class="shell-page-subtitle">
                   Presupuesto, compromisos y ejecución vinculados a sus operaciones de origen.
-                </p>
+                </p><!-- /IF -->
               </div>
               <a class="btn btn-outline-primary" :href="projectHref">Abrir ficha del proyecto</a>
             </div>
@@ -90,7 +93,8 @@
                 <span class="kpi-label"><i class="kpi-dot" :class="executionAhead ? 'kpi-dot--bad' : ''" aria-hidden="true"></i>Ejecución</span>
                 <span class="kpi-value" x-count.pct="financials.executionPercent"></span>
                 <span class="kpi-foot"
-                  ><span class="pill" :class="executionAhead ? 'pill-bad' : 'pill-good'" x-text="`Avance físico ${project.progressPercent} %`"></span
+                  ><span x-show="hasProgress" class="pill" :class="executionAhead ? 'pill-bad' : 'pill-good'" x-text="`Avance físico ${project.progressPercent} %`"></span
+                  ><span x-show="!hasProgress">Del presupuesto del proyecto</span
                 ></span>
               </div>
             </section>
@@ -192,6 +196,7 @@
                 </section>
               </div>
             </div>
+            <!-- IF costTreatment=true --><!-- INCLUDE cost-treatment --><!-- /IF -->
             <section class="card mb-3" aria-labelledby="cost-operations-title">
               <div class="card-body">
                 <div class="shell-section-header costs-section-header">
@@ -233,7 +238,7 @@
                               type="button"
                               class="btn btn-link btn-sm p-0"
                               @click="selectOperation(item)"
-                              x-text="item.operationId"
+                              x-text="item.label"
                             ></button>
                           </td>
                           <td x-text="formatDate(item.date)"></td>
@@ -259,7 +264,7 @@
                   <template x-for="item in visibleEntries" :key="item.id"
                     ><article class="costs-mobile-card">
                       <div>
-                        <strong x-text="item.operationId"></strong
+                        <strong x-text="item.label"></strong
                         ><span x-text="formatMoney(item.amount)"></span>
                       </div>
                       <small
@@ -293,7 +298,7 @@
               <div class="card-body" x-show="selectedEntry">
                 <div class="shell-section-header">
                   <div>
-<h2 id="cost-operation-title" x-text="selectedEntry?.operationId"></h2>
+<h2 id="cost-operation-title" x-text="selectedEntry?.label"></h2>
                   </div>
                   <button
                     type="button"
@@ -354,6 +359,7 @@
               </div>
             </section>
             <div class="row g-3">
+              <!-- IF controlAllocation=true -->
               <div class="col-xl-7">
                 <section class="card h-100" aria-labelledby="cost-parts-title">
                   <div class="card-body">
@@ -407,7 +413,8 @@
                   </div>
                 </section>
               </div>
-              <div class="col-xl-5">
+              <!-- /IF -->
+              <div :class="hasControlParts ? 'col-xl-5' : 'col-12'">
                 <section class="card h-100" aria-labelledby="cost-commitments-title">
                   <div class="card-body">
                     <div class="shell-section-header">

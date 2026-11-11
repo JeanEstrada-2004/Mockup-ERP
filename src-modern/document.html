@@ -49,9 +49,11 @@
                   <a class="btn btn-outline-primary" :href="backHref" x-text="`← ${backLabel}`"></a>
                 </div>
                 <div class="d9-actions mb-3">
-                  <button type="button" class="btn btn-primary" @click="openPreview()">
+                  <!-- IF documentViewer=true --><button type="button" class="btn btn-primary" @click="toggleFull()">
                     <i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa</button
-                  ><button type="button" class="btn btn-outline-secondary" @click="download()">
+                  ><!-- ELSE --><button type="button" class="btn btn-primary" @click="openPreview()">
+                    <i class="bi bi-eye me-1" aria-hidden="true"></i>Vista previa</button
+                  ><!-- /IF --><button type="button" class="btn btn-outline-secondary" @click="download()">
                     <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar</button
                   ><button type="button" class="btn btn-outline-primary" @click="openVersion()">
                     <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Nueva versión</button
@@ -61,6 +63,18 @@
                     >Abrir operación de origen</a
                   ><a class="btn btn-outline-secondary" :href="projectHref">Abrir proyecto</a>
                 </div>
+                <!-- IF documentViewer=true -->
+                <section class="card mb-3 document-viewer" aria-labelledby="document-viewer-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: ver el documento (comprobante, captura, PDF) junto a sus datos, sin abrir otra aplicación.">
+                        <h2 id="document-viewer-title">Vista del documento</h2>
+                      </div>
+                    </div>
+                    <!-- INCLUDE evidence-viewer -->
+                  </div>
+                </section>
+                <!-- /IF -->
                 <div class="row g-3">
                   <div class="col-xl-7">
                     <section class="card h-100" aria-labelledby="document-facts-title">

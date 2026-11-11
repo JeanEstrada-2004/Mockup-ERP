@@ -1,6 +1,6 @@
 # Realineamiento funcional de J&Y Demo — auditoría y propuesta
 
-> Estado: **R1 y R2 terminadas** (11/11/2026); siguiente: R3 (Costos, Documentos, Pendientes, Inicio). Análisis sobre `6b7dc4e`.
+> Estado: **R1, R2 y R3 terminadas** (11/11/2026); siguiente: R4 (Presupuestos, APU, cotizaciones, OC). Análisis sobre `6b7dc4e`.
 > Fuente de requisitos: prompt "Revisión funcional integral" del usuario (secciones 1–40),
 > resumido aquí. Este documento es la referencia para las fases R1–R6 (sección 9).
 
@@ -574,3 +574,43 @@ Preguntas originales:
 - **Para R3:** Costos muestra todavía el id técnico `R-26-NNN`; usar `operation.label`. Añadir
   J&Y Real vs. tratamiento formal y la clasificación por categoría con los gastos de las
   rendiciones.
+
+## 12. Notas de R3 (11/11/2026) — Control: Costos, Documentos, Pendientes, Inicio
+
+- **Reglas nuevas** (`DEFAULT_RULES`, Demo entre paréntesis): `approvalsMode` (`'worklist'`),
+  `physicalProgress` (`false`), `budgetAlertPercent` (`null`), `controlAllocation` (`false`),
+  `costTreatment` (`true`), `documentViewer` (`true`). Etiquetas del Demo: "Pendientes" y
+  "Costos y Control Contable". PETI y PMI conservan los valores por defecto.
+- **Costos y Control Contable** (`data/cost-treatment.js`, `partials/cost-treatment.html`):
+  cada costo ejecutado se descompone en líneas (los gastos de una rendición, una OC, el tareo o
+  un ajuste) con fuente, categoría, responsable, periodo y documento. **J&Y Real** = suma de
+  todas las líneas = costo ejecutado (validado). **Tratamiento formal**: V.V., IGV, No gravado,
+  No documentado y "Sin desglose tributario" (planilla y ajustes). Sin reglas tributarias
+  automáticas; queda por validar con Contabilidad si el IGV con crédito fiscal se resta del
+  costo real. Costos por categoría (gráfico de barras del kit) y **Consolidación** por fuente,
+  categoría, periodo, responsable o proyecto, para el proyecto o todo el portafolio, con detalle
+  que abre el gasto de origen. Sin avance físico, sin alerta del 80 % y sin el reparto
+  referencial 40/25/15/15/5. Las operaciones muestran "N.º 7-2026".
+- **Datos:** las operaciones del Demo llevan `category` y `description`; las evidencias con
+  documento de cada rendición son documentos (`getDocuments` › `evidenceItemId`); los gastos sin
+  documento no tienen documento.
+- **Documentos** (`partials/evidence-viewer.html`, compartido con la rendición): vista del
+  documento con zoom y vista ampliada. Evidencias: el comprobante; rendición: hoja con sus
+  gastos y totales; OC: orden ilustrada; otros: hoja resumen. "Abrir operación de origen" de una
+  evidencia abre su gasto.
+- **Pendientes** (`data/worklist.js`, `partials/worklist.html`): bandeja de tareas, no de
+  aprobaciones: rendiciones por revisar, observadas (con el motivo), por entregar a
+  Contabilidad, OC pendientes y documentos faltantes. Cada fila lleva a su registro con la
+  acción siguiente. El contador del encabezado y del riel cuenta todas las tareas (6 al inicio).
+- **Inicio:** "Proyecto en contexto" reemplaza "Ejecución frente al avance" (presupuesto, costo
+  J&Y Real, disponible, rendiciones, compras, personal, documentos); el bloque principal muestra
+  Pendientes. **Proyecto:** KPI de rendiciones en lugar de avance; sin avance físico en la ficha
+  ni en la lista.
+- **Plugin:** los `INCLUDE` pueden anidarse (hasta 4 niveles).
+- **Riel:** los nombres largos de módulo pasan a dos líneas en lugar de ensanchar el riel.
+- **Pruebas:** `jy-control-interaction-test.mjs` (`npm run test:jy-control`, en
+  `test:delivery10`); `validate-mock-data` comprueba el desglose de cada línea, J&Y Real =
+  ejecutado en las tres variantes y un documento por evidencia; la prueba de R2 usa el contador
+  de Pendientes.
+- **Para R4:** Presupuestos (Tipo A con partidas, APU e insumos; Tipo B de productos),
+  Productos y precios, cotizaciones y comparador, OC con cotización de origen.

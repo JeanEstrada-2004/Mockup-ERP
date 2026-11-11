@@ -79,6 +79,14 @@ export const DEFAULT_RULES = {
   // 'review': J&Y Demo (R2) — numbered per worker and year, three people,
   // evidence per expense and administrative review instead of approval.
   expenseFlow: 'approval',
+  // R3 — J&Y Demo works with a list of pending tasks, not formal approvals,
+  // and only shows rules confirmed with the company.
+  approvalsMode: 'approval', // 'worklist' → "Pendientes"
+  physicalProgress: true, // progress vs. execution comparisons
+  budgetAlertPercent: 80, // automatic budget alert; null = none
+  controlAllocation: true, // referential budget split by source (40/25/15/15/5)
+  costTreatment: false, // J&Y Real vs. formal treatment, categories, consolidation
+  documentViewer: false, // visual preview of documents and evidence
 };
 
 // Fictitious signed-in user shown in the header (punto 3).
@@ -172,8 +180,21 @@ export const VARIANTS = {
       logoRailBox: LOGO_BOXES.jyDark,
     },
     presentation: { code: 'Demo', label: 'Propuesta para J&Y' },
-    rules: { maturityTags: true, expenseFlow: 'review' },
-    labels: { purchases: 'Compras / OC' },
+    rules: {
+      maturityTags: true,
+      expenseFlow: 'review',
+      approvalsMode: 'worklist',
+      physicalProgress: false,
+      budgetAlertPercent: null,
+      controlAllocation: false,
+      costTreatment: true,
+      documentViewer: true,
+    },
+    labels: {
+      approvals: 'Pendientes',
+      purchases: 'Compras / OC',
+      costs: 'Costos y Control Contable',
+    },
     theme: {
       primary: '#334155',
       accent: '#2563EB',

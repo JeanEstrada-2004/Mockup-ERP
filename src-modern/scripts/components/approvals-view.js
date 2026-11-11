@@ -3,7 +3,7 @@
 // ==========================================================================
 
 import { Modal } from 'bootstrap';
-import { isModuleEnabled } from '../config/variants.js';
+import { activeVariant, isModuleEnabled, variantRule } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import {
   APPROVAL_TABS,
@@ -13,6 +13,9 @@ import {
   saveDecision,
 } from '../data/approval-demo.js';
 import { tableControls } from '../utils/data-table.js';
+import { WORKLIST_TABS, worklistItems } from '../data/worklist.js';
+import { getDataForVariant, getProject } from '../data/mock-data.js';
+import { formatAmount } from '../data/commercial-data.js';
 import { formatDate } from './project-views.js';
 import { formatMoney } from './shell.js';
 
@@ -24,14 +27,21 @@ export const OBSERVATION_REASONS = [
 ];
 
 /** Keeps the header and rail counters equal to the inbox (local decisions). */
+const worklistMode = variantRule('approvalsMode') === 'worklist';
+
 export function syncApprovalCounters() {
-  const count = approvalRecords().filter((item) => !loadDecisions()[item.id]).length;
+  const count = worklistMode
+    ? worklistItems(getDataForVariant(activeVariant)).length
+    : approvalRecords().filter((item) => !loadDecisions()[item.id]).length;
   document.querySelectorAll('[data-approvals-count]').forEach((badge) => {
     badge.textContent = String(count);
     badge.hidden = count === 0;
   });
   document.querySelectorAll('[data-approvals-link]').forEach((link) => {
-    link.setAttribute('aria-label', `Aprobaciones: ${count} pendientes`);
+    link.setAttribute(
+      'aria-label',
+      worklistMode ? `Pendientes: ${count}` : `Aprobaciones: ${count} pendientes`
+    );
   });
   return count;
 }
@@ -141,6 +151,53 @@ export function approvalsView() {
     undo(item) {
       this.decisions = removeDecision(item.id);
       syncApprovalCounters();
+    },
+  };
+}
+
+// Pendientes (R3, J&Y Demo): a list of tasks that link to their records.
+export function worklistView() {
+  const data = getDataForVariant(activeVariant);
+  const items = worklistItems(data);
+  const requested = new URLSearchParams(location.search).get('tab');
+  const firstWithItems = WORKLIST_TABS.find((tab) => items.some((item) => item.tab === tab.id));
+  return {
+    tabs: WORKLIST_TABS,
+    items,
+    tab: WORKLIST_TABS.some((tab) => tab.id === requested)
+      ? requested
+      : firstWithItems?.id || WORKLIST_TABS[0].id,
+    formatAmount,
+    formatDate,
+    init() {
+      document.title = `Pendientes · ${activeVariant.company.shortName}`;
+      syncApprovalCounters();
+    },
+    get currentTab() {
+      return WORKLIST_TABS.find((tab) => tab.id === this.tab);
+    },
+    get rows() {
+      return this.items
+        .filter((item) => item.tab === this.tab)
+        .sort((a, b) => a.date.localeCompare(b.date));
+    },
+    countIn(id) {
+      return this.items.filter((item) => item.tab === id).length;
+    },
+    selectTab(id) {
+      this.tab = id;
+      const next = new URL(location.href);
+      next.searchParams.set('tab', id);
+      history.replaceState(null, '', next);
+    },
+    workerName(id) {
+      return data.workers.find((item) => item.id === id)?.name || '—';
+    },
+    projectName(id) {
+      return getProject(data, id)?.name || '';
+    },
+    projectHref(item) {
+      return moduleHref('projects', item.projectId);
     },
   };
 }

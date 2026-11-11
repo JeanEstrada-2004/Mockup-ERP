@@ -1,0 +1,104 @@
+          <div class="container-fluid shell-page approvals-workspace worklist-workspace" x-data="worklistView">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Pendientes</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: bandeja de trabajo. J&amp;Y no tiene aprobaciones formales de varios niveles; cada tarea lleva a su registro.">
+                  <h1>Pendientes</h1>
+                </div>
+                <p class="shell-page-subtitle">
+                  Lo que espera a alguien y qué hacer a continuación. No son aprobaciones formales.
+                </p>
+              </div>
+            </div>
+
+            <section class="kpi-strip kpi-strip--5" aria-label="Pendientes por tipo">
+              <template x-for="item in tabs" :key="item.id">
+                <button type="button" class="kpi kpi--button" :class="{ 'is-active': tab === item.id }" @click="selectTab(item.id)">
+                  <span class="kpi-label"><i class="kpi-dot" :class="item.id === 'observed' ? 'kpi-dot--bad' : item.id === 'review' ? 'kpi-dot--s3' : ''" aria-hidden="true"></i><span x-text="item.short"></span></span>
+                  <span class="kpi-value" x-text="countIn(item.id)"></span>
+                  <span class="kpi-foot" x-text="item.foot"></span>
+                </button>
+              </template>
+            </section>
+
+            <section class="card" aria-labelledby="worklist-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="worklist-title" x-text="currentTab?.label"></h2>
+                  <span class="text-muted small" aria-live="polite" x-text="`${rows.length} pendientes · ${items.length} en total`"></span>
+                </div>
+                <div class="workspace-tabs" role="tablist" aria-label="Tipos de pendiente">
+                  <template x-for="item in tabs" :key="item.id">
+                    <button type="button" role="tab" :id="`worklist-tab-${item.id}`" :aria-selected="String(tab === item.id)" :class="tab === item.id ? 'active' : ''" @click="selectTab(item.id)">
+                      <span x-text="item.short"></span>
+                      <span class="tab-count" x-text="countIn(item.id)"></span>
+                    </button>
+                  </template>
+                </div>
+
+                <div class="table-responsive data-table d-none d-lg-block" x-show="rows.length">
+                  <table class="table table-hover align-middle mb-0 worklist-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Registro</th>
+                        <th scope="col">Qué falta</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Responsable</th>
+                        <th scope="col" class="text-end">Monto</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col" class="text-end">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="item in rows" :key="item.id">
+                        <tr>
+                          <td>
+                            <a class="data-code" :href="item.href" x-text="item.label"></a
+                            ><small class="show-block text-muted" x-text="item.kind"></small>
+                          </td>
+                          <td>
+                            <span x-text="item.title"></span
+                            ><small class="show-block text-muted" x-show="item.note" x-text="item.note"></small>
+                          </td>
+                          <td>
+                            <a class="data-code" :href="projectHref(item)" x-text="item.projectId"></a
+                            ><small class="show-block text-muted" x-text="projectName(item.projectId)"></small>
+                          </td>
+                          <td x-text="workerName(item.responsibleId)"></td>
+                          <td class="text-end data-money" x-text="formatAmount(item.amount)"></td>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td class="text-end">
+                            <a class="btn btn-primary btn-sm" :href="item.href" x-text="currentTab.action"></a>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <ul class="worklist-cards d-lg-none" x-show="rows.length">
+                  <template x-for="item in rows" :key="item.id"
+                    ><li>
+                      <a :href="item.href">
+                        <span class="worklist-card-top">
+                          <strong x-text="`${item.kind} ${item.label}`"></strong>
+                          <b x-text="formatAmount(item.amount)"></b>
+                        </span>
+                        <span x-text="item.title"></span>
+                        <small x-text="`${item.projectId} · ${workerName(item.responsibleId)} · ${formatDate(item.date)}`"></small>
+                        <span class="worklist-card-action" x-text="`${currentTab.action} →`"></span>
+                      </a>
+                    </li></template
+                  >
+                </ul>
+                <div class="empty-state" x-show="!rows.length" x-cloak>
+                  <i class="bi bi-check2-square" aria-hidden="true"></i>
+                  <p x-text="`No hay pendientes en ${currentTab ? currentTab.label.toLowerCase() : 'esta bandeja'}.`"></p>
+                </div>
+              </div>
+            </section>
+          </div>

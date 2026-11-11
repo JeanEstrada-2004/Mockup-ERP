@@ -1,0 +1,136 @@
+            <div class="row g-3 mb-3">
+              <div class="col-xl-6">
+                <section class="card h-100" aria-labelledby="cost-real-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <div class="master-title-row" data-maturity="as-is" data-maturity-note="Concepto confirmado por Contabilidad: J&amp;Y Real es el costo que realmente ocurrió, aunque no tenga sustento tributario.">
+                          <h2 id="cost-real-title">J&amp;Y Real y tratamiento formal</h2>
+                        </div>
+                        <p class="workspace-caption">El mismo costo, leído de dos maneras.</p>
+                      </div>
+                    </div>
+                    <div class="treatment-real">
+                      <span>Costo J&amp;Y Real</span>
+                      <strong x-text="formatAmount(treatment.total)"></strong>
+                      <small>Todo lo que realmente se gastó en el proyecto, con o sin comprobante.</small>
+                    </div>
+                    <div id="cost-treatment-bar" class="treatment-bar" role="img" :aria-label="treatmentLabel"></div>
+                    <dl class="treatment-list">
+                      <template x-for="column in treatmentColumns" :key="column.id"
+                        ><div :class="column.id === 'undocumented' ? 'is-undocumented' : ''">
+                          <dt><i class="kpi-dot" :style="`background: var(${column.color})`" aria-hidden="true"></i><span x-text="column.label"></span></dt>
+                          <dd x-text="formatAmount(treatment[column.id])"></dd>
+                        </div></template
+                      >
+                    </dl>
+                    <p class="workspace-caption mb-0" data-maturity="validate" data-maturity-note="Por definir con Contabilidad si el IGV con crédito fiscal se resta del costo real y cómo se trata la planilla.">
+                      No se aplican reglas tributarias automáticas: cada importe se muestra como se registró.
+                    </p>
+                  </div>
+                </section>
+              </div>
+              <div class="col-xl-6">
+                <section class="card h-100" aria-labelledby="cost-category-title">
+                  <div class="card-body">
+                    <div class="shell-section-header">
+                      <div>
+                        <div class="master-title-row" data-maturity="as-is" data-maturity-note="Categorías observadas en las rendiciones de J&amp;Y; se configuran en Administración. La categoría no es la descripción del gasto.">
+                          <h2 id="cost-category-title">Costos por categoría</h2>
+                        </div>
+                        <p class="workspace-caption">Clasificación del gasto, distinta de su descripción.</p>
+                      </div>
+                    </div>
+                    <div id="cost-category-chart" class="cost-category-chart"></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <section class="card mb-3" aria-labelledby="cost-consolidation-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div>
+                    <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: consolidar en un solo lugar lo que hoy se arma en hojas de cálculo.">
+                      <h2 id="cost-consolidation-title">Consolidación</h2>
+                    </div>
+                    <p class="workspace-caption">Agrupa el costo por fuente, categoría, periodo, responsable o proyecto.</p>
+                  </div>
+                </div>
+                <div class="workspace-filters consolidation-filters mb-3">
+                  <div>
+                    <label class="form-label" for="consolidation-scope">Alcance</label>
+                    <select id="consolidation-scope" class="form-select" x-model="consolidationScope" @change="consolidationGroup = ''">
+                      <option value="project" x-text="`Proyecto ${projectId}`"></option>
+                      <option value="all">Todos los proyectos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="consolidation-grouping">Agrupar por</label>
+                    <select id="consolidation-grouping" class="form-select" x-model="grouping" @change="consolidationGroup = ''">
+                      <template x-for="item in groupings" :key="item.id"
+                        ><option :value="item.id" x-text="item.label" :selected="item.id === grouping"></option
+                      ></template>
+                    </select>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle consolidation-table">
+                    <thead>
+                      <tr>
+                        <th scope="col" x-text="groupings.find((item) => item.id === grouping)?.label"></th>
+                        <th scope="col" class="text-end">Registros</th>
+                        <th scope="col" class="text-end">J&amp;Y Real</th>
+                        <template x-for="column in treatmentColumns" :key="column.id"
+                          ><th scope="col" class="text-end" x-text="column.label"></th
+                        ></template>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="group in consolidation" :key="group.key"
+                        ><tr :class="{ 'is-selected': group.key === consolidationGroup }">
+                          <th scope="row">
+                            <button type="button" class="btn btn-link btn-sm p-0 text-start" @click="consolidationGroup = consolidationGroup === group.key ? '' : group.key" :aria-expanded="String(group.key === consolidationGroup)" x-text="group.label"></button>
+                          </th>
+                          <td class="text-end" x-text="group.count"></td>
+                          <td class="text-end data-money fw-semibold" x-text="formatAmount(group.total)"></td>
+                          <template x-for="column in treatmentColumns" :key="column.id"
+                            ><td class="text-end data-money" x-text="formatAmount(group[column.id])"></td
+                          ></template>
+                        </tr></template
+                      >
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th scope="row">Total</th>
+                        <td class="text-end" x-text="consolidationTotals.count"></td>
+                        <td class="text-end data-money" x-text="formatAmount(consolidationTotals.total)"></td>
+                        <template x-for="column in treatmentColumns" :key="column.id"
+                          ><td class="text-end data-money" x-text="formatAmount(consolidationTotals[column.id])"></td
+                        ></template>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                <div class="consolidation-detail" x-show="consolidationGroup" x-cloak>
+                  <h3 class="form-section-title" x-text="`Detalle: ${consolidation.find((group) => group.key === consolidationGroup)?.label || ''}`"></h3>
+                  <ul class="consolidation-lines">
+                    <template x-for="line in consolidationLines" :key="line.id"
+                      ><li>
+                        <a :href="lineHref(line)">
+                          <span>
+                            <strong x-text="`${line.operationLabel}${line.itemIndex ? ` · ítem ${line.itemIndex}` : ''}`"></strong>
+                            <small x-text="`${formatDate(line.date)} · ${line.category} · ${line.description}`"></small>
+                            <small x-text="`${line.counterpart} · ${line.documentLabel} · ${line.responsible}`"></small>
+                          </span>
+                          <span class="text-end">
+                            <b x-text="formatAmount(line.total)"></b>
+                            <small x-text="line.treatment.undocumented ? 'No documentado' : line.treatment.noBreakdown ? 'Sin desglose' : 'Con comprobante'"></small>
+                          </span>
+                        </a>
+                      </li></template
+                    >
+                  </ul>
+                </div>
+              </div>
+            </section>

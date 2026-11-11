@@ -39,7 +39,11 @@ import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
 import { designSystemView } from './components/design-system-view.js';
 import { initPresentationSwitcher } from './components/presentation-switcher.js';
-import { approvalsView, syncApprovalCounters } from './components/approvals-view.js';
+import {
+  approvalsView,
+  syncApprovalCounters,
+  worklistView,
+} from './components/approvals-view.js';
 import { budgetCreate, purchaseCreate } from './components/commercial-forms.js';
 import {
   clientsList,
@@ -268,6 +272,7 @@ class AdminApp {
     Alpine.data('costWorkspace', costWorkspace);
     Alpine.data('designSystemView', designSystemView);
     Alpine.data('approvalsView', approvalsView);
+    Alpine.data('worklistView', worklistView);
     Alpine.data('budgetCreate', budgetCreate);
     Alpine.data('purchaseCreate', purchaseCreate);
     Alpine.data('documentsWorkspace', documentsWorkspace);

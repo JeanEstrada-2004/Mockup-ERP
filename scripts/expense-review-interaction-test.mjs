@@ -110,7 +110,7 @@ async function testReview() {
   await ready();
   assert.equal(await page.locator('h1').innerText(), `Rendición ${reportNumber(report)}`);
   assert.equal(await status(), 'Presentada');
-  assert.equal(await approvalsCount(), '3');
+  assert.equal(await approvalsCount(), '6'); // R3: every pending task of the worklist
   const facts = await page.locator('.review-facts').first().innerText();
   assert.match(facts, /Responsable del gasto\s+Luis Condori/);
   assert.match(facts, /Preparada por\s+Rosa Huamán/);
@@ -174,7 +174,7 @@ async function testReview() {
   await tick();
   assert.equal(await status(), 'Observada');
   assert.match(await history(), /Observada[\s\S]*Gastos observados: Ítem 4/);
-  assert.equal(await approvalsCount(), '2');
+  assert.equal(await approvalsCount(), '6'); // moved from 'por revisar' to 'observadas'
 
   // Correction: only the observed expense is edited, then presented again.
   assert.ok(await page.getByRole('button', { name: 'Presentar corrección' }).isDisabled());
@@ -186,7 +186,7 @@ async function testReview() {
   await page.getByRole('button', { name: 'Presentar corrección' }).click();
   await tick();
   assert.equal(await status(), 'Corregida');
-  assert.equal(await approvalsCount(), '3');
+  assert.equal(await approvalsCount(), '6');
 
   // Administrative fix of a small error, then accept and hand to Contabilidad.
   await page.getByRole('button', { name: 'Ver gasto 4' }).click();
@@ -203,7 +203,7 @@ async function testReview() {
   await page.getByRole('button', { name: 'Entregar a Contabilidad' }).click();
   await tick();
   assert.equal(await status(), 'Entregada a Contabilidad');
-  assert.equal(await approvalsCount(), '2');
+  assert.equal(await approvalsCount(), '5'); // delivered: no task left for it
   const log = await history();
   for (const step of [
     'Entregada a Contabilidad',
@@ -222,13 +222,13 @@ async function testReview() {
   await page.goto(url('jy-demo', 'index.html'));
   await ready();
   assert.equal(getPortfolioFinancials(data).executedCost, baseExecuted);
-  // The approvals inbox only links to the review page for rendiciones.
-  await page.goto(url('jy-demo', 'approvals.html?tab=expenses'));
+  // Pendientes (R3) only links to the review page: no "Aprobar".
+  await page.goto(url('jy-demo', 'approvals.html?tab=review'));
   await ready();
-  const inbox = page.locator('.approvals-workspace table tbody tr');
+  const inbox = page.locator('.worklist-table tbody tr');
   assert.equal(await inbox.count(), 1);
   assert.match(await inbox.innerText(), /N\.º 1-2026/);
-  assert.equal(await inbox.getByRole('button', { name: 'Aprobar' }).isVisible(), false);
+  assert.equal(await page.getByRole('button', { name: 'Aprobar' }).count(), 0);
 }
 
 async function testMobileCreate() {
@@ -304,7 +304,7 @@ async function testMobileCreate() {
     await page.locator('.expense-table').innerText(),
     /N\.º 9-2026[\s\S]*Creada en esta demostración/
   );
-  assert.equal(await approvalsCount(), '3');
+  assert.equal(await approvalsCount(), '6');
 }
 
 async function testOtherPresentations() {

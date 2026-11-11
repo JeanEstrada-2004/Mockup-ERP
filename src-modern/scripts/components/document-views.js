@@ -1,8 +1,20 @@
 import { Modal } from 'bootstrap';
-import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
+import {
+  activeVariant,
+  isModuleEnabled,
+  variantRule,
+  variantStorageKey,
+} from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getDocument, getDocuments, getProject } from '../data/mock-data.js';
 import { formatDate } from './project-views.js';
+import { formatAmount } from '../data/commercial-data.js';
+import {
+  EVIDENCE_TYPES,
+  evidenceLayout,
+  reportNumber,
+  reportTotals,
+} from '../data/expense-reports.js';
 import { writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
@@ -77,6 +89,79 @@ function saveVersion(document, record) {
     return false;
   }
 }
+const round = (value) => Math.round((Number(value) || 0) * 100) / 100;
+
+// R3 (J&Y Demo, variant.rules.documentViewer): what the document looks like.
+// Evidence of a rendición shows the receipt itself; documents the platform
+// generates (rendición, orden de compra, others) show an illustrated sheet.
+function documentVisual(doc) {
+  if (!doc) return null;
+  const project = getProject(data, doc.projectId);
+  const projectLabel = `${doc.projectId} · ${project?.name || ''}`;
+  const report = data.expenseReports?.find((item) => item.id === doc.operationId);
+  if (doc.evidenceItemId && report) {
+    const item = report.items.find((entry) => entry.id === doc.evidenceItemId);
+    if (item) return { ...item, ...(item.evidence || {}) };
+  }
+  if (report) {
+    return {
+      layout: 'report',
+      viewerLabel: 'Rendición de gastos',
+      number: reportNumber(report),
+      workerName: workerName(report.workerId),
+      preparedName: workerName(report.preparedBy),
+      projectLabel,
+      date: report.date,
+      totals: reportTotals(report),
+      lines: report.items.map((item, index) => ({
+        index: index + 1,
+        doc: item.series
+          ? `${EVIDENCE_TYPES[item.docType].short} ${item.series}-${item.number} · ${item.vendor}`
+          : `${EVIDENCE_TYPES[item.docType].short}${item.payee ? ` · ${item.payee}` : ''}`,
+        description: item.description,
+        total: item.total,
+      })),
+    };
+  }
+  const operation = data.operations.find((item) => item.id === doc.operationId);
+  if (operation?.type === 'purchase') {
+    const supplier = data.suppliers.find((item) => item.id === operation.supplierId);
+    const vv = round(operation.amount / 1.18);
+    return {
+      layout: 'order',
+      viewerLabel: 'Orden de compra',
+      orderId: operation.id,
+      supplierName: supplier?.name || '—',
+      supplierRuc: supplier?.ruc || '—',
+      projectLabel,
+      date: operation.date,
+      description: operation.description || 'Suministro o servicio',
+      vv,
+      igv: round(operation.amount - vv),
+      total: operation.amount,
+      status: operation.status,
+    };
+  }
+  const budget = data.budgets.find((item) => item.id === doc.operationId);
+  return {
+    layout: 'sheet',
+    viewerLabel: doc.type,
+    title: doc.type.toUpperCase(),
+    code: budget ? `${budget.id}-V${budget.version}` : doc.operationId,
+    subtitle: project?.name || '',
+    lines: [
+      { label: 'Proyecto', value: projectLabel },
+      { label: 'Operación', value: operation?.label || doc.operationId },
+      { label: 'Responsable', value: workerName(doc.responsibleId) },
+      { label: 'Fecha', value: formatDate(doc.date) },
+      ...(operation || budget
+        ? [{ label: 'Importe', value: formatAmount((operation || budget).amount) }]
+        : []),
+      { label: 'Situación', value: operation?.status || budget?.status || doc.status },
+    ],
+  };
+}
+
 function listParams(params) {
   const next = new URLSearchParams();
   for (const key of ['search', 'project', 'module', 'type']) {
@@ -148,7 +233,9 @@ export function documentsWorkspace() {
             (!this.moduleFilter || item.module === this.moduleFilter) &&
             (!this.responsibleFilter || item.responsibleId === this.responsibleFilter) &&
             (!this.folderFilter ||
-              FOLDERS.find((folder) => folder.id === this.folderFilter)?.modules.includes(item.module)) &&
+              FOLDERS.find((folder) => folder.id === this.folderFilter)?.modules.includes(
+                item.module
+              )) &&
             (!this.typeFilter || item.type === this.typeFilter)
         )
         .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
@@ -211,6 +298,26 @@ export function documentDetail() {
     project,
     backHref,
     backLabel: costOrigin ? 'Volver a Costos' : 'Volver a Documentos',
+    // ---- Visual preview (R3) ----
+    hasViewer: variantRule('documentViewer') && Boolean(document),
+    ev: variantRule('documentViewer') ? documentVisual(document) : null,
+    zoom: 1,
+    viewerFull: false,
+    formatAmount,
+    companyName: activeVariant.company.name,
+    layout(item) {
+      return item?.layout || evidenceLayout(item);
+    },
+    typeLabel(item) {
+      return item?.viewerLabel || EVIDENCE_TYPES[item?.docType]?.label || document?.type || '';
+    },
+    zoomBy(step) {
+      this.zoom = Math.min(2, Math.max(0.75, Math.round((this.zoom + step) * 100) / 100));
+    },
+    toggleFull() {
+      this.viewerFull = !this.viewerFull;
+      if (!this.viewerFull) this.zoom = 1;
+    },
     extras: [],
     versionComment: '',
     error: '',
@@ -237,6 +344,8 @@ export function documentDetail() {
     get originHref() {
       if (!document) return null;
       if (document.module === 'costs') return moduleHref('costs', `COST-${document.operationId}`);
+      if (document.evidenceItemId)
+        return `${moduleHref('expenses', document.operationId)}&item=${encodeURIComponent(document.evidenceItemId)}`;
       return moduleHref(document.module, document.operationId);
     },
     get projectHref() {

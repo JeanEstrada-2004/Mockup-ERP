@@ -21,7 +21,7 @@ npm run build                    # dist-modern/
 npm test                         # smoke test de 29 páginas
 ```
 
-Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:jy-expenses`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
+Pruebas de interacción: `test:shell`, `test:commercial`, `test:expenses`, `test:personnel`, `test:warehouse`, `test:costs`, `test:delivery9`, `test:masters`, `test:jy-expenses`, `test:jy-control`, `test:delivery10`. `node scripts/capture-views.mjs <etiqueta>` toma capturas de variantes, temas y anchos configurables. `npm run preview:pages` sirve la estructura de Pages localmente.
 
 ## Arquitectura
 

@@ -1,8 +1,9 @@
 /* global __ACTIVE_VARIANT__ */
-import { activeVariant, getVariantConfig } from '../config/variants.js';
+import { activeVariant, getVariantConfig, variantRule } from '../config/variants.js';
 import { surtecData } from './surtec.js';
 import { jyData } from './jy.js';
 import { jyDemoData } from './jy-demo.js';
+import { EVIDENCE_TYPES } from './expense-reports.js';
 
 // During a variant build, Vite replaces MODE and removes the other data set
 // from the generated bundle. Node validation keeps both sets available.
@@ -189,7 +190,9 @@ export function getDocuments(data) {
         projectId: operation.projectId,
         module,
         operationId: operation.id,
-        fileName: `${operation.id}.pdf`,
+        fileName: operation.label?.startsWith('N.º ')
+          ? `rendicion-${operation.label.slice(4)}.pdf`
+          : `${operation.id}.pdf`,
         type,
         date: operation.date,
         responsibleId: operation.workerId || project.managerId,
@@ -200,7 +203,33 @@ export function getDocuments(data) {
       };
     });
 
-  return [...budgetDocuments, ...operationDocuments];
+  // R2/R3: each evidence of a rendición is a document of its own (expenses
+  // without document have none: they are never given a receipt).
+  const evidenceDocuments = (data.expenseReports || [])
+    .filter((report) => report.status !== 'Borrador')
+    .flatMap((report) =>
+      report.items
+        .filter((item) => item.docType !== 'sin-documento')
+        .map((item, index) => ({
+          id: `DOC-${item.id}`,
+          projectId: report.projectId,
+          module: 'expenses',
+          operationId: report.id,
+          evidenceItemId: item.id,
+          fileName: item.series
+            ? `${item.series}-${item.number}.${item.docType === 'boleta-foto' ? 'jpg' : 'pdf'}`
+            : `${item.docType}-${item.operationCode}.${item.docType === 'transferencia' ? 'pdf' : 'jpg'}`,
+          type: EVIDENCE_TYPES[item.docType].label,
+          date: item.date,
+          responsibleId: report.preparedBy,
+          status: 'Registrado',
+          description: `Evidencia del ítem ${index + 1} de la rendición N.º ${report.number}-${report.year}: ${item.description}.`,
+          version: 1,
+          simulated: true,
+        }))
+    );
+
+  return [...budgetDocuments, ...operationDocuments, ...evidenceDocuments];
 }
 
 export function getDocument(data, documentId) {
@@ -264,16 +293,20 @@ export function getPendingApprovals(data, variant) {
 // Información y Sistema. `level` drives the colour, `category` the label.
 export function getShellNotifications(data, variant) {
   const notifications = [];
+  const worklist = variantRule('approvalsMode', variant) === 'worklist';
+  const alertPercent = variantRule('budgetAlertPercent', variant);
 
   for (const operation of data.operations) {
     if (operation.type === 'purchase' && operation.status === 'Pendiente') {
       notifications.push({
         id: `notification-${operation.id}`,
-        text: `${operation.id} requiere aprobación.`,
+        text: worklist
+          ? `${operation.id} pendiente de revisión.`
+          : `${operation.id} requiere aprobación.`,
         moduleId: 'purchases',
         recordId: operation.id,
         level: 'approval',
-        category: 'Aprobación',
+        category: worklist ? 'Pendiente' : 'Aprobación',
       });
     }
     if (operation.type === 'expense' && EXPENSE_PENDING_STATUSES.includes(operation.status)) {
@@ -283,17 +316,21 @@ export function getShellNotifications(data, variant) {
         moduleId: 'expenses',
         recordId: operation.id,
         level: 'approval',
-        category: 'Aprobación',
+        category: worklist ? 'Pendiente' : 'Aprobación',
       });
     }
   }
 
   for (const project of data.projects) {
     const { executionPercent } = getProjectFinancials(data, project.id);
-    if (project.status === 'En riesgo' && executionPercent >= 80) {
+    if (
+      alertPercent !== null &&
+      project.status === 'En riesgo' &&
+      executionPercent >= alertPercent
+    ) {
       notifications.push({
         id: `notification-${project.id}`,
-        text: `${project.id} supera el 80 % del presupuesto (${String(executionPercent).replace('.', ',')} % ejecutado).`,
+        text: `${project.id} supera el ${alertPercent} % del presupuesto (${String(executionPercent).replace('.', ',')} % ejecutado).`,
         moduleId: 'projects',
         recordId: project.id,
         level: 'warning',

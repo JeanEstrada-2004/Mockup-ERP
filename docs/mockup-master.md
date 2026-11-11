@@ -466,3 +466,11 @@ tres variantes bajo la subruta de Pages.
 - Visor de evidencia (factura, boleta, foto, Yape/Plin, transferencia) con datos sugeridos por OCR
   corregibles, gasto sin documento con motivo y revisión de Administración hasta la entrega a
   Contabilidad. PETI y PMI conservan su flujo de aprobación.
+
+## Realineamiento de J&Y Demo — R3: control (11/11/2026)
+
+- Costos y Control Contable: J&Y Real frente al tratamiento formal, costos por categoría y
+  consolidación por fuente, categoría, periodo, responsable o proyecto.
+- Documentos con vista previa del comprobante, la rendición o la orden de compra.
+- Pendientes como bandeja de tareas; Inicio con "Proyecto en contexto"; sin avance físico ni
+  alerta automática del 80 % en el Demo.

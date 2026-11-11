@@ -90,11 +90,17 @@
                     ></span
                     ><span class="kpi-foot">Presupuesto menos ejecutado</span>
                   </button>
-                  <button class="kpi" type="button" @click="setTab('indicators')">
+                  <!-- IF physicalProgress=true --><button class="kpi" type="button" @click="setTab('indicators')">
                     <span class="kpi-label"><i class="kpi-dot"></i>Avance</span
                     ><span class="kpi-value" x-count.pct="project.progressPercent"></span
                     ><span class="kpi-foot">Avance físico reportado</span>
-                  </button>
+                  </button
+                  ><!-- ELSE --><button class="kpi" type="button" @click="setTab('expenses')">
+                    <span class="kpi-label"><i class="kpi-dot"></i>Rendiciones</span
+                    ><span class="kpi-value" x-count="expenseCount"></span
+                    ><span class="kpi-foot" x-text="`${expenseReviewCount} por revisar`"></span>
+                  </button
+                  ><!-- /IF -->
                   <button class="kpi" type="button" @click="setTab('documents')">
                     <span class="kpi-label"><i class="kpi-dot kpi-dot--s4"></i>Documentos</span
                     ><span class="kpi-value" x-count="documents.length"></span
@@ -196,7 +202,7 @@
                           <template x-for="item in projectActivity" :key="item.id"
                             ><a :href="operationHref(item) || moduleHref('costs', project.id)"
                               ><span
-                                ><strong x-text="item.id"></strong
+                                ><strong x-text="item.label || item.id"></strong
                                 ><small x-text="item.status"></small></span
                               ><time :datetime="item.date" x-text="formatDate(item.date)"></time></a
                           ></template>
@@ -229,10 +235,12 @@
                             ><strong x-text="formatDate(project.endDate)"></strong>
                           </div>
                           <div><span>Estado</span><strong x-text="project.status"></strong></div>
-                          <div>
+                          <!-- IF physicalProgress=true --><div>
                             <span>Avance físico</span
                             ><strong x-text="project.progressPercent + ' %'"></strong>
-                          </div>
+                          </div><!-- ELSE --><div>
+                            <span>Ubicación</span><strong x-text="project.location || '—'"></strong>
+                          </div><!-- /IF -->
                         </div>
                       </div>
                       <div class="panel">
@@ -244,10 +252,10 @@
                             <span>Inicio</span
                             ><strong x-text="formatDate(project.startDate)"></strong>
                           </div>
-                          <div>
+                          <!-- IF physicalProgress=true --><div>
                             <span>Avance informado</span
                             ><strong x-text="project.progressPercent + ' %'"></strong>
-                          </div>
+                          </div><!-- /IF -->
                           <div>
                             <span>Fin previsto</span
                             ><strong x-text="formatDate(project.endDate)"></strong>
@@ -435,14 +443,14 @@
                   <div class="panel-head">
                     <div>
                       <h2>Indicadores del proyecto</h2>
-                      <p>Avance físico y ejecución presupuestaria</p>
+                      <p x-text="hasProgress ? 'Avance físico y ejecución presupuestaria' : 'Ejecución presupuestaria'"></p>
                     </div>
                     <a x-show="!project.demo" :href="moduleHref('costs', project.id)"
                       >Abrir en Costos →</a
                     >
                   </div>
                   <div class="project-indicator-bars">
-                    <div>
+                    <div x-show="hasProgress">
                       <span>Avance físico</span
                       ><strong x-text="project.progressPercent + ' %'"></strong>
                       <div class="progress">
@@ -462,10 +470,9 @@
                       </div>
                     </div>
                   </div>
-                  <p>
-                    Compara el trabajo informado con el costo ejecutado. Los importes detallados
-                    están en Costos.
-                  </p>
+                  <p
+                    x-text="hasProgress ? 'Compara el trabajo informado con el costo ejecutado. Los importes detallados están en Costos.' : 'Costo ejecutado frente al presupuesto. J&Y Real, tratamiento formal y categorías están en Costos.'"
+                  ></p>
                 </section>
               </div></template
             >

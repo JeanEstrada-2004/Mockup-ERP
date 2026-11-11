@@ -141,6 +141,9 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.master-table`, `.master-contacts`, `.master-contact` | Listas y fichas de Clientes y Proveedores |
 | `.evidence-stage`, `.ev-doc--invoice/--photo/--wallet/--transfer/--none` | Visor de evidencia con zoom y vista ampliada (tokens `--paper*`) |
 | `.review-steps`, `.review-table`, `.confidence--alta/--media/--baja` | Rendición con revisión (J&Y Demo) |
+| `.treatment-*`, `.consolidation-*` | J&Y Real y tratamiento formal, consolidación de costos (J&Y Demo) |
+| `.worklist-*` | Bandeja Pendientes (J&Y Demo) |
+| `.project-context` | Proyecto en contexto en el Inicio (J&Y Demo) |
 | `.maturity`, `.maturity--as-is/--to-be/--validate` | Marca de madurez (solo J&Y Demo; texto + color, oculta hasta que el presentador la activa) |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema

@@ -1,0 +1,158 @@
+                      <!-- Evidence viewer -->
+                      <div class="evidence-stage" :class="{ 'is-full': viewerFull }" x-show="ev">
+                        <div class="evidence-toolbar">
+                          <span class="evidence-toolbar-title" x-text="ev ? typeLabel(ev) : ''"></span>
+                          <div class="evidence-toolbar-actions" x-show="ev && layout(ev) !== 'none'">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="zoomBy(-0.25)" aria-label="Alejar"><i class="bi bi-zoom-out" aria-hidden="true"></i></button>
+                            <span class="evidence-zoom-value" x-text="`${Math.round(zoom * 100)} %`"></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="zoomBy(0.25)" aria-label="Acercar"><i class="bi bi-zoom-in" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="toggleFull()" :aria-label="viewerFull ? 'Cerrar vista ampliada' : 'Vista ampliada'"><i class="bi" :class="viewerFull ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i></button>
+                          </div>
+                        </div>
+                        <div class="evidence-canvas" @keydown.escape.window="viewerFull && toggleFull()">
+                          <div class="evidence-zoom" :style="`--zoom: ${zoom}`">
+                            <!-- Invoice / receipt -->
+                            <template x-if="ev && ['invoice', 'photo'].includes(layout(ev))"
+                              ><article class="ev-doc" :class="layout(ev) === 'photo' ? 'ev-doc--photo' : 'ev-doc--invoice'" aria-label="Ilustración del comprobante">
+                                <header class="ev-head">
+                                  <div class="ev-issuer">
+                                    <strong x-text="ev.vendor"></strong>
+                                    <small>Arequipa · Perú</small>
+                                  </div>
+                                  <div class="ev-ruc">
+                                    <span x-text="`R.U.C. ${ev.ruc}`"></span>
+                                    <strong x-text="ev.docType === 'factura' ? 'FACTURA ELECTRÓNICA' : layout(ev) === 'photo' ? 'BOLETA DE VENTA' : 'BOLETA DE VENTA ELECTRÓNICA'"></strong>
+                                    <span x-text="`${ev.series}-${ev.number}`"></span>
+                                  </div>
+                                </header>
+                                <dl class="ev-meta">
+                                  <div><dt>Fecha de emisión</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>Señor(es)</dt><dd x-text="ev.buyer || companyName"></dd></div>
+                                  <div><dt>Moneda</dt><dd>Soles</dd></div>
+                                </dl>
+                                <table class="ev-lines">
+                                  <thead><tr><th scope="col">Cant.</th><th scope="col">Descripción</th><th scope="col">Importe</th></tr></thead>
+                                  <tbody><tr><td>1</td><td x-text="ev.description"></td><td x-text="formatAmount(Number(ev.vv) + Number(ev.nonTaxed))"></td></tr></tbody>
+                                </table>
+                                <dl class="ev-totals">
+                                  <div x-show="Number(ev.vv)"><dt>Op. gravada</dt><dd x-text="formatAmount(ev.vv)"></dd></div>
+                                  <div x-show="Number(ev.nonTaxed)"><dt>Op. inafecta</dt><dd x-text="formatAmount(ev.nonTaxed)"></dd></div>
+                                  <div x-show="Number(ev.igv)"><dt>IGV 18 %</dt><dd x-text="formatAmount(ev.igv)"></dd></div>
+                                  <div class="ev-grand"><dt>Importe total</dt><dd x-text="formatAmount(ev.total)"></dd></div>
+                                </dl>
+                                <footer class="ev-foot" x-text="layout(ev) === 'photo' ? 'Fotografía enviada desde obra' : 'Representación impresa del comprobante electrónico'"></footer>
+                              </article></template
+                            >
+                            <!-- Digital wallet capture -->
+                            <template x-if="ev && layout(ev) === 'wallet'"
+                              ><article class="ev-doc ev-doc--wallet" aria-label="Ilustración de la captura de pago">
+                                <p class="ev-wallet-app" x-text="ev.docType === 'yape' ? 'Yape' : 'Plin'"></p>
+                                <i class="bi bi-check-circle-fill ev-wallet-ok" aria-hidden="true"></i>
+                                <p class="ev-wallet-title">Pago realizado</p>
+                                <p class="ev-wallet-amount" x-text="formatAmount(ev.total)"></p>
+                                <dl class="ev-meta">
+                                  <div><dt>Para</dt><dd x-text="ev.payee"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>N.º de operación</dt><dd x-text="ev.operationCode"></dd></div>
+                                </dl>
+                              </article></template
+                            >
+                            <!-- Transfer / deposit -->
+                            <template x-if="ev && layout(ev) === 'transfer'"
+                              ><article class="ev-doc ev-doc--transfer" aria-label="Ilustración de la constancia">
+                                <header class="ev-head">
+                                  <strong x-text="ev.docType === 'deposito' ? 'Constancia de depósito' : 'Constancia de transferencia'"></strong>
+                                  <span class="badge status-badge status-badge--success">Operación exitosa</span>
+                                </header>
+                                <p class="ev-wallet-amount" x-text="formatAmount(ev.total)"></p>
+                                <dl class="ev-meta">
+                                  <div><dt>Cuenta de origen</dt><dd x-text="ev.account || '—'"></dd></div>
+                                  <div><dt>Beneficiario</dt><dd x-text="ev.payee"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                  <div><dt>N.º de operación</dt><dd x-text="ev.operationCode"></dd></div>
+                                </dl>
+                              </article></template
+                            >
+                            <!-- Rendición (document generated by the system) -->
+                            <template x-if="ev && layout(ev) === 'report'"
+                              ><article class="ev-doc ev-doc--sheet" aria-label="Ilustración de la rendición">
+                                <header class="ev-head">
+                                  <div class="ev-issuer"><strong x-text="companyName"></strong><small>Rendición de gastos</small></div>
+                                  <div class="ev-ruc"><strong>RENDICIÓN</strong><span x-text="ev.number"></span></div>
+                                </header>
+                                <dl class="ev-meta">
+                                  <div><dt>Responsable del gasto</dt><dd x-text="ev.workerName"></dd></div>
+                                  <div><dt>Preparada por</dt><dd x-text="ev.preparedName"></dd></div>
+                                  <div><dt>Proyecto</dt><dd x-text="ev.projectLabel"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                </dl>
+                                <table class="ev-lines">
+                                  <thead><tr><th scope="col">N.º</th><th scope="col">Documento y descripción</th><th scope="col">Total</th></tr></thead>
+                                  <tbody>
+                                    <template x-for="line in ev.lines" :key="line.index"
+                                      ><tr><td x-text="line.index"></td><td><span x-text="line.doc"></span><br /><small x-text="line.description"></small></td><td x-text="formatAmount(line.total)"></td></tr
+                                    ></template>
+                                  </tbody>
+                                </table>
+                                <dl class="ev-totals">
+                                  <div><dt>V.V.</dt><dd x-text="formatAmount(ev.totals.vv)"></dd></div>
+                                  <div><dt>IGV</dt><dd x-text="formatAmount(ev.totals.igv)"></dd></div>
+                                  <div><dt>No gravado</dt><dd x-text="formatAmount(ev.totals.nonTaxed)"></dd></div>
+                                  <div><dt>No documentado</dt><dd x-text="formatAmount(ev.totals.undocumented)"></dd></div>
+                                  <div class="ev-grand"><dt>Total rendido</dt><dd x-text="formatAmount(ev.totals.total)"></dd></div>
+                                </dl>
+                                <footer class="ev-foot">Documento generado por la plataforma</footer>
+                              </article></template
+                            >
+                            <!-- Orden de compra -->
+                            <template x-if="ev && layout(ev) === 'order'"
+                              ><article class="ev-doc ev-doc--sheet" aria-label="Ilustración de la orden de compra">
+                                <header class="ev-head">
+                                  <div class="ev-issuer"><strong x-text="companyName"></strong><small>Arequipa · Perú</small></div>
+                                  <div class="ev-ruc"><strong>ORDEN DE COMPRA</strong><span x-text="ev.orderId"></span></div>
+                                </header>
+                                <dl class="ev-meta">
+                                  <div><dt>Proveedor</dt><dd x-text="ev.supplierName"></dd></div>
+                                  <div><dt>RUC</dt><dd x-text="ev.supplierRuc"></dd></div>
+                                  <div><dt>Proyecto</dt><dd x-text="ev.projectLabel"></dd></div>
+                                  <div><dt>Fecha</dt><dd x-text="formatDate(ev.date)"></dd></div>
+                                </dl>
+                                <table class="ev-lines">
+                                  <thead><tr><th scope="col">Cant.</th><th scope="col">Descripción</th><th scope="col">Importe</th></tr></thead>
+                                  <tbody><tr><td>1</td><td x-text="ev.description"></td><td x-text="formatAmount(ev.vv)"></td></tr></tbody>
+                                </table>
+                                <dl class="ev-totals">
+                                  <div><dt>Subtotal</dt><dd x-text="formatAmount(ev.vv)"></dd></div>
+                                  <div><dt>IGV 18 %</dt><dd x-text="formatAmount(ev.igv)"></dd></div>
+                                  <div class="ev-grand"><dt>Total</dt><dd x-text="formatAmount(ev.total)"></dd></div>
+                                </dl>
+                                <footer class="ev-foot" x-text="`Situación: ${ev.status}`"></footer>
+                              </article></template
+                            >
+                            <!-- Other documents: a summary sheet -->
+                            <template x-if="ev && layout(ev) === 'sheet'"
+                              ><article class="ev-doc ev-doc--sheet" aria-label="Ilustración del documento">
+                                <header class="ev-head">
+                                  <div class="ev-issuer"><strong x-text="companyName"></strong><small x-text="ev.subtitle"></small></div>
+                                  <div class="ev-ruc"><strong x-text="ev.title"></strong><span x-text="ev.code"></span></div>
+                                </header>
+                                <dl class="ev-meta">
+                                  <template x-for="line in ev.lines" :key="line.label"
+                                    ><div><dt x-text="line.label"></dt><dd x-text="line.value"></dd></div
+                                  ></template>
+                                </dl>
+                                <footer class="ev-foot">Documento generado por la plataforma</footer>
+                              </article></template
+                            >
+                            <!-- No document -->
+                            <template x-if="ev && layout(ev) === 'none'"
+                              ><article class="ev-doc ev-doc--none" aria-label="Gasto sin documento">
+                                <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
+                                <strong class="ev-undocumented">NO DOCUMENTADO</strong>
+                                <p>Gasto real sin comprobante ni constancia. Se registra con su motivo; nunca se genera un comprobante.</p>
+                              </article></template
+                            >
+                          </div>
+                        </div>
+                      </div>
+

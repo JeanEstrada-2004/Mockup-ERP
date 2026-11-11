@@ -1,12 +1,24 @@
-import { activeVariant, isModuleEnabled } from '../config/variants.js';
+import { activeVariant, isModuleEnabled, variantRule } from '../config/variants.js';
 import { moduleHref } from '../config/modules.js';
 import { getDataForVariant, getProject } from '../data/mock-data.js';
 import { COST_SOURCES, projectCostModel } from '../data/cost-data.js';
+import { formatAmount } from '../data/commercial-data.js';
+import {
+  GROUPINGS,
+  TREATMENT_COLUMNS,
+  costLines,
+  groupLines,
+  treatmentTotals,
+} from '../data/cost-treatment.js';
 import { formatDate, projectFlowData } from './project-views.js';
 import { formatMoney, writeProjectId } from './shell.js';
 
 const data = getDataForVariant(activeVariant);
 const sourceIds = COST_SOURCES.map((item) => item.id);
+// R3: J&Y Demo shows only confirmed rules and adds J&Y Real vs. formal treatment.
+const hasProgress = variantRule('physicalProgress');
+const alertPercent = variantRule('budgetAlertPercent');
+const hasTreatment = variantRule('costTreatment');
 
 export function costWorkspace() {
   const params = new URLSearchParams(location.search);
@@ -32,7 +44,56 @@ export function costWorkspace() {
     formatDate,
     sourcesCatalog: COST_SOURCES,
     hasWarehouse: isModuleEnabled('warehouse'),
+    hasProgress,
+    hasTreatment,
+    hasControlParts: variantRule('controlAllocation'),
     moduleHref,
+    formatAmount,
+    treatmentColumns: TREATMENT_COLUMNS,
+    groupings: GROUPINGS,
+    grouping: GROUPINGS.some((item) => item.id === params.get('group'))
+      ? params.get('group')
+      : 'category',
+    consolidationScope: params.get('scope') === 'all' ? 'all' : 'project',
+    consolidationGroup: '',
+    treatmentChart: null,
+    categoryChart: null,
+    // ---- J&Y Real and formal treatment (R3) ----------------------------
+    get lines() {
+      return hasTreatment ? costLines(data, this.projectId) : [];
+    },
+    get treatment() {
+      return treatmentTotals(this.lines);
+    },
+    get treatmentLabel() {
+      return `Costo J&Y Real ${formatAmount(this.treatment.total)}: ${TREATMENT_COLUMNS.map(
+        (column) => `${column.label} ${formatAmount(this.treatment[column.id])}`
+      ).join(', ')}`;
+    },
+    get categories() {
+      return groupLines(data, this.lines, 'category');
+    },
+    get scopedLines() {
+      if (!hasTreatment) return [];
+      return this.consolidationScope === 'all' ? costLines(data) : this.lines;
+    },
+    get consolidation() {
+      return groupLines(data, this.scopedLines, this.grouping);
+    },
+    get consolidationTotals() {
+      return treatmentTotals(this.scopedLines);
+    },
+    get consolidationLines() {
+      return this.consolidation.find((group) => group.key === this.consolidationGroup)?.lines || [];
+    },
+    lineHref(line) {
+      if (line.source === 'expenses' && line.itemId)
+        return `./expense.html?id=${encodeURIComponent(line.operationId)}&item=${encodeURIComponent(line.itemId)}`;
+      return this.entryHrefFor(line.projectId, line.source, line.operationId);
+    },
+    entryHrefFor(projectId, source, operationId) {
+      return `./costs.html?${new URLSearchParams({ project: projectId, source, operation: operationId })}`;
+    },
     get project() {
       return getProject(data, this.projectId);
     },
@@ -70,17 +131,25 @@ export function costWorkspace() {
     // Spending more than 5 points ahead of physical progress (same rule as
     // "Ejecución frente al avance" in the Panel).
     get executionAhead() {
+      if (!hasProgress) return false;
       return this.financials.executionPercent > (this.project?.progressPercent ?? 100) + 5;
     },
     get alerts() {
       const alerts = [];
       const pct = (value) => `${(Math.round(value * 10) / 10).toString().replace('.', ',')} %`;
-      if (this.executionAhead || this.financials.executionPercent >= 80)
+      if (
+        this.executionAhead ||
+        (alertPercent !== null && this.financials.executionPercent >= alertPercent)
+      )
         alerts.push({
           level: 'warning',
-          text: `${this.project.id} ha consumido ${pct(this.financials.executionPercent)} del presupuesto con ${this.project.progressPercent} % de avance.`,
+          text: hasProgress
+            ? `${this.project.id} ha consumido ${pct(this.financials.executionPercent)} del presupuesto con ${this.project.progressPercent} % de avance.`
+            : `${this.project.id} ha consumido ${pct(this.financials.executionPercent)} del presupuesto.`,
         });
-      for (const part of this.parts.filter((item) => item.executionPercent > 100))
+      for (const part of this.hasControlParts
+        ? this.parts.filter((item) => item.executionPercent > 100)
+        : [])
         alerts.push({
           level: 'warning',
           text: `Partida ${part.label} supera el presupuesto referencial en ${pct(part.executionPercent - 100)} (${formatMoney(-part.variation)}).`,
@@ -145,13 +214,14 @@ export function costWorkspace() {
       return data.materials.find((item) => item.id === id)?.name || '—';
     },
     init() {
-      document.title = `Costos por Proyecto · ${activeVariant.company.shortName}`;
+      document.title = `${hasTreatment ? 'Costos y Control Contable' : 'Costos por Proyecto'} · ${activeVariant.company.shortName}`;
       if (this.projectId) writeProjectId(this.projectId);
       this.$nextTick(() => this.renderChart());
     },
     selectProject(id) {
       if (!getProject(data, id)) return;
       this.projectId = id;
+      this.consolidationGroup = '';
       this.sourceFilter = '';
       this.operationId = '';
       writeProjectId(id);
@@ -195,8 +265,45 @@ export function costWorkspace() {
         label: `Trazabilidad del costo de ${this.projectId}: fuentes, ejecutado y presupuesto`,
       });
     },
+    async renderTreatment() {
+      if (!hasTreatment) return;
+      const barElement = document.getElementById('cost-treatment-bar');
+      const chartElement = document.getElementById('cost-category-chart');
+      const barData = TREATMENT_COLUMNS.map((column) => ({
+        label: column.label,
+        value: this.treatment[column.id],
+        color: column.color,
+      }));
+      const categoryData = {
+        categories: this.categories.map((item) => item.label),
+        series: [
+          { label: 'Costo', color: '--s1', values: this.categories.map((item) => item.total) },
+        ],
+      };
+      const [split, bars] = await Promise.all([
+        import('../charts/split-bar.js'),
+        import('../charts/bars.js'),
+      ]);
+      if (barElement) {
+        if (this.treatmentChart?.update) this.treatmentChart.update(barData);
+        else
+          this.treatmentChart = split.render(barElement, barData, { label: this.treatmentLabel });
+      }
+      if (chartElement) {
+        this.categoryChart?.destroy?.();
+        chartElement.replaceChildren();
+        this.categoryChart = bars.render(chartElement, categoryData, {
+          orientation: 'horizontal',
+          labelWidth: 210,
+          height: Math.max(160, this.categories.length * 34 + 40),
+          label: `Costo por categoría de ${this.projectId}, en soles`,
+          table: false,
+        });
+      }
+    },
     async renderChart() {
       this.renderFlow();
+      this.renderTreatment();
       const element = document.getElementById('cost-budget-chart');
       if (!element || !this.financials) return;
       const { render } = await import('../charts/bars.js');

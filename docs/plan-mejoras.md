@@ -301,4 +301,4 @@ propuesta del futuro ERP interno de J&Y, con cada pieza marcada como AS-IS confi
 propuesta TO-BE o por validar. La auditoría, la matriz de alineamiento, la arquitectura de
 vistas y el plan por fases (R1–R6) están en
 [realineamiento-jy-demo.md](realineamiento-jy-demo.md). SurTec PETI y J&Y PMI conservan su comportamiento; solo suman Clientes y Proveedores. Antes
-de R1 se resolvieron las decisiones D1–D5. **R1 terminada** (11/11/2026): datos propios del Demo, Clientes y Proveedores en las tres presentaciones y marcas de madurez; notas en la sección 10 de ese documento. **R2 terminada** (11/11/2026): rendiciones de J&Y con revisión administrativa (sección 11). Siguiente: R3.
+de R1 se resolvieron las decisiones D1–D5. **R1 terminada** (11/11/2026): datos propios del Demo, Clientes y Proveedores en las tres presentaciones y marcas de madurez; notas en la sección 10 de ese documento. **R2 terminada** (11/11/2026): rendiciones de J&Y con revisión administrativa (sección 11). **R3 terminada**: Costos y Control Contable, Documentos con vista previa, Pendientes e Inicio sin reglas no confirmadas (sección 12). Siguiente: R4.

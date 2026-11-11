@@ -1,0 +1,27 @@
+              <section class="panel" aria-labelledby="dashboard-context-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="dashboard-context-title" x-text="`Proyecto en contexto · ${selectedProjectId}`"></h2>
+                    <p x-text="currentProject ? `${currentProject.name} · ${projectClient(currentProject)}` : ''"></p>
+                  </div>
+                  <a :href="projectHref(selectedProjectId)">Abrir ficha →</a>
+                </div>
+                <div class="project-context">
+                  <a class="project-context-money" :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}`">
+                    <span>Presupuesto</span><strong x-text="formatMoney(context.financials.budgetAmount)"></strong>
+                  </a>
+                  <a class="project-context-money" :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}`">
+                    <span>Costo J&amp;Y Real</span><strong x-text="formatMoney(context.financials.executedCost)"></strong>
+                  </a>
+                  <a class="project-context-money" :href="`./costs.html?project=${encodeURIComponent(selectedProjectId)}`">
+                    <span>Disponible</span><strong x-text="formatMoney(context.financials.availableAgainstExecuted)"></strong>
+                  </a>
+                  <template x-for="item in context.modules" :key="item.id"
+                    ><a class="project-context-item" :href="item.href">
+                      <i class="bi" :class="item.icon" aria-hidden="true"></i>
+                      <span><strong x-text="item.label"></strong><small x-text="item.detail"></small></span>
+                      <b x-text="item.count"></b>
+                    </a></template
+                  >
+                </div>
+              </section>

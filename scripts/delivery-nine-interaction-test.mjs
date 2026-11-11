@@ -4,6 +4,7 @@ import { mkdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { getVariantConfig, variantRule } from '../src-modern/scripts/config/variants.js';
 import {
   getDataForVariant,
   getDocuments,
@@ -105,17 +106,28 @@ async function testDocuments() {
       new RegExp(data.budgets[0].id)
     );
     await page.getByRole('button', { name: 'Vista previa' }).click();
-    await page.locator('#document-preview-modal').waitFor({ state: 'visible' });
-    assert.match(
-      await page.locator('#document-preview-modal').innerText(),
-      /No hay contenido de archivo/
-    );
-    await page
-      .locator('#document-preview-modal')
-      .getByRole('button', { name: 'Cerrar' })
-      .last()
-      .click();
-    await page.locator('#document-preview-modal').waitFor({ state: 'hidden' });
+    if (variantRule('documentViewer', getVariantConfig(variant))) {
+      // R3 (J&Y Demo): the preview is the document itself, in the full view.
+      await page.locator('.evidence-stage.is-full').waitFor({ state: 'visible' });
+      assert.match(
+        await page.locator('.evidence-stage .ev-doc').innerText(),
+        new RegExp(data.budgets[0].id)
+      );
+      await page.keyboard.press('Escape');
+      await page.locator('.evidence-stage.is-full').waitFor({ state: 'detached' });
+    } else {
+      await page.locator('#document-preview-modal').waitFor({ state: 'visible' });
+      assert.match(
+        await page.locator('#document-preview-modal').innerText(),
+        /No hay contenido de archivo/
+      );
+      await page
+        .locator('#document-preview-modal')
+        .getByRole('button', { name: 'Cerrar' })
+        .last()
+        .click();
+      await page.locator('#document-preview-modal').waitFor({ state: 'hidden' });
+    }
     await page.getByRole('button', { name: 'Nueva versión', exact: true }).click();
     await page.locator('#document-version-modal').waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'Guardar versión visual' }).click();
@@ -199,7 +211,10 @@ async function testReports() {
   await page.locator('.analytics-link').click();
   await page.waitForURL(/analytics\.html\?.*period=2027-03/);
   await ready();
-  assert.equal(await page.locator('.shell-page-heading h1').innerText(), 'Inteligencia de Negocios');
+  assert.equal(
+    await page.locator('.shell-page-heading h1').innerText(),
+    'Inteligencia de Negocios'
+  );
   await page.locator('#analytics-margin-chart .chart-svg').waitFor();
   await page.locator('#reports-budget-chart .chart-svg rect').first().waitFor();
   const kpis = await page.locator('.d9-kpis').innerText();
@@ -281,9 +296,16 @@ async function testCRM() {
     6
   );
   await page.locator('.crm-card').filter({ hasText: 'Radioenlaces de campamento' }).click();
-  assert.match(await page.locator('#crm-detail-title').locator('xpath=ancestor::section[1]').innerText(), /OP-005[\s\S]*Prospecto/);
+  assert.match(
+    await page.locator('#crm-detail-title').locator('xpath=ancestor::section[1]').innerText(),
+    /OP-005[\s\S]*Prospecto/
+  );
   await page.getByRole('button', { name: 'Marcar como ganado' }).click();
-  await page.locator('.crm-column').filter({ hasText: 'Ganado' }).filter({ hasText: 'Radioenlaces' }).waitFor();
+  await page
+    .locator('.crm-column')
+    .filter({ hasText: 'Ganado' })
+    .filter({ hasText: 'Radioenlaces' })
+    .waitFor();
   await page.evaluate(() => localStorage.removeItem('mockup-erp:surtec-peti:crm-stages'));
   await page.goto(url('surtec-peti', 'crm.html'));
   await ready();
@@ -341,8 +363,18 @@ async function testIntegrations() {
     /Biometría.*Conectado/s
   );
   // Entrega 6: credible states, sync history and the punto 92 error.
-  assert.match(await page.locator('#main-content').innerText(), /2 registros biométricos no pudieron asociarse con trabajadores/);
-  assert.equal(await page.locator('#integration-history-title').locator('xpath=ancestor::section[1]').locator('tbody tr').count(), 5);
+  assert.match(
+    await page.locator('#main-content').innerText(),
+    /2 registros biométricos no pudieron asociarse con trabajadores/
+  );
+  assert.equal(
+    await page
+      .locator('#integration-history-title')
+      .locator('xpath=ancestor::section[1]')
+      .locator('tbody tr')
+      .count(),
+    5
+  );
   await page.locator('#integration-category').selectOption('Finanzas');
   assert.equal(await page.locator('.integration-list button').count(), 1);
   assert.match(
@@ -463,10 +495,7 @@ async function testAdministration() {
     await page.locator('#admin-catalog-search').fill('sin coincidencias');
     await page.locator('.d9-empty:visible').waitFor();
     await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
-    await page
-      .locator('.admin-catalog-menu button')
-      .filter({ hasText: 'Clientes' })
-      .click();
+    await page.locator('.admin-catalog-menu button').filter({ hasText: 'Clientes' }).click();
     assert.equal(
       await page.locator('.admin-catalog-layout table tbody tr').count(),
       data.clients.length

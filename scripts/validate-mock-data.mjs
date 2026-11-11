@@ -23,6 +23,7 @@ import {
   warehouseStock,
 } from '../src-modern/scripts/data/warehouse-data.js';
 import { projectCostModel } from '../src-modern/scripts/data/cost-data.js';
+import { costLines, treatmentTotals } from '../src-modern/scripts/data/cost-treatment.js';
 import {
   EVIDENCE_TYPES,
   EXPENSE_CATEGORIES,
@@ -403,6 +404,31 @@ assert.deepEqual(
   ['Aceptada', 'Corregida', 'Entregada a Contabilidad', 'Observada', 'Presentada']
 );
 for (const sample of demo.expenseSamples) assert.ok(EVIDENCE_TYPES[sample.docType], sample.id);
+
+// R3 — J&Y Real and formal treatment: every line splits exactly, and the lines
+// of a project add up to its executed cost (the same sol everywhere).
+for (const variantId of VARIANT_IDS) {
+  const variantData = getDataForVariant(variantId);
+  for (const project of variantData.projects) {
+    const lines = costLines(variantData, project.id);
+    for (const line of lines) {
+      const split = Object.values(line.treatment).reduce((sum, value) => sum + value, 0);
+      assert.equal(Math.round(split * 100), Math.round(line.total * 100), `${line.id}: tratamiento`);
+    }
+    assert.equal(
+      Math.round(treatmentTotals(lines).total * 100),
+      Math.round(getProjectFinancials(variantData, project.id).executedCost * 100),
+      `${project.id}: J&Y Real distinto del costo ejecutado`
+    );
+  }
+}
+const demoDocuments = getDocuments(demo);
+for (const report of demo.expenseReports) {
+  for (const item of report.items) {
+    const hasDocument = demoDocuments.some((doc) => doc.evidenceItemId === item.id);
+    assert.equal(hasDocument, item.docType !== 'sin-documento', `${item.id}: documento de evidencia`);
+  }
+}
 for (const project of demo.projects) {
   assert.match(project.id, /^PY-26-\d{3}$/);
   assert.match(project.budgetId, /^PR26\d{2}-\d{4}$/);

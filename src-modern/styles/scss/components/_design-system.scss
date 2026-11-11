@@ -4172,6 +4172,224 @@ button.kpi {
   }
 }
 
+// Long module names (J&Y Demo: "Costos y Control Contable") wrap in the
+// rail instead of widening it.
+.admin-sidebar .sidebar-nav {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-sidebar .sidebar-nav .nav .nav-link,
+.admin-sidebar .sidebar-nav .nav-link {
+  white-space: normal;
+  line-height: 1.25;
+}
+.admin-sidebar .sidebar-nav .nav .nav-link span,
+.admin-sidebar .sidebar-nav .nav-link span {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+// Costos y Control Contable, Pendientes, Inicio (R3, J&Y Demo).
+.treatment-real {
+  display: grid;
+  gap: 0.15rem;
+  margin-bottom: 1rem;
+}
+.treatment-real span {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+.treatment-real strong {
+  color: var(--ink);
+  font-size: var(--fs-2xl);
+  font-variant-numeric: tabular-nums;
+}
+.treatment-real small {
+  color: var(--ink-3);
+}
+.treatment-bar .splitbar {
+  height: 14px;
+  margin-bottom: 1rem;
+}
+.treatment-list {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+}
+.treatment-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.treatment-list dt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.treatment-list dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.treatment-list .is-undocumented dd {
+  color: var(--warn);
+}
+.cost-category-chart {
+  min-height: 180px;
+}
+.consolidation-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 0.75rem;
+}
+.consolidation-table {
+  font-size: var(--fs-sm);
+}
+.consolidation-table th,
+.consolidation-table .data-money {
+  white-space: nowrap;
+}
+.consolidation-table tbody tr.is-selected > * {
+  background: var(--accent-soft);
+}
+.consolidation-table tfoot th,
+.consolidation-table tfoot td {
+  border-top: 2px solid var(--line-strong);
+  font-weight: 700;
+}
+.consolidation-detail {
+  margin-top: 1rem;
+}
+.consolidation-lines,
+.worklist-cards {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.consolidation-lines a,
+.worklist-cards a {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  text-decoration: none;
+}
+.consolidation-lines a:hover,
+.worklist-cards a:hover,
+.consolidation-lines a:focus-visible,
+.worklist-cards a:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.consolidation-lines a > span {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.consolidation-lines small,
+.worklist-cards small {
+  color: var(--ink-3);
+}
+.worklist-cards a {
+  display: grid;
+  gap: 0.25rem;
+}
+.worklist-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.worklist-card-action {
+  color: var(--accent);
+  font-weight: 600;
+}
+.worklist-workspace .kpi--button.is-active {
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+.project-context {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+.project-context a {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.project-context a:hover,
+.project-context a:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.project-context a.project-context-money {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  background: var(--panel-2);
+}
+.project-context-money span {
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+.project-context-money strong {
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+}
+.project-context-item .bi {
+  color: var(--accent);
+  font-size: 1.15rem;
+}
+.project-context-item > span {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.project-context-item small {
+  color: var(--ink-3);
+}
+.project-context-item b {
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+}
+.ev-doc--sheet .ev-lines small {
+  color: var(--paper-muted);
+}
+.document-viewer .evidence-canvas {
+  min-height: 300px;
+}
+@media (max-width: 767.98px) {
+  .project-context {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 575.98px) {
+  .project-context {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767.98px) {
+  .consolidation-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 // Maturity badges (utils/maturity.js): J&Y Demo only, hidden until the
 // presenter turns them on. Text and colour together, never colour alone.
 .maturity {

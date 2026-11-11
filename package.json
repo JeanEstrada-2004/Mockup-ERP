@@ -65,6 +65,7 @@
     "test:delivery10": "node scripts/verify-delivery-ten.mjs",
     "test:masters": "node scripts/masters-interaction-test.mjs",
     "test:jy-expenses": "node scripts/expense-review-interaction-test.mjs",
+    "test:jy-control": "node scripts/jy-control-interaction-test.mjs",
     "preview:pages": "node scripts/preview-pages.mjs",
     "preview": "vite preview",
     "serve": "vite build && vite preview",

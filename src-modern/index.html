@@ -62,7 +62,8 @@
               ></a>
               <a class="kpi" href="./costs.html"
                 ><span class="kpi-label"
-                  ><i class="kpi-dot" aria-hidden="true"></i>Costo acumulado</span
+                  ><i class="kpi-dot" aria-hidden="true"></i
+                  ><span x-text="worklistMode ? 'Costo J&Y Real acumulado' : 'Costo acumulado'"></span></span
                 ><span class="kpi-value" x-count.money="portfolio.executedCost"></span
                 ><span class="kpi-foot"
                   ><span id="dashboard-spark" aria-hidden="true"></span
@@ -80,7 +81,9 @@
                 ><span class="kpi-label"
                   ><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Órdenes de compra</span
                 ><span class="kpi-value" x-count="purchasePendingCount"></span
-                ><span class="kpi-foot"><span class="pill pill-info">Por aprobar</span></span></a
+                ><span class="kpi-foot"
+                  ><span class="pill pill-info" x-text="worklistMode ? 'Pendientes' : 'Por aprobar'"></span></span
+              ></a
               >
               <button
                 class="kpi"
@@ -108,14 +111,9 @@
                     x-show="approvals.length"
                     x-count="approvals.length"
                   ></span>
-                  <h2
-                    id="dashboard-approvals-title"
-                    x-text="approvals.length === 0 ? 'No hay aprobaciones pendientes' : approvals.length === 1 ? 'aprobación espera tu revisión' : 'aprobaciones esperan tu revisión'"
-                  ></h2>
+                  <h2 id="dashboard-approvals-title" x-text="heroTitle"></h2>
                 </div>
-                <p
-                  x-text="approvals.length ? 'Revisa los registros pendientes antes de continuar con el proyecto.' : 'El equipo no tiene registros esperando aprobación.'"
-                ></p>
+                <p x-text="heroText"></p>
                 <div class="hero-list">
                   <template x-for="item in oldestApprovals" :key="item.id"
                     ><a :href="item.href"
@@ -126,9 +124,7 @@
                       ><strong x-text="formatMoney(item.amount)"></strong></a
                   ></template>
                 </div>
-                <a class="btn btn-light" href="./approvals.html" x-show="approvals.length">
-                  Abrir bandeja
-                </a>
+                <a class="btn btn-light" href="./approvals.html" x-show="approvals.length" x-text="worklistMode ? 'Abrir pendientes' : 'Abrir bandeja'"></a>
               </section>
               <section class="panel" aria-labelledby="dashboard-flow-title">
                 <div class="panel-head">
@@ -150,6 +146,7 @@
               </section>
             </div>
             <div class="panel-grid panel-grid--wide dashboard-secondary-grid">
+              <!-- IF physicalProgress=true -->
               <section class="panel" aria-labelledby="dashboard-execution-title">
                 <div class="panel-head">
                   <div>
@@ -162,6 +159,7 @@
                 </div>
                 <div id="dashboard-execution" class="chart"></div>
               </section>
+              <!-- ELSE --><!-- INCLUDE project-context --><!-- /IF -->
               <div class="panel-stack">
                 <section class="panel" aria-labelledby="dashboard-monthly-title">
                   <div class="panel-head">
@@ -181,7 +179,7 @@
                     <template x-for="item in activity" :key="item.id"
                       ><a :href="item.href"
                         ><span
-                          ><strong x-text="`${item.kind} ${item.id}`"></strong
+                          ><strong x-text="`${item.kind} ${item.label}`"></strong
                           ><small x-text="`${item.projectId} · ${item.status}`"></small></span
                         ><time :datetime="item.date" x-text="formatDate(item.date)"></time></a
                     ></template>

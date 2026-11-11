@@ -1,4 +1,9 @@
-import { activeVariant, isModuleEnabled, variantStorageKey } from '../config/variants.js';
+import {
+  activeVariant,
+  isModuleEnabled,
+  variantRule,
+  variantStorageKey,
+} from '../config/variants.js';
 import { Modal } from 'bootstrap';
 import { moduleHref } from '../config/modules.js';
 import {
@@ -17,6 +22,12 @@ import {
 } from '../data/mock-data.js';
 import { formatMoney, writeProjectId } from './shell.js';
 import { tableControls } from '../utils/data-table.js';
+import { worklistItems } from '../data/worklist.js';
+import { personnelAssignments } from '../data/personnel-data.js';
+// R3 — J&Y Demo hides physical progress and works with a list of pending tasks.
+const hasProgress = variantRule('physicalProgress');
+const worklistMode = variantRule('approvalsMode') === 'worklist';
+const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 const data = getDataForVariant(activeVariant);
 const costNames = {
@@ -103,6 +114,7 @@ function recentActivity() {
     .map((item) => ({
       ...item,
       kind: operationNames[item.type] || 'Operación',
+      label: item.label || item.id,
       projectName: getProject(data, item.projectId)?.name || item.projectId,
       href: projectDetailUrl(item.projectId, 'home'),
     }));
@@ -157,14 +169,28 @@ export function dashboardView() {
   const projects = data.projects.filter((project) =>
     ['Activo', 'En riesgo'].includes(project.status)
   );
-  const approvals = getPendingApprovals(data, activeVariant)
+  const approvals = (
+    worklistMode
+      ? worklistItems(data).map((item) => ({
+          id: item.label,
+          kind: item.kind,
+          moduleId:
+            { review: 'expenses', observed: 'expenses', deliver: 'expenses' }[item.tab] || item.tab,
+          tab: item.tab,
+          projectId: item.projectId,
+          amount: item.amount,
+          date: item.date,
+          href: item.href,
+        }))
+      : getPendingApprovals(data, activeVariant)
+  )
     .map((item) => ({
       ...item,
       date:
         data.operations.find((operation) => operation.id === item.id)?.date ||
         getProject(data, item.projectId)?.startDate ||
         '',
-      href: moduleHref(item.moduleId, item.id),
+      href: item.href || moduleHref(item.moduleId, item.id),
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
   const months = getMonthlyExecutedCost(data);
@@ -213,11 +239,105 @@ export function dashboardView() {
           .at(-1)
       );
     },
+    hasProgress,
+    worklistMode,
     get expensePendingCount() {
-      return this.approvals.filter((item) => item.moduleId === 'expenses').length;
+      return this.approvals.filter((item) =>
+        worklistMode ? item.tab === 'review' : item.moduleId === 'expenses'
+      ).length;
     },
     get purchasePendingCount() {
       return this.approvals.filter((item) => item.moduleId === 'purchases').length;
+    },
+    get heroTitle() {
+      const count = this.approvals.length;
+      if (worklistMode)
+        return count === 0
+          ? 'No hay pendientes'
+          : count === 1
+            ? 'pendiente espera atención'
+            : 'pendientes esperan atención';
+      return count === 0
+        ? 'No hay aprobaciones pendientes'
+        : count === 1
+          ? 'aprobación espera tu revisión'
+          : 'aprobaciones esperan tu revisión';
+    },
+    get heroText() {
+      if (worklistMode)
+        return this.approvals.length
+          ? 'Rendiciones por revisar o entregar, órdenes de compra y documentos que faltan.'
+          : 'El equipo no tiene tareas esperando.';
+      return this.approvals.length
+        ? 'Revisa los registros pendientes antes de continuar con el proyecto.'
+        : 'El equipo no tiene registros esperando aprobación.';
+    },
+    // "Proyecto en contexto" (R3, J&Y Demo): the selected project at a glance.
+    get context() {
+      const id = this.selectedProjectId;
+      const operations = getProjectOperations(data, id);
+      const of = (type) => operations.filter((item) => item.type === type);
+      const tab = (name) => `${projectDetailUrl(id, 'home')}#${name}`;
+      const expenses = of('expense');
+      const purchases = of('purchase');
+      const people = new Set(
+        personnelAssignments(data)
+          .filter((item) => item.projectId === id)
+          .map((item) => item.workerId)
+      );
+      const documents = getDocuments(data).filter((item) => item.projectId === id);
+      return {
+        financials: getProjectFinancials(data, id),
+        modules: [
+          {
+            id: 'expenses',
+            label: 'Rendiciones',
+            icon: 'bi-file-text',
+            count: expenses.length,
+            detail: `${expenses.filter((item) => EXPENSE_PENDING_STATUSES.includes(item.status)).length} por revisar`,
+            href: tab('expenses'),
+          },
+          {
+            id: 'purchases',
+            label: 'Compras / OC',
+            icon: 'bi-bag-check',
+            count: purchases.length,
+            detail: plural(
+              purchases.filter((item) => item.status === 'Pendiente').length,
+              'pendiente'
+            ),
+            href: tab('purchases'),
+          },
+          {
+            id: 'personnel',
+            label: 'Personal',
+            icon: 'bi-person',
+            count: people.size,
+            detail: 'Personas vinculadas',
+            href: tab('personnel'),
+          },
+          ...(isModuleEnabled('warehouse')
+            ? [
+                {
+                  id: 'materials',
+                  label: 'Materiales',
+                  icon: 'bi-box',
+                  count: of('material_issue').length,
+                  detail: 'Salidas al proyecto',
+                  href: tab('materials'),
+                },
+              ]
+            : []),
+          {
+            id: 'documents',
+            label: 'Documentos',
+            icon: 'bi-folder2-open',
+            count: documents.length,
+            detail: 'Comprobantes, OC y reportes',
+            href: tab('documents'),
+          },
+        ],
+      };
     },
     get riskCount() {
       return data.projects.filter((project) => project.status === 'En riesgo').length;
@@ -276,18 +396,20 @@ export function dashboardView() {
         flow.render(el('dashboard-flow'), this.flowData, {
           label: `Trazabilidad del costo de ${this.selectedProjectId}`,
         }),
-        execution.render(
-          el('dashboard-execution'),
-          this.projects.map((project) => ({
-            id: project.id,
-            name: projectShortName(project.name),
-            budget: project.budgetAmount,
-            cost: getProjectFinancials(data, project.id).executedCost,
-            progress: project.progressPercent,
-            href: this.projectHref(project.id),
-          })),
-          { label: 'Ejecución del presupuesto frente al avance físico por proyecto' }
-        ),
+        // J&Y Demo has no physical progress: no execution-vs-progress chart.
+        el('dashboard-execution') &&
+          execution.render(
+            el('dashboard-execution'),
+            this.projects.map((project) => ({
+              id: project.id,
+              name: projectShortName(project.name),
+              budget: project.budgetAmount,
+              cost: getProjectFinancials(data, project.id).executedCost,
+              progress: project.progressPercent,
+              href: this.projectHref(project.id),
+            })),
+            { label: 'Ejecución del presupuesto frente al avance físico por proyecto' }
+          ),
         area.render(el('dashboard-monthly'), this.months, {
           label: 'Costo ejecutado por mes del portafolio en ejecución',
           valueLabel: 'ejecutados',
@@ -380,6 +502,7 @@ export function projectsList() {
     clients,
     managers,
     dataClients: data.clients,
+    hasProgress,
     dataWorkers: data.workers,
     search: '',
     status: '',
@@ -595,6 +718,15 @@ export function projectDetail() {
     backLabel: from === 'home' ? 'Volver al Panel General' : 'Volver a Proyectos',
     hasWarehouse: isModuleEnabled('warehouse'),
     hasBudgets: isModuleEnabled('budgets'),
+    hasProgress,
+    get expenseCount() {
+      return getProjectOperations(data, id).filter((item) => item.type === 'expense').length;
+    },
+    get expenseReviewCount() {
+      return getProjectOperations(data, id).filter(
+        (item) => item.type === 'expense' && EXPENSE_PENDING_STATUSES.includes(item.status)
+      ).length;
+    },
     get clientHref() {
       return this.project && isModuleEnabled('clients')
         ? moduleHref('clients', this.project.clientId)
@@ -691,13 +823,17 @@ export function projectDetail() {
       const element = document.getElementById('project-budget-chart');
       if (!element) return;
       const { render } = await import('../charts/bars.js');
-      this.budgetChart = render(element, {
-        categories: [project.id],
-        series: [
-          { label: 'Presupuesto', color: '--s1', values: [financials.budgetAmount] },
-          { label: 'Ejecutado', color: '--s2', values: [financials.executedCost] },
-        ],
-      }, { height: 160, label: `Presupuesto y costo ejecutado de ${project.id}` });
+      this.budgetChart = render(
+        element,
+        {
+          categories: [project.id],
+          series: [
+            { label: 'Presupuesto', color: '--s1', values: [financials.budgetAmount] },
+            { label: 'Ejecutado', color: '--s2', values: [financials.executedCost] },
+          ],
+        },
+        { height: 160, label: `Presupuesto y costo ejecutado de ${project.id}` }
+      );
     },
     destroy() {
       this.budgetChart?.destroy?.();

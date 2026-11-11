@@ -163,7 +163,7 @@
                     <thead>
                       <tr>
                         <template
-                          x-for="column in [['id','Código'],['name','Proyecto'],['client','Cliente'],['manager','Responsable'],['progress','Avance'],['budget','Presupuesto'],['cost','Costo'],['status','Estado']]"
+                          x-for="column in [['id','Código'],['name','Proyecto'],['client','Cliente'],['manager','Responsable'],['progress','Avance'],['budget','Presupuesto'],['cost','Costo'],['status','Estado']].filter((item) => hasProgress || item[0] !== 'progress')"
                           :key="column[0]"
                           ><th
                             scope="col"
@@ -198,7 +198,7 @@
                           </td>
                           <td x-text="projectClient(project)"></td>
                           <td class="data-col-wide" x-text="projectManager(project)"></td>
-                          <td class="text-end">
+                          <td class="text-end" x-show="hasProgress">
                             <span class="data-progress"
                               ><span class="data-progress-bar"
                                 ><span :style="`width:${project.progressPercent}%`"></span></span
@@ -302,7 +302,7 @@
                       ></span>
                       <span
                         class="workspace-project-card-end"
-                        x-text="`Avance ${project.progressPercent} % · Abrir ficha →`"
+                        x-text="hasProgress ? `Avance ${project.progressPercent} % · Abrir ficha →` : 'Abrir ficha →'"
                       ></span> </a
                   ></template>
                 </div>

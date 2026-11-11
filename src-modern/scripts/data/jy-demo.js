@@ -1217,20 +1217,28 @@ function buildJyDemoData() {
     expenseSamples: EXPENSE_SAMPLES,
     operations: [
       operation('OC-26-001', 'PY-26-001', 'purchase', 38400, 'purchases', {
+      category: 'Suministro',
+      description: 'Conductores y tableros para obra',
         supplierId: 'PROV-JY-001',
         status: 'Atendida',
         date: '2026-04-14',
       }),
       operation('TAR-26-001', 'PY-26-001', 'timesheet', 26800, 'personnel', {
+      category: 'Planilla',
+      description: 'Tareo de supervisión de campo',
         workerId: 'PER-JY-002',
         status: 'Aprobado',
         date: '2026-05-29',
       }),
       operation('AJ-26-001', 'PY-26-001', 'other', 1800, 'other', {
+      category: 'Otros',
+      description: 'Ajuste de costo registrado por Contabilidad',
         status: 'Registrado',
         date: '2026-05-31',
       }),
       operation('OC-26-004', 'PY-26-001', 'purchase', 6200, null, {
+      category: 'Servicio',
+      description: 'Alquiler de estación total',
         supplierId: 'PROV-JY-002',
         status: 'Pendiente',
         date: '2026-07-06',
@@ -1238,22 +1246,30 @@ function buildJyDemoData() {
       }),
 
       operation('OC-26-002', 'PY-26-002', 'purchase', 21500, 'purchases', {
+      category: 'Suministro',
+      description: 'Tablero autosoportado e instalación',
         supplierId: 'PROV-JY-003',
         status: 'Atendida',
         date: '2026-05-08',
       }),
       operation('TAR-26-002', 'PY-26-002', 'timesheet', 14200, 'personnel', {
+      category: 'Planilla',
+      description: 'Tareo de instalaciones eléctricas',
         workerId: 'PER-JY-004',
         status: 'Aprobado',
         date: '2026-06-30',
       }),
 
       operation('OC-26-003', 'PY-26-003', 'purchase', 16900, 'purchases', {
+      category: 'Suministro',
+      description: 'Equipos de cómputo y pantallas',
         supplierId: 'PROV-JY-004',
         status: 'Atendida',
         date: '2026-05-27',
       }),
       operation('TAR-26-003', 'PY-26-003', 'timesheet', 5400, 'personnel', {
+      category: 'Planilla',
+      description: 'Tareo de equipamiento de aulas',
         workerId: 'PER-JY-001',
         status: 'Aprobado',
         date: '2026-06-30',

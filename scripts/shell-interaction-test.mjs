@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { getVariantConfig, variantRule } from '../src-modern/scripts/config/variants.js';
 import {
   getDataForVariant,
   getDocuments,
@@ -134,10 +135,16 @@ async function verifyProjectFlow(variant, projectId) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(pageUrl(variant));
   // Entrega 3: flow and monthly charts are SVG; execution is accessible linked rows.
+  // R3: J&Y Demo has no physical progress; "Proyecto en contexto" takes its place.
+  const withProgress = variantRule('physicalProgress', getVariantConfig(variant));
   await page.waitForFunction(
-    () =>
+    (progress) =>
       document.querySelectorAll('#dashboard-flow .chart-svg, #dashboard-monthly .chart-svg')
-        .length === 2 && document.querySelectorAll('#dashboard-execution .exec-row').length > 0
+        .length === 2 &&
+      (progress
+        ? document.querySelectorAll('#dashboard-execution .exec-row').length > 0
+        : document.querySelectorAll('.project-context-item').length > 0),
+    withProgress
   );
   // KPI figures count up (~650 ms); read them once they settle.
   await page.waitForTimeout(900);
@@ -192,6 +199,12 @@ async function verifyProjectFlow(variant, projectId) {
   await page.locator('.workspace-heading-actions a[href*="projects.html"]').click();
   await page.waitForURL(/projects\.html\?new=1$/);
   await page.locator('#project-create-modal').waitFor({ state: 'visible' });
+  // Bootstrap ignores a close request while the opening fade is still running.
+  await page.waitForFunction(() => {
+    const modal = document.querySelector('#project-create-modal');
+    return modal?.classList.contains('show') && document.body.classList.contains('modal-open');
+  });
+  await page.waitForTimeout(350);
   await page.locator('#project-create-modal [data-bs-dismiss="modal"]').last().click();
   // Wait for Bootstrap's fade-out: the backdrop must be gone before the table is clicked.
   await page.locator('#project-create-modal').waitFor({ state: 'hidden' });
@@ -346,7 +359,10 @@ try {
   await page.waitForURL(/supplier\.html\?id=PROV-001/);
   await page.waitForFunction(() => window.AdminApp?.isInitialized);
   assert.equal(await page.locator('.sidebar-nav [data-module="suppliers"].active').count(), 1);
-  await page.locator('.d9-tabs').getByRole('tab', { name: /Órdenes de compra/ }).click();
+  await page
+    .locator('.d9-tabs')
+    .getByRole('tab', { name: /Órdenes de compra/ })
+    .click();
   await page.getByRole('link', { name: 'Ver en Compras' }).click();
   await page.waitForURL(/purchases\.html\?supplier=PROV-001/);
   assert.equal(await page.locator('#purchases-supplier').inputValue(), 'PROV-001');

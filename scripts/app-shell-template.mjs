@@ -12,6 +12,7 @@ import {
   moduleHref,
   moduleLabel,
 } from '../src-modern/scripts/config/modules.js';
+import { worklistItems } from '../src-modern/scripts/data/worklist.js';
 import {
   getDataForVariant,
   getPendingApprovals,
@@ -25,9 +26,13 @@ import {
 //   <!-- INCLUDE name -->   inserts src-modern/partials/name.html
 const partialsDir = fileURLToPath(new URL('../src-modern/partials/', import.meta.url));
 function applyPageBlocks(html, variant) {
-  const withIncludes = html.replace(/<!-- INCLUDE ([a-z0-9-]+) -->/g, (_match, name) =>
-    readFileSync(path.join(partialsDir, `${name}.html`), 'utf8')
-  );
+  // Partials may include other partials (a few levels at most).
+  let withIncludes = html;
+  for (let depth = 0; depth < 4 && withIncludes.includes('<!-- INCLUDE '); depth += 1) {
+    withIncludes = withIncludes.replace(/<!-- INCLUDE ([a-z0-9-]+) -->/g, (_match, name) =>
+      readFileSync(path.join(partialsDir, `${name}.html`), 'utf8')
+    );
+  }
   return withIncludes.replace(
     /<!-- IF (\w+)=([\w-]+) -->([\s\S]*?)(?:<!-- ELSE -->([\s\S]*?))?<!-- \/IF -->/g,
     (_match, key, value, whenTrue, whenFalse = '') =>
@@ -161,7 +166,8 @@ function renderHeader(variant, data) {
     ? '<li><button class="dropdown-item shell-maturity-toggle" type="button" data-maturity-toggle aria-pressed="false" title="Alt + Shift + V"><i class="bi bi-patch-check me-2" aria-hidden="true"></i>Estado de validación</button></li>'
     : '';
   const notifications = getShellNotifications(data, variant);
-  const approvals = getPendingApprovals(data, variant);
+  const worklist = variantRule('approvalsMode', variant) === 'worklist';
+  const approvals = worklist ? worklistItems(data, variant) : getPendingApprovals(data, variant);
   const company = variant.company;
   const user = variant.user;
   const projectOptions = data.projects
@@ -212,7 +218,7 @@ function renderHeader(variant, data) {
               <i class="bi bi-info-circle" aria-hidden="true"></i><span class="shell-demo-badge-long">Datos de demostración</span><span class="shell-demo-badge-short">Demo</span>
             </span>
             <div>
-              <a class="btn shell-icon-button position-relative" href="./approvals.html" data-approvals-link aria-label="Aprobaciones: ${approvals.length} pendientes" title="Aprobaciones pendientes">
+              <a class="btn shell-icon-button position-relative" href="./approvals.html" data-approvals-link aria-label="${worklist ? `Pendientes: ${approvals.length}` : `Aprobaciones: ${approvals.length} pendientes`}" title="${worklist ? 'Pendientes' : 'Aprobaciones pendientes'}">
                 <i class="bi bi-check2-square" aria-hidden="true"></i>
                 <span class="shell-notification-count" data-approvals-count${approvals.length ? '' : ' hidden'}>${approvals.length}</span>
               </a>
@@ -255,7 +261,10 @@ function renderHeader(variant, data) {
 }
 
 function renderSidebar(variant, data) {
-  const pendingCount = getPendingApprovals(data, variant).length;
+  const pendingCount =
+    variantRule('approvalsMode', variant) === 'worklist'
+      ? worklistItems(data, variant).length
+      : getPendingApprovals(data, variant).length;
   const sections = NAV_GROUPS.map((group) => {
     const ids = group.modules.filter((id) => variant.enabledModules.includes(id));
     if (!ids.length) return '';
