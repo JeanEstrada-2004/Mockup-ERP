@@ -199,7 +199,9 @@ No se incorporan gráficos de otra biblioteca.
 - Cifras de KPI que cuentan hasta su valor (≈650 ms) con la directiva de Alpine
   `x-count` (`x-count.money`, `x-count.pct`; `utils/motion.js`). El valor final queda en
   `aria-label` desde el primer cuadro.
-- El contenido de la página entra una vez (opacidad + 6 px, 360 ms, escalonado).
+- El título y el contenido entran una vez (opacidad + 6 px, 220–240 ms,
+  escalonado). La navegación entre documentos usa un fundido de 100–180 ms
+  cuando el navegador admite View Transitions; los enlaces siguen siendo nativos.
 - Textura de red del bloque protagonista: `canvas.hero-net`, dibujada por
   `mountHeroNetworks()` en `main.js` (determinista y redimensionable).
 - Botones `scale(0.97)` al presionar; filas y celdas KPI con cambio de fondo al pasar.

@@ -5179,7 +5179,31 @@ html[data-maturity-tags='on'] .maturity {
   transform-origin: top left;
 }
 
-// Page content settles in once on load (opacity + short rise).
+// The document opt-in is in the head so navigation can be captured before
+// this stylesheet finishes loading. Keep the visual treatment lightweight.
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ds-page-out {
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes ds-page-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  ::view-transition-old(root) {
+    animation: 100ms var(--ease-out) both ds-page-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: 180ms var(--ease-out) both ds-page-in;
+  }
+}
+
+// Page content and headings settle in without delaying navigation.
 @keyframes ds-rise {
   from {
     opacity: 0;
@@ -5194,18 +5218,26 @@ html[data-maturity-tags='on'] .maturity {
 // `backwards` (not `both`): once finished, no transform remains on the page
 // sections. A lingering `translate` would make them containing blocks and trap
 // the Bootstrap modals they contain beneath the body-level backdrop.
-.shell-page > :not(.modal) {
-  animation: ds-rise 360ms var(--ease-out) backwards;
+.shell-page > :not(.modal):not(.shell-page-heading) {
+  animation: ds-rise 220ms var(--ease-out) backwards;
 }
 
-.shell-page > :nth-child(2):not(.modal) {
-  animation-delay: 40ms;
+.shell-page > :nth-child(2):not(.modal):not(.shell-page-heading) {
+  animation-delay: 24ms;
 }
-.shell-page > :nth-child(3):not(.modal) {
-  animation-delay: 80ms;
+.shell-page > :nth-child(3):not(.modal):not(.shell-page-heading) {
+  animation-delay: 48ms;
 }
-.shell-page > :nth-child(n + 4):not(.modal) {
-  animation-delay: 120ms;
+.shell-page > :nth-child(n + 4):not(.modal):not(.shell-page-heading) {
+  animation-delay: 72ms;
+}
+
+.shell-page-heading h1 {
+  animation: ds-rise 220ms var(--ease-out) backwards;
+}
+
+.shell-page-heading .shell-page-subtitle {
+  animation: ds-rise 240ms var(--ease-out) 32ms backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

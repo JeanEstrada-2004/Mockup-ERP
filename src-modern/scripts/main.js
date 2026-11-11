@@ -62,7 +62,6 @@ import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
 // Import Alpine.js for reactive components
 import Alpine from 'alpinejs';
 
-// Import styles (Bootstrap Icons are included in SCSS)
 // Inter, self-hosted. Replaces the render-blocking fonts.googleapis.com
 // stylesheet that every page used to load: one fewer third-party origin on the
 // critical path, no IP leak to a third party on first paint (a GDPR concern for
@@ -71,8 +70,6 @@ import Alpine from 'alpinejs';
 // template uses (300/400/500/600/700) all come from one request.
 import '@fontsource-variable/inter';
 import '@fontsource-variable/plus-jakarta-sans';
-
-import '../styles/scss/main.scss';
 
 // Application Class
 class AdminApp {

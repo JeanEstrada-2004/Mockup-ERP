@@ -526,6 +526,8 @@ export function appShellPlugin(mode) {
 
         const themeKey = `mockup-erp:${variant.id}:theme`;
         const brandStyle = `<style>${brandTokens(variant.theme)}${logoTokens(variant.company)}</style>`;
+        const motionOptIn =
+          '<style>@media (prefers-reduced-motion: no-preference) {@view-transition { navigation: auto; }}</style>';
         const earlyTheme = `<script>try{document.documentElement.dataset.bsTheme=localStorage.getItem(${JSON.stringify(themeKey)})||'light'}catch{document.documentElement.dataset.bsTheme='light'}</script>`;
 
         return html
@@ -538,7 +540,7 @@ export function appShellPlugin(mode) {
           )
           .replace(
             '</head>',
-            `<link rel="manifest" href="./manifest.json">${brandStyle}${earlyTheme}</head>`
+            `${motionOptIn}<link rel="stylesheet" href="./styles/scss/main.scss"><link rel="manifest" href="./manifest.json">${brandStyle}${earlyTheme}</head>`
           )
           .replace(
             '<!-- APP_FAVICON -->',
