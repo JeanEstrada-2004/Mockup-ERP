@@ -34,16 +34,12 @@ import { costWorkspace } from './components/cost-views.js';
 import { documentsWorkspace, documentDetail } from './components/document-views.js';
 import { reportsWorkspace } from './components/report-views.js';
 import { crmWorkspace } from './components/crm-views.js';
-import { integrationsWorkspace } from './components/integration-views.js';
+import { integrationsWorkspace, integrationsJyWorkspace } from './components/integration-views.js';
 import { securityWorkspace } from './components/security-views.js';
 import { administrationWorkspace } from './components/administration-views.js';
 import { designSystemView } from './components/design-system-view.js';
 import { initPresentationSwitcher } from './components/presentation-switcher.js';
-import {
-  approvalsView,
-  syncApprovalCounters,
-  worklistView,
-} from './components/approvals-view.js';
+import { approvalsView, syncApprovalCounters, worklistView } from './components/approvals-view.js';
 import { budgetCreate, purchaseCreate } from './components/commercial-forms.js';
 import {
   clientsList,
@@ -54,6 +50,7 @@ import {
 import { initMaturityTags } from './utils/maturity.js';
 import { budgetTechList, budgetTechDetail } from './components/budget-tech-views.js';
 import { productsWorkspace } from './components/product-views.js';
+import { personnelJyWorkspace, workerJyDetail } from './components/personnel-jy-views.js';
 
 import { statusClass } from './utils/status.js';
 import { registerCountDirective, mountHeroNetworks } from './utils/motion.js';
@@ -291,6 +288,9 @@ class AdminApp {
     Alpine.data('budgetTechList', budgetTechList);
     Alpine.data('budgetTechDetail', budgetTechDetail);
     Alpine.data('productsWorkspace', productsWorkspace);
+    Alpine.data('personnelJyWorkspace', personnelJyWorkspace);
+    Alpine.data('workerJyDetail', workerJyDetail);
+    Alpine.data('integrationsJyWorkspace', integrationsJyWorkspace);
 
     Alpine.data('themeSwitch', () => ({
       currentTheme: 'light',

@@ -39,6 +39,8 @@ function operationHref(item) {
     purchase: 'purchases',
     expense: 'expenses',
     timesheet: 'personnel',
+    payroll: 'personnel',
+    rxh: 'personnel',
     material_issue: 'warehouse',
     other: 'costs',
   }[item.type];
@@ -183,7 +185,7 @@ export function reportsWorkspace() {
       const types = {
         purchases: (item) => item.type === 'purchase',
         expenses: (item) => item.type === 'expense',
-        personnel: (item) => item.type === 'timesheet',
+        personnel: (item) => ['timesheet', 'payroll', 'rxh'].includes(item.type),
         costs: (item) => Boolean(item.costSource),
         warehouse: (item) => item.type === 'material_issue',
       };

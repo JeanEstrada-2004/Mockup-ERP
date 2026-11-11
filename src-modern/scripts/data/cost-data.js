@@ -16,6 +16,8 @@ export const COST_SOURCES = [
 const operationKinds = {
   purchase: 'Orden de compra atendida',
   timesheet: 'Tareo aprobado',
+  payroll: 'Planilla imputada',
+  rxh: 'Recibo por honorarios',
   expense: 'Rendición aprobada',
   material_issue: 'Salida de material',
   other: 'Ajuste de costo',

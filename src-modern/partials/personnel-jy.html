@@ -1,0 +1,388 @@
+          <div class="container-fluid shell-page project-workspace delivery-nine-workspace jy-personnel" x-data="personnelJyWorkspace">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Personal</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Personal</h1>
+                <p class="shell-page-subtitle">
+                  Asistencia, tareo de campo, planilla imputada a proyectos y recibos por honorarios.
+                </p>
+              </div>
+            </div>
+            <section class="kpi-strip kpi-strip--4" aria-label="Resumen de personal">
+              <button type="button" class="kpi kpi--button" @click="setTab('personal')">
+                <span class="kpi-label"><i class="kpi-dot" aria-hidden="true"></i>Personas</span>
+                <span class="kpi-value" x-count="workers.length"></span>
+                <span class="kpi-foot" x-text="`${countKind('Oficina')} oficina · ${countKind('Campo')} campo · ${countKind('Temporal')} temporal`"></span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="setTab('planilla')">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s2" aria-hidden="true"></i>Planilla imputada</span>
+                <span class="kpi-value" x-text="formatAmount(imputedTotal)"></span>
+                <span class="kpi-foot" x-text="`de ${formatAmount(payrollTotal)} · ${monthLabel(month)}`"></span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="setTab('rxh')">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--s4" aria-hidden="true"></i>Recibos por honorarios</span>
+                <span class="kpi-value" x-text="formatAmount(rxhTotal)"></span>
+                <span class="kpi-foot" x-text="`${rxh.length} recibos`"></span>
+              </button>
+              <button type="button" class="kpi kpi--button" @click="setTab('incidencias')">
+                <span class="kpi-label"><i class="kpi-dot kpi-dot--bad" aria-hidden="true"></i>Incidencias</span>
+                <span class="kpi-value" x-count="pendingIncidents.length"></span>
+                <span class="kpi-foot">Marcaciones o firmas faltantes</span>
+              </button>
+            </section>
+            <div class="d9-tabs" role="tablist" aria-label="Secciones de personal">
+              <template x-for="[id, label] in tabs" :key="id"
+                ><button type="button" role="tab" :class="{ active: tab === id }" :aria-selected="String(tab === id)" @click="setTab(id)"
+                  ><span x-text="label"></span
+                  ><span class="tab-count" x-show="id === 'incidencias' && pendingIncidents.length" x-text="pendingIncidents.length"></span></button
+              ></template>
+            </div>
+
+            <!-- Personal -->
+            <section class="card" x-show="tab === 'personal'" aria-labelledby="jy-people-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="as-is" data-maturity-note="J&amp;Y tiene personal de oficina y de campo en planilla, y personal temporal que cobra con recibo por honorarios.">
+                    <h2 id="jy-people-title">Personal</h2>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0 d9-table jy-people-table">
+                    <thead><tr><th scope="col">Trabajador</th><th scope="col">Cargo y área</th><th scope="col">Tipo</th><th scope="col">Régimen</th><th scope="col">Proyectos</th></tr></thead>
+                    <tbody>
+                      <template x-for="item in workers" :key="item.id">
+                        <tr>
+                          <td><a :href="workerHref(item.id)" x-text="item.name"></a><small class="show-block text-muted" x-text="`DNI ${item.dni}`"></small></td>
+                          <td><span x-text="item.role"></span><small class="show-block text-muted" x-text="item.area"></small></td>
+                          <td><span class="pill" :class="item.kind === 'Temporal' ? 'pill-warn' : item.kind === 'Campo' ? 'pill-good' : 'pill-info'" x-text="item.kind"></span></td>
+                          <td x-text="item.regime === 'RxH' ? 'Recibo por honorarios' : 'Planilla'"></td>
+                          <td>
+                            <template x-for="projectId in projectsOf(item.id)" :key="projectId"><a class="data-code jy-chip" :href="projectHref(projectId)" x-text="projectId"></a></template>
+                            <span class="text-muted" x-show="!projectsOf(item.id).length">Oficina</span>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="workspace-caption mt-3 mb-0" data-maturity="validate" data-maturity-note="Del personal temporal falta levantar modalidad, cálculo de jornadas, documentos y pagos.">
+                  El personal temporal se vincula al proyecto por su tareo y sus recibos por honorarios.
+                </p>
+              </div>
+            </section>
+
+            <!-- Asistencia -->
+            <section class="card" x-show="tab === 'asistencia'" aria-labelledby="jy-attendance-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="as-is" data-maturity-note="Hoy el ZKTeco SF100 no está integrado: los registros se exportan a Excel.">
+                    <h2 id="jy-attendance-title">Asistencia</h2>
+                  </div>
+                  <button type="button" class="btn btn-outline-primary btn-sm" @click="importSf100()">Importar Excel del SF100</button>
+                </div>
+                <p class="workspace-caption">Control general de asistencia de la oficina. No calcula costo: el costo de personal viene de la planilla imputada.</p>
+                <div class="d9-filters jy-filters mb-3">
+                  <div>
+                    <label class="form-label" for="jy-attendance-worker">Trabajador</label
+                    ><select id="jy-attendance-worker" class="form-select" x-model="workerFilter">
+                      <option value="">Todos</option>
+                      <template x-for="item in workers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                    </select>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0 d9-table jy-attendance">
+                    <thead><tr><th scope="col">Fecha</th><th scope="col">Trabajador</th><th scope="col">Entrada</th><th scope="col">Salida</th><th scope="col">Estado</th><th scope="col">Origen</th></tr></thead>
+                    <tbody>
+                      <template x-for="row in filteredAttendance" :key="row.id">
+                        <tr>
+                          <td x-text="formatDate(row.date)"></td>
+                          <td x-text="workerName(row.workerId)"></td>
+                          <td x-text="row.start || '—'"></td>
+                          <td x-text="row.end || '—'"></td>
+                          <td><span class="badge" :class="row.status === 'Completa' ? 'status-badge status-badge--success' : 'status-badge status-badge--warning'" x-text="row.status"></span></td>
+                          <td x-text="row.source"></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <!-- Tareo -->
+            <section class="card" x-show="tab === 'tareo'" aria-labelledby="jy-tareo-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="to-be" data-maturity-note="Hoy el tareo de campo es una lista firmada en papel y a veces falta la firma. Propuesta: registrarlo por proyecto y firmarlo en el sistema.">
+                    <h2 id="jy-tareo-title">Tareo de campo</h2>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" @click="openTareo()">Registrar tareo</button>
+                </div>
+                <p class="workspace-caption" data-maturity="validate" data-maturity-note="No se asume una tarifa por hora: falta validar cómo se valoriza la jornada del personal de campo y temporal.">
+                  Participación del personal en cada proyecto por jornada. Es distinto de la asistencia de oficina y no genera costo por horas.
+                </p>
+                <div class="d9-filters jy-filters mb-3">
+                  <div>
+                    <label class="form-label" for="jy-tareo-project">Proyecto</label
+                    ><select id="jy-tareo-project" class="form-select" x-model="projectFilter">
+                      <option value="">Todos</option>
+                      <template x-for="item in projects" :key="item.id"><option :value="item.id" x-text="item.id"></option></template>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label" for="jy-tareo-worker">Trabajador</label
+                    ><select id="jy-tareo-worker" class="form-select" x-model="workerFilter">
+                      <option value="">Todos</option>
+                      <template x-for="item in fieldWorkers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template>
+                    </select>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0 d9-table jy-tareo">
+                    <thead><tr><th scope="col">Fecha</th><th scope="col">Proyecto</th><th scope="col">Trabajador</th><th scope="col">Jornada</th><th scope="col">Registró</th><th scope="col">Firma</th></tr></thead>
+                    <tbody>
+                      <template x-for="row in filteredTareo" :key="row.id">
+                        <tr :class="{ 'is-selected': row.id === record }">
+                          <td x-text="formatDate(row.date)"></td>
+                          <td><a class="data-code" :href="projectHref(row.projectId)" x-text="row.projectId"></a></td>
+                          <td><span x-text="workerName(row.workerId)"></span><small class="show-block text-muted" x-show="row.note" x-text="row.note"></small></td>
+                          <td x-text="row.shift"></td>
+                          <td x-text="row.recordedBy ? workerName(row.recordedBy) : row.recordedByName"></td>
+                          <td>
+                            <span class="badge status-badge status-badge--success" x-show="row.signed">Firmado</span>
+                            <button type="button" class="btn btn-outline-primary btn-sm" x-show="!row.signed" @click="sign(row)" :aria-label="`Firmar tareo de ${workerName(row.workerId)} del ${formatDate(row.date)}`">Firmar</button>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <!-- Planilla -->
+            <section class="card" x-show="tab === 'planilla'" aria-labelledby="jy-payroll-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="as-is" data-maturity-note="Contabilidad imputa un % estimado del costo mensual de cada persona a los proyectos (por ejemplo, 5 % del sueldo de una persona de oficina). No se calcula desde horas.">
+                    <h2 id="jy-payroll-title">Planilla e imputación a proyectos</h2>
+                  </div>
+                  <div>
+                    <label class="visually-hidden" for="jy-payroll-month">Mes</label>
+                    <select id="jy-payroll-month" class="form-select form-select-sm" @change="setMonth($event.target.value)">
+                      <template x-for="item in months" :key="item"><option :value="item" :selected="item === month" x-text="monthLabel(item)"></option></template>
+                    </select>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle d9-table jy-payroll">
+                    <thead><tr><th scope="col">Persona</th><th scope="col" class="text-end">Costo mensual</th><th scope="col">Imputación estimada</th><th scope="col" class="text-end">Imputado</th><th scope="col" class="text-end">Oficina (no imputado)</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <template x-for="row in payroll" :key="row.workerId">
+                        <tr>
+                          <td><a :href="workerHref(row.workerId)" x-text="workerName(row.workerId)"></a><small class="show-block text-muted" x-text="worker(row.workerId)?.role"></small></td>
+                          <td class="text-end data-money" x-text="formatAmount(row.cost)"></td>
+                          <td>
+                            <template x-for="entry in row.imputations" :key="entry.projectId"
+                              ><span class="jy-imputation"><b x-text="entry.projectId"></b> <span x-text="`${entry.percent} %`"></span> <small x-text="formatAmount(entry.amount)"></small></span></template
+                            >
+                            <small class="show-block jy-draft" x-show="row.draft">Propuesta local, no registrada</small>
+                          </td>
+                          <td class="text-end data-money" x-text="`${formatAmount(row.imputedAmount)} · ${row.imputedPct} %`"></td>
+                          <td class="text-end data-money" x-text="formatAmount(row.officeAmount)"></td>
+                          <td class="text-end"><button type="button" class="btn btn-link btn-sm" @click="openImputation(row)" :aria-label="`Editar imputación de ${workerName(row.workerId)}`">Editar %</button></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <h3 class="form-section-title">Costo de planilla por proyecto</h3>
+                <div class="d9-link-list">
+                  <template x-for="item in projectTotals" :key="item.projectId"
+                    ><a :href="costHref(payrollOperation(item.projectId))">
+                      <span class="data-code" x-text="item.projectId"></span>
+                      <span><strong x-text="formatAmount(item.amount)"></strong><small class="show-block" x-text="`${projectName(item.projectId)} · ver en Costos`"></small></span>
+                    </a></template
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- RxH -->
+            <section class="card" x-show="tab === 'rxh'" aria-labelledby="jy-rxh-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="as-is" data-maturity-note="Los recibos por honorarios son una fuente confirmada de costo de personal.">
+                    <h2 id="jy-rxh-title">Recibos por honorarios</h2>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" @click="openRxh()">Registrar RxH</button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0 d9-table jy-rxh">
+                    <thead><tr><th scope="col">N.º</th><th scope="col">Persona</th><th scope="col">RUC</th><th scope="col">Proyecto</th><th scope="col">Concepto</th><th scope="col">Fecha</th><th scope="col" class="text-end">Importe</th></tr></thead>
+                    <tbody>
+                      <template x-for="row in rxh" :key="row.id">
+                        <tr :class="{ 'is-selected': row.id === record }">
+                          <td>
+                            <a class="data-code" x-show="row.base" :href="costHref(row.id)" x-text="row.number"></a
+                            ><span class="data-code" x-show="!row.base" x-text="row.number"></span
+                            ><small class="show-block text-muted" x-show="!row.base">Registrado en esta demostración</small>
+                          </td>
+                          <td><a x-show="row.workerId" :href="workerHref(row.workerId)" x-text="row.person"></a><span x-show="!row.workerId" x-text="row.person"></span></td>
+                          <td x-text="row.docId"></td>
+                          <td><a class="data-code" :href="projectHref(row.projectId)" x-text="row.projectId"></a></td>
+                          <td x-text="row.concept"></td>
+                          <td x-text="formatDate(row.date)"></td>
+                          <td class="text-end data-money" x-text="formatAmount(row.amount)"></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <!-- Biometría -->
+            <section class="card" x-show="tab === 'biometria'" aria-labelledby="jy-sf100-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <h2 id="jy-sf100-title">Biometría</h2>
+                </div>
+                <div class="jy-sf100">
+                  <div class="bio-device">
+                    <i class="bi bi-fingerprint" aria-hidden="true"></i>
+                    <div>
+                      <strong x-text="sf100.model"></strong>
+                      <small x-text="sf100.location"></small>
+                    </div>
+                    <span class="badge status-badge status-badge--warning" x-text="sf100.status"></span>
+                  </div>
+                  <dl class="review-facts">
+                    <div class="review-facts-wide" data-maturity="as-is" data-maturity-note="Situación actual levantada con J&amp;Y."><dt>Hoy</dt><dd x-text="sf100.today"></dd></div>
+                    <div><dt>Última exportación</dt><dd x-text="formatDate(sf100.lastExport)"></dd></div>
+                    <div><dt>Personas con huella</dt><dd x-text="sf100.workers"></dd></div>
+                  </dl>
+                  <h3 class="form-section-title" data-maturity="to-be" data-maturity-note="Propuesta: sincronización del SF100 con la plataforma.">Propuesta</h3>
+                  <ol class="flow-steps jy-flow">
+                    <li>SF100</li>
+                    <li>Sincronización</li>
+                    <li>Registros de asistencia</li>
+                    <li>Incidencias</li>
+                  </ol>
+                </div>
+              </div>
+            </section>
+
+            <!-- Incidencias -->
+            <section class="card" x-show="tab === 'incidencias'" aria-labelledby="jy-incidents-title">
+              <div class="card-body">
+                <div class="shell-section-header">
+                  <div class="master-title-row" data-maturity="to-be" data-maturity-note="Propuesta: marcaciones y firmas faltantes como incidencias con su justificación o corrección.">
+                    <h2 id="jy-incidents-title">Incidencias</h2>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0 d9-table jy-incidents">
+                    <thead><tr><th scope="col">Fecha</th><th scope="col">Incidencia</th><th scope="col">Trabajador</th><th scope="col">Origen</th><th scope="col">Estado</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr></thead>
+                    <tbody>
+                      <template x-for="item in incidents" :key="item.id">
+                        <tr>
+                          <td x-text="formatDate(item.date)"></td>
+                          <td><span x-text="item.kind"></span><small class="show-block text-muted" x-show="item.reason" x-text="item.reason"></small></td>
+                          <td x-text="workerName(item.workerId)"></td>
+                          <td><span x-text="item.source"></span><small class="show-block text-muted" x-show="item.projectId" x-text="item.projectId"></small></td>
+                          <td><span class="badge" :class="item.status === 'Pendiente' ? 'status-badge status-badge--warning' : 'status-badge status-badge--success'" x-text="item.status"></span></td>
+                          <td class="text-end"><button type="button" class="btn btn-outline-primary btn-sm" x-show="item.status === 'Pendiente'" @click="openIncident(item)">Atender</button></td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <!-- Modals -->
+            <div class="modal fade" id="jy-tareo-modal" tabindex="-1" aria-labelledby="jy-tareo-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" novalidate @submit.prevent="saveTareo()">
+                  <div class="modal-header"><h2 class="modal-title fs-5" id="jy-tareo-modal-title">Registrar tareo</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                  <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" x-show="tareoError" x-text="tareoError"></div>
+                    <label class="form-label" for="jy-tareo-form-project">Proyecto</label>
+                    <select id="jy-tareo-form-project" class="form-select mb-3" x-model="tareoForm.projectId"><option value="">Selecciona</option><template x-for="item in projects" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option></template></select>
+                    <label class="form-label" for="jy-tareo-form-worker">Trabajador</label>
+                    <select id="jy-tareo-form-worker" class="form-select mb-3" x-model="tareoForm.workerId"><option value="">Selecciona</option><template x-for="item in fieldWorkers" :key="item.id"><option :value="item.id" x-text="`${item.name} · ${item.kind}`"></option></template></select>
+                    <div class="row g-3">
+                      <div class="col-6"><label class="form-label" for="jy-tareo-form-date">Fecha</label><input id="jy-tareo-form-date" class="form-control" type="date" x-model="tareoForm.date" /></div>
+                      <div class="col-6"><label class="form-label" for="jy-tareo-form-shift">Jornada</label><select id="jy-tareo-form-shift" class="form-select" x-model="tareoForm.shift"><option>Completa</option><option>Media</option></select></div>
+                    </div>
+                    <label class="form-label mt-3" for="jy-tareo-form-note">Observación</label>
+                    <input id="jy-tareo-form-note" class="form-control" maxlength="160" x-model="tareoForm.note" />
+                  </div>
+                  <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Registrar</button></div>
+                </form>
+              </div>
+            </div>
+            <div class="modal fade" id="jy-imputation-modal" tabindex="-1" aria-labelledby="jy-imputation-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content" novalidate @submit.prevent="saveImputation()">
+                  <div class="modal-header"><h2 class="modal-title fs-5" id="jy-imputation-modal-title" x-text="imputationTarget ? `Imputación de ${workerName(imputationTarget.workerId)} · ${monthLabel(month)}` : 'Imputación'"></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                  <div class="modal-body">
+                    <p class="workspace-caption">Porcentaje estimado del costo mensual que se imputa a cada proyecto. El resto queda como costo de oficina.</p>
+                    <div class="alert alert-danger" role="alert" x-show="imputationError" x-text="imputationError"></div>
+                    <template x-for="item in imputationForm" :key="item.projectId">
+                      <div class="jy-imputation-row">
+                        <label class="form-label" :for="`imp-${item.projectId}`" x-text="`${item.projectId} · ${projectName(item.projectId)}`"></label>
+                        <div class="input-group"><input :id="`imp-${item.projectId}`" class="form-control" type="number" min="0" max="100" step="1" x-model.number="item.percent" /><span class="input-group-text">%</span></div>
+                      </div>
+                    </template>
+                    <p class="jy-imputation-sum" x-text="`Total imputado: ${imputationSum} % · oficina: ${Math.max(0, 100 - imputationSum)} %`"></p>
+                  </div>
+                  <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar propuesta</button></div>
+                </form>
+              </div>
+            </div>
+            <div class="modal fade" id="jy-rxh-modal" tabindex="-1" aria-labelledby="jy-rxh-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-lg">
+                <form class="modal-content" novalidate @submit.prevent="saveRxh()">
+                  <div class="modal-header"><h2 class="modal-title fs-5" id="jy-rxh-modal-title">Registrar recibo por honorarios</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                  <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" x-show="rxhError" x-text="rxhError"></div>
+                    <div class="row g-3">
+                      <div class="col-md-6"><label class="form-label" for="jy-rxh-worker">Trabajador (opcional)</label><select id="jy-rxh-worker" class="form-select" x-model="rxhForm.workerId" @change="pickRxhWorker()"><option value="">Persona externa</option><template x-for="item in workers" :key="item.id"><option :value="item.id" x-text="item.name"></option></template></select></div>
+                      <div class="col-md-6"><label class="form-label" for="jy-rxh-person">Persona</label><input id="jy-rxh-person" class="form-control" maxlength="80" x-model="rxhForm.person" /></div>
+                      <div class="col-md-4"><label class="form-label" for="jy-rxh-doc">RUC</label><input id="jy-rxh-doc" class="form-control" inputmode="numeric" maxlength="11" x-model="rxhForm.docId" /></div>
+                      <div class="col-md-4"><label class="form-label" for="jy-rxh-number">N.º de recibo</label><input id="jy-rxh-number" class="form-control" maxlength="20" x-model="rxhForm.number" placeholder="E001-17" /></div>
+                      <div class="col-md-4"><label class="form-label" for="jy-rxh-date">Fecha</label><input id="jy-rxh-date" class="form-control" type="date" x-model="rxhForm.date" /></div>
+                      <div class="col-md-6"><label class="form-label" for="jy-rxh-project">Proyecto</label><select id="jy-rxh-project" class="form-select" x-model="rxhForm.projectId"><option value="">Selecciona</option><template x-for="item in projects" :key="item.id"><option :value="item.id" x-text="`${item.id} · ${item.name}`"></option></template></select></div>
+                      <div class="col-md-6"><label class="form-label" for="jy-rxh-amount">Importe</label><input id="jy-rxh-amount" class="form-control" type="number" min="0" step="0.01" x-model="rxhForm.amount" /></div>
+                      <div class="col-12"><label class="form-label" for="jy-rxh-concept">Concepto</label><input id="jy-rxh-concept" class="form-control" maxlength="120" x-model="rxhForm.concept" /></div>
+                    </div>
+                  </div>
+                  <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Registrar recibo</button></div>
+                </form>
+              </div>
+            </div>
+            <div class="modal fade" id="jy-incident-modal" tabindex="-1" aria-labelledby="jy-incident-modal-title" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header"><h2 class="modal-title fs-5" id="jy-incident-modal-title" x-text="incidentTarget ? `${incidentTarget.kind} · ${workerName(incidentTarget.workerId)}` : 'Incidencia'"></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                  <div class="modal-body">
+                    <label class="form-label" for="jy-incident-reason">Detalle</label>
+                    <textarea id="jy-incident-reason" class="form-control" rows="2" maxlength="200" x-model="incidentReason" placeholder="Ejemplo: estuvo en obra todo el día"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-outline-primary" :disabled="!incidentReason.trim()" @click="resolve('Justificada')">Justificar</button>
+                    <button type="button" class="btn btn-primary" :disabled="!incidentReason.trim()" @click="resolve('Corregida')">Corregir</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>

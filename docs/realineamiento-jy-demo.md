@@ -1,6 +1,6 @@
 # Realineamiento funcional de J&Y Demo — auditoría y propuesta
 
-> Estado: **R1–R4 terminadas** (11/11/2026); siguiente: R5 (Personal: asistencia, tareo, planilla, RxH). Análisis sobre `6b7dc4e`.
+> Estado: **R1–R5 terminadas** (11/11/2026); siguiente: R6 (Almacén, Pagos, Reportes, Seguridad, Administración, cierre). Análisis sobre `6b7dc4e`.
 > Fuente de requisitos: prompt "Revisión funcional integral" del usuario (secciones 1–40),
 > resumido aquí. Este documento es la referencia para las fases R1–R6 (sección 9).
 
@@ -656,3 +656,40 @@ Preguntas originales:
   pendientes; la auditoría final cuenta 30 páginas.
 - **Para R5:** Personal (asistencia SF100, tareo de campo, planilla con imputación %, RxH,
   temporales) e Integraciones con estados honestos.
+
+## 14. Notas de R5 (11/11/2026) — Personal e Integraciones
+
+- **Reglas:** `laborCost` (`'hours'` en PETI/PMI, `'payroll'` en el Demo) e
+  `integrationStates` (`'credible'` / `'honest'`). El Demo habilita `integrations` y llama al
+  módulo "Personal". Páginas `personnel.html`, `worker.html` e `integrations.html` con parciales
+  `personnel-jy`, `worker-jy` e `integrations-jy` (bloques IF).
+- **Costo de personal sin horas:** se eliminan las operaciones `TAR-26-*` del Demo. El costo
+  sale de dos tipos nuevos de operación, derivados de los datos: `payroll` ("Planilla imputada",
+  `PLA-AAMM-NNN`, una por proyecto y mes = Σ costo mensual × % imputado) y `rxh` ("Recibo por
+  honorarios"). Registrados en todos los mapas (nombres, módulos, enlaces, documentos,
+  búsqueda, reportes, auditoría, costos). Costo ejecutado de la cartera: S/ 133 508.
+- **Datos:** planilla de abril a junio de 2026 (5 personas en planilla con su % por proyecto; el
+  resto queda como costo de oficina), 3 RxH (Pedro Mamani, temporal, y un especialista
+  externo), asistencia del SF100 de 7 días hábiles para la oficina (con una salida y un día sin
+  marcación), tareo de campo por proyecto con firma (dos filas sin firmar) e integraciones.
+- **Vistas** (`data/personnel-jy.js`, `components/personnel-jy-views.js`): Personal (oficina,
+  campo, temporal; planilla o RxH), Asistencia (SF100, hoy exportado a Excel; no genera costo),
+  Tareo (por proyecto y jornada, firma digital; sin tarifa por hora), Planilla (costo mensual,
+  imputación estimada, imputado vs. oficina; edición del % como propuesta local, sin cambiar el
+  costo registrado), RxH (registro local con RUC de persona natural), Biometría (SF100 "No
+  integrado") e Incidencias (marcaciones y firmas faltantes; justificar o corregir). Ficha de
+  trabajador con imputación, tareo, asistencia, RxH y rendiciones.
+- **Integraciones honestas:** SF100 (No integrado), OCR, clasificación asistida y
+  almacenamiento documental (Propuesta), Contabilidad (Por definir), correo (Opcional); cada una
+  con "hoy", la propuesta y su flujo. Ninguna se presenta como conectada.
+- **Inicio:** "Personal" de Proyecto en contexto cuenta a quienes tienen planilla imputada,
+  tareo o RxH en el proyecto. El recorrido de personal sigue asistencia → tareo → planilla →
+  costo.
+- **Por validar con J&Y:** valorización de la jornada de campo y del personal temporal, cada
+  cuánto se fija el % de imputación y dónde se registra hoy, si hay tolerancia de tardanza.
+- **Pruebas:** `jy-personnel-interaction-test.mjs` (`npm run test:jy-personnel`); el validador
+  comprueba imputaciones ≤ 100 %, que cada planilla imputada sume sus porcentajes, RxH, tareo,
+  ausencia de costo por horas y estados honestos; las pruebas de personal e integraciones
+  antiguas cubren PETI y PMI.
+- **Para R6:** Almacén simplificado con Kardex TO-BE, Pagos en levantamiento, Reportes
+  operativos, Seguridad y Administración con catálogos de J&Y, recorridos y auditoría final.

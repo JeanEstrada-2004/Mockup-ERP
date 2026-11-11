@@ -119,6 +119,8 @@ function searchItems() {
       purchase: 'purchases',
       expense: 'expenses',
       timesheet: 'personnel',
+      payroll: 'personnel',
+      rxh: 'personnel',
       material_issue: 'warehouse',
       material_return: 'warehouse',
       other: 'costs',
@@ -288,6 +290,8 @@ function previewRecords(moduleId, projectId) {
     case 'personnel':
       return [
         ...opRecords('timesheet'),
+        ...opRecords('payroll'),
+        ...opRecords('rxh'),
         ...data.workers.map((item) => ({
           id: item.id,
           title: item.name,

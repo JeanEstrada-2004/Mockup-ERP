@@ -317,6 +317,7 @@ function renderDemoTours(variant, data) {
   const isSurtec = variant.id === 'surtec-peti';
   // J&Y Demo (R2): rendiciones are reviewed in their own page.
   const reviewFlow = variantRule('expenseFlow', variant) === 'review';
+  const payrollFlow = variantRule('laborCost', variant) === 'payroll';
   const pendingReport = data.operations.find(
     (item) => item.type === 'expense' && ['Presentada', 'Corregida'].includes(item.status)
   );
@@ -376,7 +377,19 @@ function renderDemoTours(variant, data) {
             step('Costo de compra', `./costs.html?project=${projectId}&source=purchases`),
           ],
     },
-    {
+    payrollFlow
+      ? {
+          title: 'Asistencia, planilla y costo',
+          description: 'Del SF100 y el tareo a la planilla imputada y su costo.',
+          icon: 'bi-person-badge',
+          steps: [
+            step('Asistencia SF100', './personnel.html?tab=asistencia'),
+            step('Tareo de campo', './personnel.html?tab=tareo'),
+            step('Planilla e imputación', './personnel.html?tab=planilla'),
+            step('Costo de personal', `./costs.html?project=${projectId}&source=personnel`),
+          ],
+        }
+      : {
       title: 'Asistencia y costo laboral',
       description: isSurtec
         ? 'De la marcación biométrica al tareo y costo.'

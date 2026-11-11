@@ -46,6 +46,8 @@ function operationModule(item) {
     purchase: 'purchases',
     expense: 'expenses',
     timesheet: 'personnel',
+    payroll: 'personnel',
+    rxh: 'personnel',
     material_issue: 'warehouse',
     material_return: 'warehouse',
     other: 'costs',

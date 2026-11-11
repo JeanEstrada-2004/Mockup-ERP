@@ -137,10 +137,10 @@ async function variantFlow(variant, workerId, projectId) {
   await page.waitForURL(/project\.html\?id=/);
   await page.goto(url(variant, 'personnel.html?tab=tareo'));
   await ready();
-  if (variant === 'jy-demo') {
+  if (variant === 'jy-pmi') {
     await page.setViewportSize({ width: 390, height: 844 });
     await noOverflow();
-    await screenshot('jy-demo-tareo-mobile');
+    await screenshot('jy-pmi-tareo-mobile');
   }
   await page.getByRole('button', { name: 'Registro manual' }).click();
   await page.locator('#personnel-manual-modal').waitFor({ state: 'visible' });
@@ -154,7 +154,7 @@ async function variantFlow(variant, workerId, projectId) {
   await page.locator('#manual-reason').fill('Jornada de campo demostrativa');
   await page.locator('#personnel-manual-modal .alert-danger').waitFor({ state: 'hidden' });
   assert.ok((await page.locator('.personnel-hours-preview').innerText()).includes('8 h'));
-  if (variant === 'jy-demo') await screenshot('jy-demo-modal-mobile');
+  if (variant === 'jy-pmi') await screenshot('jy-pmi-modal-mobile');
   await page.getByRole('button', { name: 'Guardar tareo visual' }).click();
   await page.locator('#personnel-manual-modal').waitFor({ state: 'hidden' });
   assert.ok(
@@ -228,20 +228,11 @@ try {
   await page.locator('#personnel-assign-modal').waitFor({ state: 'hidden' });
   await page.getByText('Supervisor de obra').first().waitFor();
   await variantFlow('jy-pmi', 'PER-JY-002', 'PR-JY-001');
+  // R5: J&Y Demo books personnel by payroll imputation (jy-personnel-interaction-test.mjs).
   await page.goto(url('jy-demo', 'personnel.html'));
   await ready();
-  assert.equal(await page.locator('.personnel-tabs button').count(), 4);
-  assert.equal(
-    await page
-      .locator('.personnel-panel[x-show="tab === \'biometria\' && hasBiometrics"]:visible')
-      .count(),
-    0
-  );
-  assert.equal(
-    await page.locator('.personnel-cards').filter({ hasText: 'TR-DEMO-001' }).count(),
-    0
-  );
-  await variantFlow('jy-demo', 'PER-JY-002', 'PY-26-001');
+  assert.equal(await page.locator('.personnel-tabs button').count(), 0);
+  assert.equal(await page.locator('[x-data="personnelJyWorkspace"]').count(), 1);
   assert.equal(errors.length, 0, errors.join('\n'));
   console.log(
     'Personal, asistencia, tareo, proyecto, costo y alcance biométrico: correctos en tres variantes.'

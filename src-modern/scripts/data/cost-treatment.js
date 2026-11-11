@@ -111,7 +111,13 @@ export function costLines(data, projectId = null) {
             other: 'Ajuste de costo',
           }[entry.source] ||
           operation.id,
-        counterpart: supplier?.name || workerName(data, operation.workerId),
+        counterpart:
+          supplier?.name ||
+          (operation.type === 'payroll'
+            ? 'Planilla de J&Y'
+            : operation.type === 'rxh'
+              ? data.rxh?.find((item) => item.id === operation.id)?.person || 'Recibo por honorarios'
+              : workerName(data, operation.workerId)),
         documentLabel: entry.documentId || '—',
         responsibleId,
         responsible: workerName(data, responsibleId),

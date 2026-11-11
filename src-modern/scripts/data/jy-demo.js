@@ -1102,6 +1102,326 @@ function withBudgetFigures(data) {
   return data;
 }
 
+// Personal (R5). How J&Y really books personnel cost:
+// - office and field staff on payroll: Contabilidad imputes an estimated % of
+//   each person's monthly cost to projects (it is not computed from hours);
+// - temporary staff and external specialists: recibos por honorarios (RxH).
+// Attendance comes from the ZKTeco SF100 (today exported to Excel) and the
+// field tareo is a signed list per project; neither produces cost by itself.
+/* @__NO_SIDE_EFFECTS__ */
+const planilla = (month, workerId, cost, imputations) => ({
+  month,
+  workerId,
+  cost,
+  imputations: imputations.map(([projectId, percent]) => ({ projectId, percent })),
+});
+// Built inside a pure call so the other presentations drop it.
+const PAYROLL = /* @__PURE__ */ (() => [
+  planilla('2026-04', 'PER-JY-001', 6800, [
+    ['PY-26-001', 40],
+    ['PY-26-002', 20],
+  ]),
+  planilla('2026-04', 'PER-JY-002', 5600, [['PY-26-001', 100]]),
+  planilla('2026-04', 'PER-JY-003', 4200, [['PY-26-001', 5]]),
+  planilla('2026-04', 'PER-JY-004', 3400, [
+    ['PY-26-001', 50],
+    ['PY-26-002', 50],
+  ]),
+  planilla('2026-04', 'PER-JY-005', 5200, [
+    ['PY-26-001', 5],
+    ['PY-26-002', 5],
+  ]),
+  ...['2026-05', '2026-06'].flatMap((month) => [
+    planilla(month, 'PER-JY-001', 6800, [
+      ['PY-26-001', 30],
+      ['PY-26-002', 20],
+      ['PY-26-003', 10],
+    ]),
+    planilla(month, 'PER-JY-002', 5600, [['PY-26-001', 100]]),
+    planilla(month, 'PER-JY-003', 4200, [
+      ['PY-26-001', 5],
+      ['PY-26-003', 10],
+    ]),
+    planilla(month, 'PER-JY-004', 3400, [
+      ['PY-26-001', 40],
+      ['PY-26-002', 60],
+    ]),
+    planilla(month, 'PER-JY-005', 5200, [
+      ['PY-26-001', 5],
+      ['PY-26-002', 5],
+      ['PY-26-003', 5],
+    ]),
+  ]),
+])();
+
+/* @__NO_SIDE_EFFECTS__ */
+const honorarios = (id, number, person, docId, workerId, projectId, concept, date, amount) => ({
+  id,
+  number,
+  person,
+  docId,
+  workerId,
+  projectId,
+  concept,
+  date,
+  amount,
+});
+const RXH = [
+  honorarios(
+    'RXH-26-001',
+    'E001-15',
+    'Pedro Mamani',
+    '10000000261',
+    'PER-JY-006',
+    'PY-26-001',
+    'Maestro de obra · mayo 2026',
+    '2026-05-31',
+    3500
+  ),
+  honorarios(
+    'RXH-26-002',
+    'E001-16',
+    'Pedro Mamani',
+    '10000000261',
+    'PER-JY-006',
+    'PY-26-001',
+    'Maestro de obra · junio 2026',
+    '2026-06-30',
+    3800
+  ),
+  honorarios(
+    'RXH-26-003',
+    'E001-4',
+    'Marco Ticona',
+    '10456123781',
+    null,
+    'PY-26-002',
+    'Diseño de tablero especial TD-02',
+    '2026-06-15',
+    2200
+  ),
+];
+
+const WORKDAYS = [
+  '2026-07-06',
+  '2026-07-07',
+  '2026-07-08',
+  '2026-07-09',
+  '2026-07-10',
+  '2026-07-13',
+  '2026-07-14',
+];
+// Office attendance from the SF100 export (entry, exit; '' = no mark).
+/* @__NO_SIDE_EFFECTS__ */
+const marca = (workerId, date, start, end) => ({
+  id: `ASI-${workerId.slice(-3)}-${date.slice(5).replace('-', '')}`,
+  workerId,
+  date,
+  start,
+  end,
+  source: 'SF100 · exportado a Excel',
+});
+// Built inside a pure call so the other presentations drop it.
+const ATTENDANCE = /* @__PURE__ */ (() => [
+  ...WORKDAYS.map((date, index) =>
+    marca('PER-JY-001', date, index === 4 ? '' : `07:5${index}`, index === 4 ? '' : '17:40')
+  ),
+  ...WORKDAYS.map((date, index) =>
+    marca('PER-JY-003', date, `08:0${index % 3}`, index === 3 ? '' : '17:35')
+  ),
+  ...WORKDAYS.map((date, index) => marca('PER-JY-005', date, `08:1${index % 4}`, '17:30')),
+])();
+
+// Field tareo by project: one row per worker and day, signed or not.
+/* @__NO_SIDE_EFFECTS__ */
+const tareo = (workerId, projectId, date, shift, signed, recordedBy, note = '') => ({
+  id: `TAR-${projectId.slice(-3)}-${workerId.slice(-3)}-${date.slice(5).replace('-', '')}`,
+  workerId,
+  projectId,
+  date,
+  shift,
+  signed,
+  recordedBy,
+  note,
+});
+// Built inside a pure call so the other presentations drop it.
+const TAREO = /* @__PURE__ */ (() => [
+  ...WORKDAYS.map((date) => tareo('PER-JY-002', 'PY-26-001', date, 'Completa', true, 'PER-JY-002')),
+  ...WORKDAYS.map((date, index) =>
+    tareo(
+      'PER-JY-006',
+      'PY-26-001',
+      date,
+      index === 4 ? 'Media' : 'Completa',
+      index !== 2,
+      'PER-JY-002',
+      index === 4 ? 'Retiro a mediodía por lluvia.' : ''
+    )
+  ),
+  ...WORKDAYS.slice(0, 3).map((date) =>
+    tareo('PER-JY-004', 'PY-26-001', date, 'Completa', true, 'PER-JY-002')
+  ),
+  ...WORKDAYS.slice(3).map((date, index) =>
+    tareo(
+      'PER-JY-004',
+      'PY-26-002',
+      date,
+      'Completa',
+      index !== 2,
+      'PER-JY-001',
+      index === 0 ? 'Montaje de tableros.' : ''
+    )
+  ),
+])();
+
+const SF100 = {
+  model: 'ZKTeco SF100',
+  location: 'Oficina principal',
+  status: 'No integrado',
+  today: 'Los registros se descargan del equipo y se exportan a Excel.',
+  lastExport: '2026-07-14',
+  workers: 3,
+};
+
+const MONTH_LABELS = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'setiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
+const monthEnd = (month) => {
+  const [year, number] = month.split('-').map(Number);
+  return new Date(Date.UTC(year, number, 0)).toISOString().slice(0, 10);
+};
+// Personnel cost operations: imputed payroll per project and month, and RxH.
+/* @__NO_SIDE_EFFECTS__ */
+function personnelOperations() {
+  const totals = new Map();
+  for (const entry of PAYROLL) {
+    for (const item of entry.imputations) {
+      const key = `${entry.month}|${item.projectId}`;
+      totals.set(
+        key,
+        Math.round(((totals.get(key) || 0) + (entry.cost * item.percent) / 100) * 100) / 100
+      );
+    }
+  }
+  const payroll = [...totals].map(([key, amount]) => {
+    const [month, projectId] = key.split('|');
+    const [year, number] = month.split('-');
+    const id = `PLA-${year.slice(2)}${number}-${projectId.slice(-3)}`;
+    return operation(id, projectId, 'payroll', amount, 'personnel', {
+      status: 'Imputada',
+      date: monthEnd(month),
+      category: 'Planilla',
+      description: `Planilla imputada · ${MONTH_LABELS[Number(number) - 1]} ${year}`,
+      label: `Planilla ${MONTH_LABELS[Number(number) - 1].slice(0, 3)}. ${year}`,
+    });
+  });
+  const rxh = RXH.map((item) =>
+    operation(item.id, item.projectId, 'rxh', item.amount, 'personnel', {
+      workerId: item.workerId,
+      status: 'Registrado',
+      date: item.date,
+      category: 'Servicio',
+      description: item.concept,
+      label: `RxH ${item.number}`,
+    })
+  );
+  return [...payroll, ...rxh];
+}
+
+// Integraciones (R5): what would connect to the platform, how it is done today
+// and its honest state. None is operational.
+const INTEGRATIONS = [
+  {
+    id: 'sf100',
+    name: 'ZKTeco SF100',
+    icon: 'bi-fingerprint',
+    purpose: 'Asistencia de la oficina',
+    status: 'No integrado',
+    today: 'Los registros se descargan del equipo y se exportan a Excel.',
+    proposal: 'Sincronizar las marcaciones con la plataforma y generar incidencias.',
+    flow: ['SF100', 'Sincronización', 'Asistencia', 'Incidencias'],
+    href: './personnel.html?tab=asistencia',
+    link: 'Ver asistencia',
+    priority: 'Alta',
+  },
+  {
+    id: 'ocr',
+    name: 'Lectura de comprobantes (OCR)',
+    icon: 'bi-receipt',
+    purpose: 'Rendiciones',
+    status: 'Propuesta',
+    today: 'Los datos del comprobante se digitan a mano desde la foto.',
+    proposal: 'Leer RUC, fecha, serie, número e importes y proponerlos para revisión humana.',
+    flow: ['Foto o PDF', 'OCR', 'Datos sugeridos', 'Revisión'],
+    href: './expenses.html',
+    link: 'Ver rendiciones',
+    priority: 'Alta',
+  },
+  {
+    id: 'ia',
+    name: 'Clasificación asistida',
+    icon: 'bi-stars',
+    purpose: 'Rendiciones y costos',
+    status: 'Propuesta',
+    today: 'La clasificación del gasto se asigna manualmente.',
+    proposal: 'Sugerir la categoría del gasto; la persona confirma o corrige y queda la traza.',
+    flow: ['Gasto', 'Sugerencia', 'Confirmación', 'Costo'],
+    href: './costs.html',
+    link: 'Ver costos',
+    priority: 'Media',
+  },
+  {
+    id: 'files',
+    name: 'Almacenamiento documental',
+    icon: 'bi-folder2-open',
+    purpose: 'Comprobantes, cotizaciones y documentos',
+    status: 'Propuesta',
+    today: 'Archivos en carpetas, correo y WhatsApp; parte en papel.',
+    proposal: 'Guardar cada archivo vinculado a su proyecto y a su registro de origen.',
+    flow: ['Archivo', 'Registro', 'Proyecto', 'Consulta'],
+    href: './documents.html',
+    link: 'Ver documentos',
+    priority: 'Alta',
+  },
+  {
+    id: 'accounting',
+    name: 'Contabilidad',
+    icon: 'bi-journal-text',
+    purpose: 'Intercambio con Contabilidad',
+    status: 'Por definir',
+    today: 'Las rendiciones y la información se envían en archivos digitales.',
+    proposal: 'Exportar rendiciones aceptadas y costos en el formato que use Contabilidad.',
+    flow: ['Rendición aceptada', 'Exportación', 'Contabilidad'],
+    href: './costs.html',
+    link: 'Ver J&Y Real y tratamiento',
+    priority: 'Media',
+  },
+  {
+    id: 'mail',
+    name: 'Correo y notificaciones',
+    icon: 'bi-envelope',
+    purpose: 'Avisos de pendientes',
+    status: 'Opcional',
+    today: 'Los avisos se dan por WhatsApp o en persona.',
+    proposal: 'Avisar por correo de rendiciones observadas o presupuestos por revisar.',
+    flow: ['Pendiente', 'Aviso', 'Responsable'],
+    href: './approvals.html',
+    link: 'Ver pendientes',
+    priority: 'Baja',
+  },
+];
+
 // Evidence the "Tomar foto / Subir archivo" buttons use in the demonstration.
 const EXPENSE_SAMPLES = [
   gasto(
@@ -1785,6 +2105,12 @@ function buildJyDemoData() {
     budgets: BUDGETS,
     products: PRODUCTS,
     quotes: QUOTES,
+    payroll: PAYROLL,
+    rxh: RXH,
+    attendance: ATTENDANCE,
+    tareo: TAREO,
+    sf100: SF100,
+    integrations: INTEGRATIONS,
     // The warehouse module is enabled for the Demo in R6.
     materials: [],
     expenseReports: EXPENSE_REPORTS,
@@ -1798,13 +2124,6 @@ function buildJyDemoData() {
         supplierId: 'PROV-JY-001',
         status: 'Atendida',
         date: '2026-04-14',
-      }),
-      operation('TAR-26-001', 'PY-26-001', 'timesheet', 26800, 'personnel', {
-        category: 'Planilla',
-        description: 'Tareo de supervisión de campo',
-        workerId: 'PER-JY-002',
-        status: 'Aprobado',
-        date: '2026-05-29',
       }),
       operation('AJ-26-001', 'PY-26-001', 'other', 1800, 'other', {
         category: 'Otros',
@@ -1832,13 +2151,6 @@ function buildJyDemoData() {
         status: 'Atendida',
         date: '2026-05-08',
       }),
-      operation('TAR-26-002', 'PY-26-002', 'timesheet', 14200, 'personnel', {
-        category: 'Planilla',
-        description: 'Tareo de instalaciones eléctricas',
-        workerId: 'PER-JY-004',
-        status: 'Aprobado',
-        date: '2026-06-30',
-      }),
 
       operation('OC-26-003', 'PY-26-003', 'purchase', 16900, 'purchases', {
         quoteId: 'COT-26-004',
@@ -1849,14 +2161,8 @@ function buildJyDemoData() {
         status: 'Atendida',
         date: '2026-05-27',
       }),
-      operation('TAR-26-003', 'PY-26-003', 'timesheet', 5400, 'personnel', {
-        category: 'Planilla',
-        description: 'Tareo de equipamiento de aulas',
-        workerId: 'PER-JY-001',
-        status: 'Aprobado',
-        date: '2026-06-30',
-      }),
       ...EXPENSE_REPORTS.map(expenseOperation),
+      ...personnelOperations(),
     ],
   });
 }

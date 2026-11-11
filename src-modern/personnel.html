@@ -15,6 +15,7 @@
         <!-- APP_HEADER --><!-- APP_SIDEBAR -->
         <div class="sidebar-backdrop" aria-hidden="true"></div>
         <main id="main-content" class="admin-main">
+          <!-- IF laborCost=payroll --><!-- INCLUDE personnel-jy --><!-- ELSE -->
           <div
             class="container-fluid shell-page project-workspace personnel-workspace"
             x-data="personnelWorkspace"
@@ -897,6 +898,7 @@
               </div>
             </div>
           </div>
+          <!-- /IF -->
         </main>
         <!-- APP_FOOTER -->
       </div>

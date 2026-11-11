@@ -1,0 +1,111 @@
+          <div class="container-fluid shell-page project-workspace delivery-nine-workspace master-workspace jy-worker" x-data="workerJyDetail">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="./personnel.html">Personal</a></li>
+                <li class="breadcrumb-item active" aria-current="page" x-text="worker?.name || 'No encontrado'"></li>
+              </ol>
+            </nav>
+            <template x-if="!worker"
+              ><div class="card">
+                <div class="card-body workspace-empty">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  <h1>Trabajador no encontrado</h1>
+                  <p>El código solicitado no pertenece a esta presentación.</p>
+                  <a class="btn btn-primary" href="./personnel.html">Ver personal</a>
+                </div>
+              </div></template
+            >
+            <template x-if="worker"
+              ><div>
+                <div class="shell-page-heading workspace-detail-heading">
+                  <div>
+                    <p class="project-code" x-text="`DNI ${worker.dni}`"></p>
+                    <h1 x-text="worker.name"></h1>
+                    <div class="project-meta">
+                      <span x-text="worker.role"></span><span>·</span><span x-text="worker.area"></span
+                      ><span class="pill" :class="worker.kind === 'Temporal' ? 'pill-warn' : worker.kind === 'Campo' ? 'pill-good' : 'pill-info'" x-text="worker.kind"></span
+                      ><span class="badge text-bg-secondary" x-text="worker.regime === 'RxH' ? 'Recibo por honorarios' : 'Planilla'"></span>
+                    </div>
+                  </div>
+                  <a class="btn btn-outline-primary" href="./personnel.html"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Personal</a>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-xl-6">
+                    <section class="card h-100" aria-labelledby="jy-worker-payroll-title">
+                      <div class="card-body">
+                        <h2 id="jy-worker-payroll-title" class="workspace-subheading mt-0">Planilla e imputación</h2>
+                        <p class="workspace-caption" x-show="!payroll.length">No está en planilla: su costo llega por recibos por honorarios.</p>
+                        <ol class="review-history">
+                          <template x-for="item in payroll" :key="item.month"
+                            ><li>
+                              <strong x-text="`${monthLabel(item.month)} · ${formatAmount(item.row.cost)}`"></strong>
+                              <small x-text="`Imputado ${item.row.imputedPct} % (${formatAmount(item.row.imputedAmount)}) · oficina ${formatAmount(item.row.officeAmount)}`"></small>
+                              <span>
+                                <template x-for="entry in item.row.imputations" :key="entry.projectId"
+                                  ><span class="jy-imputation"><a :href="projectHref(entry.projectId)" x-text="entry.projectId"></a> <span x-text="`${entry.percent} %`"></span></span></template
+                                >
+                              </span>
+                            </li></template
+                          >
+                        </ol>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="col-xl-6">
+                    <section class="card h-100" aria-labelledby="jy-worker-tareo-title">
+                      <div class="card-body">
+                        <h2 id="jy-worker-tareo-title" class="workspace-subheading mt-0">Tareo de campo</h2>
+                        <p class="workspace-caption" x-show="!tareo.length">Sin tareo registrado (personal de oficina).</p>
+                        <div class="table-responsive" x-show="tareo.length">
+                          <table class="table table-sm align-middle mb-0">
+                            <thead><tr><th scope="col">Fecha</th><th scope="col">Proyecto</th><th scope="col">Jornada</th><th scope="col">Firma</th></tr></thead>
+                            <tbody>
+                              <template x-for="row in tareo" :key="row.id"
+                                ><tr><td x-text="formatDate(row.date)"></td><td><a class="data-code" :href="projectHref(row.projectId)" x-text="row.projectId"></a></td><td x-text="row.shift"></td><td x-text="row.signed ? 'Firmado' : 'Sin firma'"></td></tr
+                              ></template>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="col-xl-6">
+                    <section class="card h-100" aria-labelledby="jy-worker-attendance-title">
+                      <div class="card-body">
+                        <h2 id="jy-worker-attendance-title" class="workspace-subheading mt-0">Asistencia (SF100)</h2>
+                        <p class="workspace-caption" x-show="!attendance.length">Sin marcaciones en la oficina en el periodo exportado.</p>
+                        <div class="table-responsive" x-show="attendance.length">
+                          <table class="table table-sm align-middle mb-0">
+                            <thead><tr><th scope="col">Fecha</th><th scope="col">Entrada</th><th scope="col">Salida</th><th scope="col">Estado</th></tr></thead>
+                            <tbody>
+                              <template x-for="row in attendance" :key="row.id"
+                                ><tr><td x-text="formatDate(row.date)"></td><td x-text="row.start || '—'"></td><td x-text="row.end || '—'"></td><td x-text="row.status"></td></tr
+                              ></template>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                  <div class="col-xl-6">
+                    <section class="card h-100" aria-labelledby="jy-worker-docs-title">
+                      <div class="card-body">
+                        <h2 id="jy-worker-docs-title" class="workspace-subheading mt-0">Recibos por honorarios y rendiciones</h2>
+                        <div class="d9-link-list">
+                          <template x-for="row in rxh" :key="row.id"
+                            ><a :href="costHref(row.id)"><span class="data-code" x-text="row.number"></span><span><strong x-text="formatAmount(row.amount)"></strong><small class="show-block" x-text="`${row.projectId} · ${row.concept}`"></small></span></a></template
+                          >
+                          <template x-for="row in reports" :key="row.id"
+                            ><a :href="reportHref(row.id)"><span class="data-code" x-text="row.label"></span><span><strong x-text="formatAmount(row.total)"></strong><small class="show-block" x-text="`${row.projectId} · ${row.status}`"></small></span></a></template
+                          >
+                        </div>
+                        <p class="workspace-caption" x-show="!rxh.length && !reports.length">Sin recibos ni rendiciones.</p>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div></template
+            >
+          </div>

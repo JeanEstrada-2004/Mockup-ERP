@@ -393,12 +393,15 @@ async function testIntegrations() {
   await page.setViewportSize({ width: 390, height: 844 });
   await noOverflow();
   await screenshot('surtec-integrations-mobile');
-  for (const variant of ['jy-pmi', 'jy-demo']) {
-    await page.goto(url(variant, 'integrations.html'));
-    await ready();
-    assert.match(await page.locator('#main-content').innerText(), /Integraciones no disponibles/);
-    assert.equal(await page.locator('.integration-list button').count(), 0);
-  }
+  await page.goto(url('jy-pmi', 'integrations.html'));
+  await ready();
+  assert.match(await page.locator('#main-content').innerText(), /Integraciones no disponibles/);
+  assert.equal(await page.locator('.integration-list button').count(), 0);
+  // R5: J&Y Demo shows honest states; nothing is presented as connected.
+  await page.goto(url('jy-demo', 'integrations.html'));
+  await ready();
+  assert.equal(await page.locator('.jy-integration').count(), 6);
+  assert.doesNotMatch(await page.locator('#main-content').innerText(), /Conectado|Correcto/);
   console.log(
     'Integraciones: flujo previsto, filtros, ausencia de conexiones reales, móvil y variantes correctos.'
   );

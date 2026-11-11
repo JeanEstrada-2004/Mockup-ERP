@@ -52,6 +52,7 @@ const jyDemoModules = [
   'suppliers',
   'products',
   'budgets',
+  'integrations',
   'purchases',
   'expenses',
   'personnel',
@@ -92,6 +93,12 @@ export const DEFAULT_RULES = {
   // R4 — 'technical': partidas, metrados, APU, insumos, supplier quotes and
   // product budgets (J&Y Demo); 'simple': lines × price (SurTec, PMI).
   budgetFlow: 'simple',
+  // R5 — 'payroll': personnel cost from payroll imputed by % and RxH, SF100
+  // attendance and field tareo apart (J&Y Demo); 'hours': tareo hours × rate.
+  laborCost: 'hours',
+  // 'credible': simulated connections shown as working (SurTec); 'honest':
+  // states say what exists today and what is a proposal (J&Y Demo).
+  integrationStates: 'credible',
 };
 
 // Fictitious signed-in user shown in the header (punto 3).
@@ -195,11 +202,14 @@ export const VARIANTS = {
       costTreatment: true,
       documentViewer: true,
       budgetFlow: 'technical',
+      laborCost: 'payroll',
+      integrationStates: 'honest',
     },
     labels: {
       approvals: 'Pendientes',
       purchases: 'Compras / OC',
       costs: 'Costos y Control Contable',
+      personnel: 'Personal',
     },
     theme: {
       primary: '#334155',

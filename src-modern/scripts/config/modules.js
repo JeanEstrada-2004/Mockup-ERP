@@ -141,6 +141,11 @@ export function moduleHref(id, recordId) {
     if (recordId?.startsWith('PER-')) return `./worker.html?id=${encodeURIComponent(recordId)}`;
     if (recordId?.startsWith('TAR-'))
       return `./personnel.html?tab=tareo&record=${encodeURIComponent(recordId)}`;
+    // R5 (J&Y Demo): imputed payroll and recibos por honorarios.
+    if (recordId?.startsWith('PLA-'))
+      return `./personnel.html?tab=planilla&record=${encodeURIComponent(recordId)}`;
+    if (recordId?.startsWith('RXH-'))
+      return `./personnel.html?tab=rxh&record=${encodeURIComponent(recordId)}`;
     return './personnel.html';
   }
   if (id === 'warehouse') {

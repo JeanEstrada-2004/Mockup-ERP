@@ -24,6 +24,7 @@ import { formatMoney, writeProjectId } from './shell.js';
 import { tableControls } from '../utils/data-table.js';
 import { worklistItems } from '../data/worklist.js';
 import { personnelAssignments } from '../data/personnel-data.js';
+import { projectPeople } from '../data/personnel-jy.js';
 // R3 — J&Y Demo hides physical progress and works with a list of pending tasks.
 const hasProgress = variantRule('physicalProgress');
 const worklistMode = variantRule('approvalsMode') === 'worklist';
@@ -51,6 +52,8 @@ const operationNames = {
   purchase: 'Compra',
   expense: 'Rendición',
   timesheet: 'Tareo',
+  payroll: 'Planilla imputada',
+  rxh: 'Recibo por honorarios',
   material_issue: 'Salida de material',
   material_return: 'Devolución de material',
   other: 'Ajuste',
@@ -71,6 +74,8 @@ function operationModule(operation) {
     purchase: 'purchases',
     expense: 'expenses',
     timesheet: 'personnel',
+    payroll: 'personnel',
+    rxh: 'personnel',
     material_issue: 'warehouse',
     material_return: 'warehouse',
     other: 'costs',
@@ -281,9 +286,11 @@ export function dashboardView() {
       const expenses = of('expense');
       const purchases = of('purchase');
       const people = new Set(
-        personnelAssignments(data)
-          .filter((item) => item.projectId === id)
-          .map((item) => item.workerId)
+        data.payroll
+          ? projectPeople(data, id).map((item) => item.id)
+          : personnelAssignments(data)
+              .filter((item) => item.projectId === id)
+              .map((item) => item.workerId)
       );
       const documents = getDocuments(data).filter((item) => item.projectId === id);
       return {
@@ -746,7 +753,7 @@ export function projectDetail() {
       return this.operations.filter((item) => item.type === 'expense');
     },
     get personnelRows() {
-      return this.operations.filter((item) => item.type === 'timesheet');
+      return this.operations.filter((item) => ['timesheet', 'payroll', 'rxh'].includes(item.type));
     },
     get materialRows() {
       return this.operations.filter((item) =>
@@ -774,9 +781,11 @@ export function projectDetail() {
     recordSubtitle(item) {
       return item.type === 'purchase'
         ? this.supplierName(item.supplierId)
-        : item.type === 'expense' || item.type === 'timesheet'
-          ? this.personName(item.workerId)
-          : this.materialName(item.materialId);
+        : item.type === 'payroll' || item.type === 'rxh'
+          ? item.description
+          : item.type === 'expense' || item.type === 'timesheet'
+            ? this.personName(item.workerId)
+            : this.materialName(item.materialId);
     },
     get projectActivity() {
       return [...this.operations]

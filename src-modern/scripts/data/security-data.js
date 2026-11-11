@@ -109,6 +109,8 @@ export const AUDIT_ACTIONS = {
   purchase: 'Aprobó',
   expense: 'Modificó',
   timesheet: 'Registró',
+  payroll: 'Imputó',
+  rxh: 'Registró',
   material_issue: 'Registró',
   material_return: 'Registró',
   other: 'Ajustó',

@@ -146,6 +146,7 @@ del riel ("GENERAL", "GESTIÓN"…) y "PASO N DE 4".
 | `.project-context` | Proyecto en contexto en el Inicio (J&Y Demo) |
 | `.tech-*` | Presupuesto técnico: partidas, APU, insumos, productos, comparador (J&Y Demo) |
 | `.price-*`, `.quote-card`, `.compare-table`, `.attachment-chip` | Productos y precios (J&Y Demo) |
+| `.jy-imputation`, `.jy-payroll`, `.jy-integration` | Planilla e imputación, Integraciones honestas (J&Y Demo) |
 | `.maturity`, `.maturity--as-is/--to-be/--validate` | Marca de madurez (solo J&Y Demo; texto + color, oculta hasta que el presentador la activa) |
 
 Ejemplo vivo de todo lo anterior con datos reales: **`design-system.html`** ("Sistema

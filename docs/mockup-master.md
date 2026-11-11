@@ -481,3 +481,10 @@ tres variantes bajo la subruta de Pages.
   opciones de proveedor; vista interna y vista cliente; nueva versión distinta de duplicar.
 - Productos y precios: catálogo, búsqueda con histórico, cotizaciones con adjunto y comparador.
 - OC con cotización de origen y recepción según sea material o servicio.
+
+## Realineamiento de J&Y Demo — R5: personal e integraciones (11/11/2026)
+
+- Personal de oficina, de campo y temporal; asistencia del SF100 separada del tareo de campo
+  con firma; planilla imputada a proyectos por porcentaje; recibos por honorarios; incidencias.
+- El costo de personal sale de la planilla imputada y de los RxH, sin tarifa por hora.
+- Integraciones con estados honestos: no integrado, propuesta, por definir u opcional.

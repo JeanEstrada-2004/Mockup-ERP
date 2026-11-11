@@ -1,0 +1,44 @@
+          <div class="container-fluid shell-page project-workspace jy-integrations" x-data="integrationsJyWorkspace">
+            <nav aria-label="Ubicación">
+              <ol class="breadcrumb shell-breadcrumb">
+                <li class="breadcrumb-item"><a href="./index.html">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Integraciones</li>
+              </ol>
+            </nav>
+            <div class="shell-page-heading">
+              <div>
+                <h1>Integraciones</h1>
+                <p class="shell-page-subtitle">
+                  Qué se conectaría con la plataforma, cómo se hace hoy y en qué estado está cada conexión.
+                </p>
+              </div>
+            </div>
+            <div class="alert alert-info" role="note">
+              Ninguna de estas conexiones está operativa todavía: los estados indican si es una propuesta, si está por definir o si es opcional.
+            </div>
+            <div class="jy-integration-grid">
+              <template x-for="item in integrations" :key="item.id"
+                ><article class="jy-integration">
+                  <header>
+                    <i class="bi" :class="item.icon" aria-hidden="true"></i>
+                    <div>
+                      <h2 x-text="item.name"></h2>
+                      <small x-text="item.purpose"></small>
+                    </div>
+                    <span class="badge" :class="statusClass(item.status)" x-text="item.status"></span>
+                  </header>
+                  <dl>
+                    <div><dt>Hoy</dt><dd x-text="item.today"></dd></div>
+                    <div><dt>Propuesta</dt><dd x-text="item.proposal"></dd></div>
+                  </dl>
+                  <ol class="flow-steps jy-flow">
+                    <template x-for="step in item.flow" :key="step"><li x-text="step"></li></template>
+                  </ol>
+                  <footer>
+                    <a x-show="item.href" :href="item.href" x-text="item.link"></a>
+                    <small x-text="`Prioridad: ${item.priority}`"></small>
+                  </footer>
+                </article></template
+              >
+            </div>
+          </div>

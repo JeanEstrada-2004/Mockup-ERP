@@ -1,6 +1,8 @@
 import { activeVariant, isModuleEnabled } from '../config/variants.js';
 import { BIOMETRIC_DEVICE } from '../data/personnel-data.js';
 import { BACKUP } from '../data/security-data.js';
+import { getDataForVariant } from '../data/mock-data.js';
+import { statusClass } from '../utils/status.js';
 
 // Credible simulated states (punto 90, decision 3). Biometría and Backup reuse
 // the same records shown in Personal and Seguridad so the screens agree.
@@ -145,6 +147,18 @@ export function integrationsWorkspace() {
     },
     init() {
       if (allowed) document.title = `Integraciones · ${activeVariant.company.shortName}`;
+    },
+  };
+}
+
+// Integraciones de J&Y (R5, rules.integrationStates = 'honest'): what exists
+// today, the proposal and an honest state for each connection.
+export function integrationsJyWorkspace() {
+  return {
+    integrations: getDataForVariant(activeVariant).integrations || [],
+    statusClass,
+    init() {
+      document.title = `Integraciones · ${activeVariant.company.shortName}`;
     },
   };
 }

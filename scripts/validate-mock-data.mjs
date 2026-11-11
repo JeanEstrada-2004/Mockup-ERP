@@ -248,12 +248,14 @@ for (const variantId of VARIANT_IDS) {
         project.budgetAmount
       );
     for (const entry of costModel.entries) assert.ok(documentIds.has(entry.documentId));
-    assert.equal(
-      laborCostRows(data)
-        .filter((item) => item.projectId === project.id)
-        .reduce((sum, item) => sum + item.amount, 0),
-      getCostBySource(data, project.id).personnel || 0
-    );
+    // Hour-based labour cost only where it is the rule (R5: J&Y Demo uses payroll).
+    if (variantRule('laborCost', config) === 'hours')
+      assert.equal(
+        laborCostRows(data)
+          .filter((item) => item.projectId === project.id)
+          .reduce((sum, item) => sum + item.amount, 0),
+        getCostBySource(data, project.id).personnel || 0
+      );
   }
 
   for (const project of data.projects) {
@@ -373,8 +375,9 @@ assert.deepEqual(getPortfolioFinancials(demo), {
   activeProjectCount: 3,
   // R4: project budgets are the totals of their budgets (partidas / products).
   budgetAmount: 407865.31,
-  // R2: rendiciones derive from their expenses (accepted ones are cost).
-  executedCost: 127618,
+  // R2: rendiciones derive from their expenses; R5: personnel from imputed
+  // payroll and RxH.
+  executedCost: 133508,
 });
 
 // R2 — rendiciones of J&Y Demo.
@@ -453,6 +456,46 @@ for (const budget of demo.budgets) {
   for (const line of budget.products || []) assert.ok(productIds.has(line.productId), line.id);
 }
 assert.equal(budgetCode(demo.budgets.find((item) => item.id === 'PR2606-0022')), 'PR2606-0022-V2-GM');
+// R5 — personnel: payroll imputed by %, RxH, SF100 attendance and field tareo.
+const workerIds = new Set(demo.workers.map((item) => item.id));
+const projectIds = new Set(demo.projects.map((item) => item.id));
+const imputedByProjectMonth = new Map();
+for (const entry of demo.payroll) {
+  assert.ok(workerIds.has(entry.workerId) && entry.cost > 0, `${entry.month} ${entry.workerId}`);
+  assert.equal(demo.workers.find((item) => item.id === entry.workerId).regime, 'Planilla');
+  const total = entry.imputations.reduce((sum, item) => sum + item.percent, 0);
+  assert.ok(total > 0 && total <= 100, `${entry.month} ${entry.workerId}: imputación ${total} %`);
+  for (const item of entry.imputations) {
+    assert.ok(projectIds.has(item.projectId));
+    const key = `PLA-${entry.month.slice(2, 4)}${entry.month.slice(5, 7)}-${item.projectId.slice(-3)}`;
+    imputedByProjectMonth.set(key, (imputedByProjectMonth.get(key) || 0) + (entry.cost * item.percent) / 100);
+  }
+}
+const payrollOps = demo.operations.filter((item) => item.type === 'payroll');
+assert.equal(payrollOps.length, imputedByProjectMonth.size);
+for (const operation of payrollOps) {
+  assert.equal(Math.round(operation.amount * 100), Math.round(imputedByProjectMonth.get(operation.id) * 100), operation.id);
+  assert.equal(operation.costSource, 'personnel');
+}
+for (const item of demo.rxh) {
+  assert.match(item.docId, /^(10|15|17)\d{9}$/, `${item.id}: RUC de persona natural`);
+  assert.ok(projectIds.has(item.projectId));
+  const operation = demo.operations.find((entry) => entry.id === item.id);
+  assert.equal(operation?.type, 'rxh');
+  assert.equal(operation.amount, item.amount);
+}
+assert.equal(demo.operations.filter((item) => item.type === 'timesheet').length, 0, 'sin costo por horas');
+for (const row of demo.tareo) {
+  assert.ok(projectIds.has(row.projectId) && workerIds.has(row.workerId));
+  assert.ok(['Campo', 'Temporal'].includes(demo.workers.find((item) => item.id === row.workerId).kind), row.id);
+  assert.ok(['Completa', 'Media'].includes(row.shift));
+}
+uniqueIds(demo.tareo, 'jy-demo.tareo');
+uniqueIds(demo.attendance, 'jy-demo.attendance');
+for (const row of demo.attendance) assert.ok(workerIds.has(row.workerId));
+for (const item of demo.integrations)
+  assert.ok(['No integrado', 'Propuesta', 'Por definir', 'Opcional'].includes(item.status), `${item.id}: estado honesto`);
+
 for (const operation of demo.operations.filter((item) => item.type === 'purchase')) {
   const quote = demo.quotes.find((item) => item.id === operation.quoteId);
   assert.equal(quote?.supplierId, operation.supplierId, `${operation.id}: cotización de origen`);
